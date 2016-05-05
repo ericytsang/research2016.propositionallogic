@@ -3,7 +3,11 @@ package research2016.propositionallogic.visiter
 import java.util.LinkedList
 
 /**
- * Created by surpl on 5/4/2016.
+ * visits nodes in depth first search order, and accesses their children using a
+ * [NodeAccessStrategy].
+ *
+ * algorithms that need to iterate through nodes in dfs order should extend this
+ * class, and override [visit].
  */
 abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
 {
@@ -25,6 +29,9 @@ abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
         traverse(source,null)
     }
 
+    /**
+     * algorithm for depth first search traversal of a graph.
+     */
     private fun traverse(node:Node,parent:Node?)
     {
         visitedNodes.add(node)
@@ -40,10 +47,25 @@ abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
         visit(node,parent,children)
     }
 
+    /**
+     * called when visiting each node during the depth first search traversal.
+     * [node] is the node that is being visited by the depth first search
+     * algorithm. [parent] is the parent of [node] in the depth first search
+     * traversal. [children] are all the adjacent nodes of [node]. [parent] will
+     * be null for the last node because that is the root node which has no
+     * parent.
+     */
     protected abstract fun visit(node:Node,parent:Node?,children:List<Node>)
 
+    /**
+     * defines functions that this visitor needs to be able to perform on nodes.
+     * provides node-specific function implementations.
+     */
     interface NodeAccessStrategy<Node>
     {
+        /**
+         * returns all nodes adjacent to [node].
+         */
         fun getChildren(node:Node):List<Node>
     }
 }
