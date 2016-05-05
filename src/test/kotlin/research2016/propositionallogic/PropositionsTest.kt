@@ -71,10 +71,19 @@ class PropositionsTest
     fun evaluateTest()
     {
         val proposition = Oif(And(Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r"))),Not(BasicProposition("q"))),Not(BasicProposition("p")))
-        val allSituations = Situation.generateFrom(proposition.basicPropositions)
+        val allSituations = setOf(
+            Situation(mapOf("p" to false,"q" to false,"r" to false)),
+            Situation(mapOf("p" to false,"q" to false,"r" to true )),
+            Situation(mapOf("p" to false,"q" to true ,"r" to false)),
+            Situation(mapOf("p" to false,"q" to true ,"r" to true )),
+            Situation(mapOf("p" to true ,"q" to false,"r" to false)),
+            Situation(mapOf("p" to true ,"q" to false,"r" to true )),
+            Situation(mapOf("p" to true ,"q" to true ,"r" to false)),
+            Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
+        )
         allSituations.forEach()
         {
-            assert(proposition.evaluate(it))
+            assert(proposition.evaluate(it),{"evaluateTest failed. every situation should have evaluated to true, but situation $it evaluated to false"})
         }
     }
 }
