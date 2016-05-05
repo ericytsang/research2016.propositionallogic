@@ -64,7 +64,7 @@ val Proposition.basicPropositions:Set<BasicProposition> get()
     val atomicPropositionSearch = object:DfsVisitor<Proposition>(Proposition.nodeAccessStrategy)
     {
         val candidates = LinkedHashSet<BasicProposition>()
-        override fun visit(node:Proposition,parent:Proposition?)
+        override fun visit(node:Proposition,parent:Proposition?,children:List<Proposition>)
         {
             if (node is BasicProposition)
             {
@@ -101,7 +101,7 @@ fun Proposition.evaluate(situation:Situation):Boolean
          * evaluates the value of each node, and stores the truth value of this
          * [Proposition] in [propositionTruthValue].
          */
-        override fun visit(node:Proposition,parent:Proposition?)
+        override fun visit(node:Proposition,parent:Proposition?,children:List<Proposition>)
         {
             val nodeTruthValue = when (node)
             {

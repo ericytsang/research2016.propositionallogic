@@ -28,7 +28,8 @@ abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
     private fun traverse(node:Node,parent:Node?)
     {
         visitedNodes.add(node)
-        nodeAccessStrategy.getChildren(node).forEach()
+        val children = nodeAccessStrategy.getChildren(node)
+        children.forEach()
         {
             child ->
             if (visitedNodes.all {visited -> child !== visited})
@@ -36,10 +37,10 @@ abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
                 traverse(child,node)
             }
         }
-        visit(node,parent)
+        visit(node,parent,children)
     }
 
-    protected abstract fun visit(node:Node,parent:Node?)
+    protected abstract fun visit(node:Node,parent:Node?,children:List<Node>)
 
     interface NodeAccessStrategy<Node>
     {
