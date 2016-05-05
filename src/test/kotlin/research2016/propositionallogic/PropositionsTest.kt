@@ -56,15 +56,9 @@ class PropositionsTest
     fun basicPropositionsFromPropositionTest2()
     {
         val proposition = Oif(And(Oif(BasicProposition("x"),And(BasicProposition("y"),BasicProposition("z"))),Not(BasicProposition("y"))),Not(BasicProposition("x")))
-        val asd = proposition.basicPropositions
-        val asdadsasd = proposition.basicPropositions
-        proposition.basicPropositions
-        proposition.basicPropositions
-        proposition.basicPropositions
-        proposition.basicPropositions
         val actualResult = proposition.basicPropositions.map {it.friendly}.toSet()
         val expectedResult = setOf(BasicProposition("x"),BasicProposition("y"),BasicProposition("z")).map {it.friendly}.toSet()
-        assert(actualResult == expectedResult,{"$actualResult != $expectedResult"})
+        assert(actualResult == expectedResult,{"basicPropositionsFromPropositionTest2 failed: $actualResult != $expectedResult"})
     }
 
     @Test
