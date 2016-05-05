@@ -68,7 +68,6 @@ val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Prop
         val candidates = LinkedHashSet<BasicProposition>()
         override fun visit(node:Proposition,parent:Proposition?,children:List<Proposition>)
         {
-            println(node)
             if (node is BasicProposition)
             {
                 candidates.add(node)
