@@ -1,6 +1,6 @@
 package research2016.propositionallogic.core
 
-import research2016.propositionallogic.LazyWithReceiver
+import lib.delegates.LazyWithReceiver
 import research2016.propositionallogic.visiter.DfsVisitor
 import java.util.LinkedHashMap
 import java.util.LinkedHashSet
