@@ -79,6 +79,18 @@ val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Prop
 }
 
 /**
+ * returns all the models of this [Proposition], i.e., all the [Situation] that
+ * satisfy this [Proposition].
+ *
+ * todo: make more efficient
+ */
+val Proposition.models:Set<Situation> get()
+{
+    val allSituations = Situation.generateFrom(basicPropositions)
+    return allSituations.filter {evaluate(it)}.toSet()
+}
+
+/**
  * returns the truth value of this [Proposition] for the given [Situation].
  */
 fun Proposition.evaluate(situation:Situation):Boolean

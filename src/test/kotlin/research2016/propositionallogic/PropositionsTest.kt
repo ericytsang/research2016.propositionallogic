@@ -13,6 +13,7 @@ import research2016.propositionallogic.core.Xor
 import research2016.propositionallogic.core.basicPropositions
 import research2016.propositionallogic.core.evaluate
 import research2016.propositionallogic.core.generateFrom
+import research2016.propositionallogic.core.models
 
 /**
  * Created by surpl on 5/4/2016.
@@ -79,5 +80,19 @@ class PropositionsTest
         {
             assert(proposition.evaluate(it),{"evaluateTest failed. every situation should have evaluated to true, but situation $it evaluated to false"})
         }
+    }
+
+    @Test
+    fun modelsTest()
+    {
+        val proposition = Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r")))
+        val models = setOf(
+            Situation(mapOf("p" to false,"q" to false,"r" to false)),
+            Situation(mapOf("p" to false,"q" to false,"r" to true )),
+            Situation(mapOf("p" to false,"q" to true ,"r" to false)),
+            Situation(mapOf("p" to false,"q" to true ,"r" to true )),
+            Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
+        )
+        assert(proposition.models == models)
     }
 }
