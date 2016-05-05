@@ -39,7 +39,7 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
     val allSituations = LinkedHashSet<Situation>()
     val propositionKeys = basicPropositions.map {it.friendly}.toList().sorted()
     var seed = 0
-    while (allSituations.size != numSituationsToGenerate)
+    while (seed != numSituationsToGenerate)
     {
         val newSituation = run()
         {
@@ -50,5 +50,6 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
         allSituations.add(newSituation)
         seed++
     }
+    assert(allSituations.size == numSituationsToGenerate,{"failed to generate all situations! D: situations generated: ${allSituations}"})
     return allSituations
 }
