@@ -1,6 +1,6 @@
 package research2016.propositionallogic.visiter
 
-import java.util.LinkedHashSet
+import java.util.LinkedList
 
 /**
  * Created by surpl on 5/4/2016.
@@ -8,9 +8,13 @@ import java.util.LinkedHashSet
 abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
 {
     /**
-     * set of nodes that have already been visited by this visitor.
+     * collection of nodes that have already been visited by this visitor.
+     *
+     * it is a [List] rather than a [Set] because nodes may be structurally
+     * equal, but still referentially different. we are checking for referential
+     * difference in this case.
      */
-    private val visitedNodes:MutableSet<Node> = LinkedHashSet()
+    private val visitedNodes = LinkedList<Node>()
 
     /**
      * begins the depth first search.
@@ -27,7 +31,7 @@ abstract class DfsVisitor<Node>(val nodeAccessStrategy:NodeAccessStrategy<Node>)
         nodeAccessStrategy.getChildren(node).forEach()
         {
             child ->
-            if (visitedNodes.all {child !== it})
+            if (visitedNodes.all {visited -> child !== visited})
             {
                 traverse(child,node)
             }
