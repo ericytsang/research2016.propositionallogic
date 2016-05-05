@@ -1,5 +1,6 @@
 package research2016.propositionallogic.core
 
+import research2016.propositionallogic.LazyWithReceiver
 import research2016.propositionallogic.visiter.DfsVisitor
 import java.util.LinkedHashMap
 import java.util.LinkedHashSet
@@ -59,21 +60,23 @@ sealed class Proposition
 /**
  * returns all the basic propositions in this [Proposition].
  */
-val Proposition.basicPropositions:Set<BasicProposition> get()
+val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Proposition,Set<BasicProposition>>()
 {
+    thisRef ->
     val atomicPropositionSearch = object:DfsVisitor<Proposition>(Proposition.nodeAccessStrategy)
     {
         val candidates = LinkedHashSet<BasicProposition>()
         override fun visit(node:Proposition,parent:Proposition?,children:List<Proposition>)
         {
+            println(node)
             if (node is BasicProposition)
             {
                 candidates.add(node)
             }
         }
     }
-    atomicPropositionSearch.beginTraversal(this)
-    return atomicPropositionSearch.candidates
+    atomicPropositionSearch.beginTraversal(thisRef)
+    return@LazyWithReceiver atomicPropositionSearch.candidates
 }
 
 /**
