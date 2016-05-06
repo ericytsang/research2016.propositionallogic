@@ -26,7 +26,7 @@ sealed class Proposition
      */
     abstract val children:List<Proposition>
 
-    abstract class AtomicProposition(val friendly:String):Proposition()
+    abstract class AtomicProposition(val friendly:String,val allSituations:Set<Situation>):Proposition()
     {
         abstract fun truthValue(situation:Situation):Boolean
         override fun toString():String = friendly.toString()

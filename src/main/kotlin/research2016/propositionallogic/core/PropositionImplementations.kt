@@ -6,7 +6,7 @@ import research2016.propositionallogic.core.Proposition.Operator
 /**
  * Created by surpl on 5/4/2016.
  */
-class BasicProposition(_friendly:String):AtomicProposition(_friendly)
+class BasicProposition(_friendly:String):AtomicProposition(_friendly,setOf(Situation(mapOf(_friendly to true)),Situation(mapOf(_friendly to false))))
 {
     init
     {
@@ -16,12 +16,12 @@ class BasicProposition(_friendly:String):AtomicProposition(_friendly)
     override fun truthValue(situation:Situation):Boolean = situation.getValue(this)
 }
 
-class Tautology:AtomicProposition("1")
+class Tautology:AtomicProposition("1",setOf(Situation(emptyMap())))
 {
     override fun truthValue(situation:Situation):Boolean = true
 }
 
-class Contradiction:AtomicProposition("0")
+class Contradiction:AtomicProposition("0",setOf(Situation(emptyMap())))
 {
     override fun truthValue(situation:Situation):Boolean = false
 }
