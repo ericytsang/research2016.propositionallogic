@@ -5,8 +5,7 @@ import research2016.propositionallogic.visiter.DfsVisitor
 import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 import research2016.propositionallogic.core.Proposition.AtomicProposition
-import research2016.propositionallogic.core.Proposition.UnaryOperator
-import research2016.propositionallogic.core.Proposition.BinaryOperator
+import research2016.propositionallogic.core.Proposition.Operator
 
 /**
  * Created by surpl on 5/4/2016.
@@ -34,26 +33,22 @@ sealed class Proposition
         override val children:List<Proposition> = emptyList()
     }
 
-    abstract class UnaryOperator(val operand:Proposition,val friendly:String,val truthTable:Map<Boolean,Boolean>):Proposition()
-    {
-        fun operate(operand:Boolean):Boolean = truthTable[operand]!!
-        override fun toString():String = "($friendly$operand)"
-        override val children:List<Proposition> = listOf(operand)
-    }
-
-    abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Proposition,val friendly:String,val truthTable:Map<Pair<Boolean,Boolean>,Boolean>):Proposition()
-    {
-        fun operate(leftOperand:Boolean,rightOperand:Boolean):Boolean = truthTable[leftOperand to rightOperand]!!
-        override fun toString():String = "($leftOperand$friendly$rightOperand)"
-        override val children:List<Proposition> = listOf(leftOperand,rightOperand)
-    }
-
     companion object
     {
         val nodeAccessStrategy = object:DfsVisitor.NodeAccessStrategy<Proposition>
         {
             override fun getChildren(node:Proposition):List<Proposition> = node.children
         }
+    }
+
+    abstract class Operator(val operands:List<Proposition>,val truthTable:Map<List<Boolean>,Boolean>):Proposition()
+    {
+        init
+        {
+            assert(truthTable.keys.all {it.size == operands.size},{"length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands"})
+        }
+        fun operate(operands:List<Boolean>):Boolean = truthTable[operands]!!
+        override val children:List<Proposition> = operands
     }
 }
 
