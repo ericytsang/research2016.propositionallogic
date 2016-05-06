@@ -59,14 +59,72 @@ val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Prop
 /**
  * returns all the models of this [Proposition], i.e., all the [Situation] that
  * satisfy this [Proposition].
- *
- * todo: make more efficient
  */
-val Proposition.models:Set<Situation> get()
+val Proposition.models:Models get()
 {
     val allSituations = Situation.generateFrom(basicPropositions)
-    return allSituations.filter {evaluate(it)}.toSet()
+    return allSituations
+        .partition {evaluate(it)}
+        .let {Models(it.first.toSet(),it.second.toSet())}
 }
+
+/**
+ * returns all the models of this [Proposition], i.e., all the [Situation] that
+ * satisfy this [Proposition].
+ */
+val Proposition.models2:Models by LazyWithReceiver<Proposition,Models>()
+{
+    with (it)
+    {
+        when (this)
+        {
+            is AtomicProposition ->
+            {
+                val (trueSituations,falseSituations) = allSituations.partition {truthValue(it)}
+                Models(trueSituations.toSet(),falseSituations.toSet())
+            }
+            is Operator ->
+            {
+                // two sets. each set is a set of lists of booleans that will
+                // yield true or false respectively when evaluated by this
+                // operator
+                // e.g. one of the sets may look like this: {[1,0,0],[1,1,1]}
+                val (inputsForTrue,inputsForFalse) = truthTable.keys
+                    .partition {truthTable[it]!!}
+                    .let {it.first.toSet() to it.second.toSet()}
+
+                // list of models for each operand in the order that they appear
+                // in the operand list. each model contains situations
+                // partitioned into ones that satisfy the operand, and ones that
+                // do not.
+                // i.e.: [{q,!q} to {},{p} to {!p}]
+                val operandModels = children
+                    .map {it.models2}
+
+                // set of situations that would make this proposition true
+                val trueSituations =
+                    // {[0,0],[0,1],[1,1]}
+                    inputsForTrue
+                        // [[{p},{}],[{p},{!q,q}],[{!p},{!q,q}]]
+                        .map {booleanList -> booleanList.mapIndexed { i, b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations }}
+                        // [{},{p!q,pq},{!p!q,!pq}]
+                        .map {situationSetList -> Situation.union(situationSetList)}
+                        // {p!q,pq,!p!q,!pq}
+                        .fold(emptySet<Situation>()) {result,element -> result+element}
+
+                // set of situations that would make this proposition false
+                val falseSituations = inputsForFalse
+                    .map {booleanList -> booleanList.mapIndexed { i, b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations }}
+                    .map {situationSetList -> Situation.union(situationSetList)}
+                    .fold(emptySet<Situation>()) {result,element -> result+element}
+
+                Models(trueSituations,falseSituations)
+            }
+        }
+    }
+}
+
+data class Models(val trueSituations:Set<Situation>,val falseSituations:Set<Situation>)
 
 /**
  * returns the truth value of this [Proposition] for the given [Situation].

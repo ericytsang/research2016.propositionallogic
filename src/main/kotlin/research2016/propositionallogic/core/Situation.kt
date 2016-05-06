@@ -53,3 +53,38 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
     assert(allSituations.size == numSituationsToGenerate,{"failed to generate all situations! D: situations generated: ${allSituations}"})
     return allSituations
 }
+
+fun Situation.Companion.union(situationSets:List<Set<Situation>>):Set<Situation>
+{
+    // verify that every basic propositions specified in every situation in each
+    // set is present in every other situation in the same set.
+    situationSets.forEach()
+    {
+        situationSet -> situationSet.forEach()
+        {
+            situation ->
+            if (situation.propositionValues.keys != situationSet.first().propositionValues.keys)
+                throw IllegalArgumentException("every basic propositions specified in every situation in each set should be present in every other situation in the same set....but it is not. situationSets: $situationSets")
+        }
+    }
+
+    // permute every situation with every other situation, and return a set of
+    // all permutations...
+    return situationSets
+        .sortedBy {situationSet -> situationSet.size}
+        .fold(setOf(Situation(emptyMap())))
+        {
+            combinedSituationSet,situationSet ->
+            combinedSituationSet
+                .flatMap()
+                {
+                    situation1 ->
+                    situationSet.map()
+                    {
+                        situation2 ->
+                        Situation(situation1.propositionValues+situation2.propositionValues)
+                    }
+                }
+                .toSet()
+        }
+}

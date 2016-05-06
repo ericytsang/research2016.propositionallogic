@@ -4,6 +4,7 @@ import org.junit.Test
 import research2016.propositionallogic.core.BasicProposition
 import research2016.propositionallogic.core.Oif
 import research2016.propositionallogic.core.Situation
+import research2016.propositionallogic.core.union
 import research2016.propositionallogic.core.generateFrom
 import java.util.HashMap
 import java.util.LinkedHashMap
@@ -68,5 +69,74 @@ class SituationTest
         val basicPropositions = setOf(BasicProposition("p"),BasicProposition("q"),BasicProposition("r"))
         var allSituations = Situation.generateFrom(basicPropositions)
         assert(allSituations.size == 8,{"allSituations size is not 8. it should be 8 if there are 3 basic propositions... allSituations: $allSituations"})
+    }
+
+    @Test
+    fun combineWithEmptySet()
+    {
+        val situationSet = setOf(
+            Situation(mapOf("p" to false)),
+            Situation(mapOf("p" to true ))
+        )
+
+        val combinedSituationSet = Situation.union(listOf(situationSet,emptySet()))
+
+        assert(combinedSituationSet.isEmpty(),{"combined set should have been empty... but it is not. combinedSituationSet: $combinedSituationSet"})
+    }
+
+    @Test
+    fun combineWithEmptySituation()
+    {
+        val situationSet = setOf(
+            Situation(mapOf("p" to false)),
+            Situation(mapOf("p" to true ))
+        )
+
+        val emptySituation = Situation(emptyMap())
+
+        val combinedSituationSet = Situation.union(listOf(situationSet,setOf(emptySituation)))
+
+        assert(combinedSituationSet == situationSet,{"combined set should equal its original set...but it is not. combinedSituationSet: $combinedSituationSet"})
+    }
+
+    @Test
+    fun combineWithAnotherSituation1()
+    {
+        val situationSet1 = setOf(
+            Situation(mapOf("p" to false)),
+            Situation(mapOf("p" to true ))
+        )
+        val situationSet2 = setOf(
+            Situation(mapOf("q" to false))
+        )
+        val expectedResult = setOf(
+            Situation(mapOf("p" to false,"q" to false)),
+            Situation(mapOf("p" to true ,"q" to false))
+        )
+        val actualResult = Situation.union(listOf(situationSet1,situationSet2))
+
+        assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
+    }
+
+    @Test
+    fun combineWithAnotherSituation2()
+    {
+        val situationSet1 = setOf(
+            Situation(mapOf("p" to false,"q" to false)),
+            Situation(mapOf("p" to true ,"q" to false))
+        )
+        val situationSet2 = setOf(
+            Situation(mapOf("r" to false)),
+            Situation(mapOf("r" to true ))
+        )
+        val expectedResult = setOf(
+            Situation(mapOf("p" to false,"q" to false,"r" to true)),
+            Situation(mapOf("p" to true ,"q" to false,"r" to false)),
+            Situation(mapOf("p" to false,"q" to false,"r" to false)),
+            Situation(mapOf("p" to true ,"q" to false,"r" to true ))
+        )
+        val actualResult = Situation.union(listOf(situationSet1,situationSet2))
+
+        assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
     }
 }

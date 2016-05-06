@@ -14,6 +14,7 @@ import research2016.propositionallogic.core.basicPropositions
 import research2016.propositionallogic.core.evaluate
 import research2016.propositionallogic.core.generateFrom
 import research2016.propositionallogic.core.models
+import research2016.propositionallogic.core.models2
 
 /**
  * Created by surpl on 5/4/2016.
@@ -93,6 +94,24 @@ class PropositionsTest
             Situation(mapOf("p" to false,"q" to true ,"r" to true )),
             Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
-        assert(proposition.models == models)
+        println(proposition)
+        println(proposition.models)
+        assert(proposition.models.trueSituations == models)
+    }
+
+    @Test
+    fun models2Test()
+    {
+        val proposition = Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r")))
+        val models = setOf(
+            Situation(mapOf("p" to false,"q" to false,"r" to false)),
+            Situation(mapOf("p" to false,"q" to false,"r" to true )),
+            Situation(mapOf("p" to false,"q" to true ,"r" to false)),
+            Situation(mapOf("p" to false,"q" to true ,"r" to true )),
+            Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
+        )
+        println(proposition)
+        println(proposition.models)
+        assert(proposition.models2.trueSituations == models)
     }
 }
