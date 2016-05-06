@@ -96,7 +96,7 @@ val Proposition.models:Models by LazyWithReceiver<Proposition,Models>()
                     // {[0,0],[0,1],[1,1]}
                     inputsForTrue
                         // [[{p},{}],[{p},{!q,q}],[{!p},{!q,q}]]
-                        .map {booleanList -> booleanList.mapIndexed { i, b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations }}
+                        .map {booleanList -> booleanList.mapIndexed {i,b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations}}
                         // [{},{p!q,pq},{!p!q,!pq}]
                         .map {situationSetList -> Situation.union(situationSetList)}
                         // {p!q,pq,!p!q,!pq}
@@ -104,7 +104,7 @@ val Proposition.models:Models by LazyWithReceiver<Proposition,Models>()
 
                 // set of situations that would make this proposition false
                 val falseSituations = inputsForFalse
-                    .map {booleanList -> booleanList.mapIndexed { i, b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations }}
+                    .map {booleanList -> booleanList.mapIndexed {i,b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations}}
                     .map {situationSetList -> Situation.union(situationSetList)}
                     .fold(mutableSetOf<Situation>()) {result,element -> result.addAll(element); result;}
 
