@@ -10,6 +10,8 @@ import research2016.propositionallogic.core.Proposition.Operator
  */
 sealed class Proposition
 {
+    companion object;
+
     /**
      * returns the expression as a human-readable string, e.g., (0∨1)→1
      */
