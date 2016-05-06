@@ -74,7 +74,7 @@ class SituationTest
             Situation(mapOf("p" to true ))
         )
 
-        val combinedSituationSet = Situation.union(listOf(situationSet,emptySet()))
+        val combinedSituationSet = Situation.permute(listOf(situationSet,emptySet()))
 
         assert(combinedSituationSet.isEmpty(),{"combined set should have been empty... but it is not. combinedSituationSet: $combinedSituationSet"})
     }
@@ -89,7 +89,7 @@ class SituationTest
 
         val emptySituation = Situation(emptyMap())
 
-        val combinedSituationSet = Situation.union(listOf(situationSet,setOf(emptySituation)))
+        val combinedSituationSet = Situation.permute(listOf(situationSet,setOf(emptySituation)))
 
         assert(combinedSituationSet == situationSet,{"combined set should equal its original set...but it is not. combinedSituationSet: $combinedSituationSet"})
     }
@@ -108,7 +108,7 @@ class SituationTest
             Situation(mapOf("p" to false,"q" to false)),
             Situation(mapOf("p" to true ,"q" to false))
         )
-        val actualResult = Situation.union(listOf(situationSet1,situationSet2))
+        val actualResult = Situation.permute(listOf(situationSet1,situationSet2))
 
         assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
     }
@@ -130,7 +130,7 @@ class SituationTest
             Situation(mapOf("p" to false,"q" to false,"r" to false)),
             Situation(mapOf("p" to true ,"q" to false,"r" to true ))
         )
-        val actualResult = Situation.union(listOf(situationSet1,situationSet2))
+        val actualResult = Situation.permute(listOf(situationSet1,situationSet2))
 
         assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
     }

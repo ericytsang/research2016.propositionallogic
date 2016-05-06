@@ -54,7 +54,7 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
     return allSituations
 }
 
-fun Situation.Companion.union(situationSets:List<Set<Situation>>):Set<Situation>
+fun Situation.Companion.permute(situationSets:List<Set<Situation>>):Set<Situation>
 {
     // verify that every basic propositions specified in every situation in each
     // set is present in every other situation in the same set.
