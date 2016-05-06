@@ -1,20 +1,6 @@
 package research2016.propositionallogic
 
 import org.junit.Test
-import research2016.propositionallogic.core.And
-import research2016.propositionallogic.core.BasicProposition
-import research2016.propositionallogic.core.Contradiction
-import research2016.propositionallogic.core.Iff
-import research2016.propositionallogic.core.Nand
-import research2016.propositionallogic.core.Not
-import research2016.propositionallogic.core.Oif
-import research2016.propositionallogic.core.Or
-import research2016.propositionallogic.core.Situation
-import research2016.propositionallogic.core.Tautology
-import research2016.propositionallogic.core.Xor
-import research2016.propositionallogic.core.basicPropositions
-import research2016.propositionallogic.core.evaluate
-import research2016.propositionallogic.core.models
 
 /**
  * Created by surpl on 5/4/2016.

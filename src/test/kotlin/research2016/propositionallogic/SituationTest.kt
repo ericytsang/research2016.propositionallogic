@@ -1,11 +1,6 @@
 package research2016.propositionallogic
 
 import org.junit.Test
-import research2016.propositionallogic.core.BasicProposition
-import research2016.propositionallogic.core.Oif
-import research2016.propositionallogic.core.Situation
-import research2016.propositionallogic.core.union
-import research2016.propositionallogic.core.generateFrom
 import java.util.HashMap
 import java.util.LinkedHashMap
 import java.util.TreeMap

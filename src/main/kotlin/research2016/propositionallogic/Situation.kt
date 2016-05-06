@@ -1,4 +1,4 @@
-package research2016.propositionallogic.core
+package research2016.propositionallogic
 
 import java.util.LinkedHashSet
 

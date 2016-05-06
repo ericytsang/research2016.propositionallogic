@@ -1,7 +1,7 @@
-package research2016.propositionallogic.core
+package research2016.propositionallogic
 
-import research2016.propositionallogic.core.Proposition.AtomicProposition
-import research2016.propositionallogic.core.Proposition.Operator
+import research2016.propositionallogic.Proposition.AtomicProposition
+import research2016.propositionallogic.Proposition.Operator
 
 /**
  * Created by surpl on 5/4/2016.
@@ -36,7 +36,7 @@ abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Propo
     override fun toString():String = "($leftOperand$friendly$rightOperand)"
 }
 
-class Not(operand:Proposition):UnaryOperator(operand,"¬",Companion.truthTable)
+class Not(operand:Proposition):UnaryOperator(operand,"¬",truthTable)
 {
     companion object
     {
@@ -47,7 +47,7 @@ class Not(operand:Proposition):UnaryOperator(operand,"¬",Companion.truthTable)
     }
 }
 
-class And(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"∧",Companion.truthTable)
+class And(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"∧",truthTable)
 {
     companion object
     {
@@ -60,7 +60,7 @@ class And(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
-class Or(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"∨",Companion.truthTable)
+class Or(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"∨",truthTable)
 {
     companion object
     {
@@ -73,7 +73,7 @@ class Or(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOp
     }
 }
 
-class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"→",Companion.truthTable)
+class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"→",truthTable)
 {
     companion object
     {
@@ -86,7 +86,7 @@ class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
-class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"↔",Companion.truthTable)
+class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"↔",truthTable)
 {
     companion object
     {
@@ -99,7 +99,7 @@ class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
-class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"⊕",Companion.truthTable)
+class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"⊕",truthTable)
 {
     companion object
     {
@@ -112,7 +112,7 @@ class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
-class Nand(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"|",Companion.truthTable)
+class Nand(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"|",truthTable)
 {
     companion object
     {

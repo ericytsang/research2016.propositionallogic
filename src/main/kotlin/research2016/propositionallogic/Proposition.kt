@@ -1,9 +1,9 @@
-package research2016.propositionallogic.core
+package research2016.propositionallogic
 
 import lib.delegates.LazyWithReceiver
 import java.util.LinkedHashSet
-import research2016.propositionallogic.core.Proposition.AtomicProposition
-import research2016.propositionallogic.core.Proposition.Operator
+import research2016.propositionallogic.Proposition.AtomicProposition
+import research2016.propositionallogic.Proposition.Operator
 
 /**
  * Created by surpl on 5/4/2016.
