@@ -3,12 +3,14 @@ package research2016.propositionallogic
 import org.junit.Test
 import research2016.propositionallogic.core.And
 import research2016.propositionallogic.core.BasicProposition
+import research2016.propositionallogic.core.Contradiction
 import research2016.propositionallogic.core.Iff
 import research2016.propositionallogic.core.Nand
 import research2016.propositionallogic.core.Not
 import research2016.propositionallogic.core.Oif
 import research2016.propositionallogic.core.Or
 import research2016.propositionallogic.core.Situation
+import research2016.propositionallogic.core.Tautology
 import research2016.propositionallogic.core.Xor
 import research2016.propositionallogic.core.basicPropositions
 import research2016.propositionallogic.core.evaluate
@@ -91,6 +93,34 @@ class PropositionsTest
             Situation(mapOf("p" to false,"q" to true ,"r" to false)),
             Situation(mapOf("p" to false,"q" to true ,"r" to true )),
             Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
+        )
+        println(proposition)
+        println(proposition.models)
+        assert(proposition.models.trueSituations == models)
+    }
+
+    @Test
+    fun modelsOfTreeWithTautologyTest()
+    {
+        val proposition = Oif(BasicProposition("p"),Or(BasicProposition("q"),Tautology()))
+        val models = setOf(
+            Situation(mapOf("p" to false,"q" to false)),
+            Situation(mapOf("p" to false,"q" to true )),
+            Situation(mapOf("p" to true ,"q" to false)),
+            Situation(mapOf("p" to true ,"q" to true ))
+        )
+        println(proposition)
+        println(proposition.models)
+        assert(proposition.models.trueSituations == models)
+    }
+
+    @Test
+    fun modelsOfTreeWithContradictionTest()
+    {
+        val proposition = Oif(BasicProposition("p"),And(BasicProposition("q"),Contradiction()))
+        val models = setOf(
+            Situation(mapOf("p" to false,"q" to false)),
+            Situation(mapOf("p" to false,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
