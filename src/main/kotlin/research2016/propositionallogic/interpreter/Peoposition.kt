@@ -12,6 +12,7 @@ import research2016.propositionallogic.core.Proposition
 import research2016.propositionallogic.core.Tautology
 import research2016.propositionallogic.core.Xor
 import java.util.ArrayList
+import java.util.EmptyStackException
 import java.util.Stack
 import java.util.regex.Pattern
 
@@ -28,50 +29,57 @@ fun Proposition.Companion.from(string:String):Proposition
     {
         token ->
         val symbol = Symbol.parse(token)
-        when (symbol)
+        try
         {
-            Symbol.NOT -> operandStack.push(Not(operandStack.pop()))
-            Symbol.AND ->
+            when (symbol)
             {
-                val rightOperand = operandStack.pop()
-                val leftOperand = operandStack.pop()
-                operandStack.push(And(leftOperand,rightOperand))
+                Symbol.NOT -> operandStack.push(Not(operandStack.pop()))
+                Symbol.AND ->
+                {
+                    val rightOperand = operandStack.pop()
+                    val leftOperand = operandStack.pop()
+                    operandStack.push(And(leftOperand,rightOperand))
+                }
+                Symbol.NAND ->
+                {
+                    val rightOperand = operandStack.pop()
+                    val leftOperand = operandStack.pop()
+                    operandStack.push(Nand(leftOperand,rightOperand))
+                }
+                Symbol.OR ->
+                {
+                    val rightOperand = operandStack.pop()
+                    val leftOperand = operandStack.pop()
+                    operandStack.push(Or(leftOperand,rightOperand))
+                }
+                Symbol.XOR ->
+                {
+                    val rightOperand = operandStack.pop()
+                    val leftOperand = operandStack.pop()
+                    operandStack.push(Xor(leftOperand,rightOperand))
+                }
+                Symbol.OIF ->
+                {
+                    val rightOperand = operandStack.pop()
+                    val leftOperand = operandStack.pop()
+                    operandStack.push(Oif(leftOperand,rightOperand))
+                }
+                Symbol.IFF ->
+                {
+                    val rightOperand = operandStack.pop()
+                    val leftOperand = operandStack.pop()
+                    operandStack.push(Iff(leftOperand,rightOperand))
+                }
+                Symbol.BASIC_PROPOSITION -> operandStack.push(BasicProposition(token))
+                Symbol.TAUTOLOGY -> operandStack.push(Tautology())
+                Symbol.CONTRADICTION -> operandStack.push(Contradiction())
+                Symbol.OPEN_PARENTHESIS -> throw IllegalArgumentException("unexpected token...string has been put into reverse polish notation, and should not have any parentheses")
+                Symbol.CLOSE_PARENTHESIS -> throw IllegalArgumentException("unexpected token...string has been put into reverse polish notation, and should not have any parentheses")
             }
-            Symbol.NAND ->
-            {
-                val rightOperand = operandStack.pop()
-                val leftOperand = operandStack.pop()
-                operandStack.push(Nand(leftOperand,rightOperand))
-            }
-            Symbol.OR ->
-            {
-                val rightOperand = operandStack.pop()
-                val leftOperand = operandStack.pop()
-                operandStack.push(Or(leftOperand,rightOperand))
-            }
-            Symbol.XOR ->
-            {
-                val rightOperand = operandStack.pop()
-                val leftOperand = operandStack.pop()
-                operandStack.push(Xor(leftOperand,rightOperand))
-            }
-            Symbol.OIF ->
-            {
-                val rightOperand = operandStack.pop()
-                val leftOperand = operandStack.pop()
-                operandStack.push(Oif(leftOperand,rightOperand))
-            }
-            Symbol.IFF ->
-            {
-                val rightOperand = operandStack.pop()
-                val leftOperand = operandStack.pop()
-                operandStack.push(Iff(leftOperand,rightOperand))
-            }
-            Symbol.BASIC_PROPOSITION -> operandStack.push(BasicProposition(token))
-            Symbol.TAUTOLOGY -> operandStack.push(Tautology())
-            Symbol.CONTRADICTION -> operandStack.push(Contradiction())
-            Symbol.OPEN_PARENTHESIS -> throw IllegalArgumentException("unexpected token...string has been put into reverse polish notation, and should not have any parentheses")
-            Symbol.CLOSE_PARENTHESIS -> throw IllegalArgumentException("unexpected token...string has been put into reverse polish notation, and should not have any parentheses")
+        }
+        catch (ex:EmptyStackException)
+        {
+            throw IllegalArgumentException("missing operand for operator: $token")
         }
     }
     return operandStack.pop()
@@ -111,14 +119,21 @@ private fun toReversePolishNotaion(string:String):List<String>
             {
                 while(true)
                 {
-                    val popped = operatorStack.pop()
-                    if (Symbol.parse(popped) == Symbol.OPEN_PARENTHESIS)
+                    try
                     {
-                        break
+                        val popped = operatorStack.pop()
+                        if (Symbol.parse(popped) == Symbol.OPEN_PARENTHESIS)
+                        {
+                            break
+                        }
+                        else
+                        {
+                            outputQueue.add(popped)
+                        }
                     }
-                    else
+                    catch (ex:EmptyStackException)
                     {
-                        outputQueue.add(popped)
+                        throw IllegalArgumentException("there is an uneven amount of parenthesis...")
                     }
                 }
             }
