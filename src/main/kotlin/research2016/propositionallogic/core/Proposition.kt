@@ -1,8 +1,6 @@
 package research2016.propositionallogic.core
 
 import lib.delegates.LazyWithReceiver
-import research2016.propositionallogic.visiter.DfsVisitor
-import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 import research2016.propositionallogic.core.Proposition.AtomicProposition
 import research2016.propositionallogic.core.Proposition.Operator
@@ -33,14 +31,6 @@ sealed class Proposition
         override val children:List<Proposition> = emptyList()
     }
 
-    companion object
-    {
-        val nodeAccessStrategy = object:DfsVisitor.NodeAccessStrategy<Proposition>
-        {
-            override fun getChildren(node:Proposition):List<Proposition> = node.children
-        }
-    }
-
     abstract class Operator(val operands:List<Proposition>,val truthTable:Map<List<Boolean>,Boolean>):Proposition()
     {
         init
@@ -57,20 +47,13 @@ sealed class Proposition
  */
 val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Proposition,Set<BasicProposition>>()
 {
-    thisRef ->
-    val atomicPropositionSearch = object:DfsVisitor<Proposition>(Proposition.nodeAccessStrategy)
+    with (it)
     {
         val candidates = LinkedHashSet<BasicProposition>()
-        override fun visit(node:Proposition,parent:Proposition?,children:List<Proposition>)
-        {
-            if (node is BasicProposition)
-            {
-                candidates.add(node)
-            }
-        }
+        if (this is BasicProposition) candidates.add(this)
+        candidates.addAll(children.flatMap {it.basicPropositions})
+        return@LazyWithReceiver candidates
     }
-    atomicPropositionSearch.beginTraversal(thisRef)
-    return@LazyWithReceiver atomicPropositionSearch.candidates
 }
 
 /**
@@ -88,46 +71,8 @@ val Proposition.models:Set<Situation> get()
 /**
  * returns the truth value of this [Proposition] for the given [Situation].
  */
-fun Proposition.evaluate(situation:Situation):Boolean
+fun Proposition.evaluate(situation:Situation):Boolean = when (this)
 {
-    val evaluator = object:DfsVisitor<Proposition>(Proposition.nodeAccessStrategy)
-    {
-        /**
-         * a list of the [Proposition]'s children's evaluated truth values.
-         * these lists are populated as the visitor visits the node's children,
-         * and evaluates their truth values.
-         */
-        val Proposition.childrenTruthValues:MutableList<Boolean> get() = nodeToChildrenTruthValues.getOrPut(this,{mutableListOf<Boolean>()})
-        val nodeToChildrenTruthValues = LinkedHashMap<Proposition,MutableList<Boolean>>()
-
-        /**
-         * contains the evaluated truth value of this [Proposition].
-         */
-        var propositionTruthValue:Boolean? = null
-
-        /**
-         * called on each node in the [Proposition] formula tree in dfs order.
-         * evaluates the value of each node, and stores the truth value of this
-         * [Proposition] in [propositionTruthValue].
-         */
-        override fun visit(node:Proposition,parent:Proposition?,children:List<Proposition>)
-        {
-            val nodeTruthValue = when (node)
-            {
-                is AtomicProposition -> { node.truthValue(situation) }
-                is UnaryOperator -> { node.operate(node.childrenTruthValues.single()) }
-                is BinaryOperator -> { node.operate(node.childrenTruthValues.first(),node.childrenTruthValues.last()) }
-            }
-            if (parent != null)
-            {
-                parent.childrenTruthValues.add(nodeTruthValue)
-            }
-            else
-            {
-                propositionTruthValue = nodeTruthValue
-            }
-        }
-    }
-    evaluator.beginTraversal(this)
-    return evaluator.propositionTruthValue!!
+    is AtomicProposition -> truthValue(situation)
+    is Operator -> operate(operands.map {it.evaluate(situation)})
 }
