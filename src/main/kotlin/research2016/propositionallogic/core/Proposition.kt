@@ -62,19 +62,7 @@ val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Prop
  * returns all the models of this [Proposition], i.e., all the [Situation] that
  * satisfy this [Proposition].
  */
-val Proposition.models:Models get()
-{
-    val allSituations = Situation.generateFrom(basicPropositions)
-    return allSituations
-        .partition {evaluate(it)}
-        .let {Models(it.first.toSet(),it.second.toSet())}
-}
-
-/**
- * returns all the models of this [Proposition], i.e., all the [Situation] that
- * satisfy this [Proposition].
- */
-val Proposition.models2:Models by LazyWithReceiver<Proposition,Models>()
+val Proposition.models:Models by LazyWithReceiver<Proposition,Models>()
 {
     with (it)
     {
@@ -101,7 +89,7 @@ val Proposition.models2:Models by LazyWithReceiver<Proposition,Models>()
                 // do not.
                 // i.e.: [{q,!q} to {},{p} to {!p}]
                 val operandModels = children
-                    .map {it.models2}
+                    .map {it.models}
 
                 // set of situations that would make this proposition true
                 val trueSituations =
@@ -112,13 +100,13 @@ val Proposition.models2:Models by LazyWithReceiver<Proposition,Models>()
                         // [{},{p!q,pq},{!p!q,!pq}]
                         .map {situationSetList -> Situation.union(situationSetList)}
                         // {p!q,pq,!p!q,!pq}
-                        .fold(emptySet<Situation>()) {result,element -> result+element}
+                        .fold(mutableSetOf<Situation>()) {result,element -> result.addAll(element); result;}
 
                 // set of situations that would make this proposition false
                 val falseSituations = inputsForFalse
                     .map {booleanList -> booleanList.mapIndexed { i, b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations }}
                     .map {situationSetList -> Situation.union(situationSetList)}
-                    .fold(emptySet<Situation>()) {result,element -> result+element}
+                    .fold(mutableSetOf<Situation>()) {result,element -> result.addAll(element); result;}
 
                 Models(trueSituations,falseSituations)
             }

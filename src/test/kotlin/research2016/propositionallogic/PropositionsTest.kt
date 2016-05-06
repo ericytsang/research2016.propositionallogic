@@ -12,9 +12,7 @@ import research2016.propositionallogic.core.Situation
 import research2016.propositionallogic.core.Xor
 import research2016.propositionallogic.core.basicPropositions
 import research2016.propositionallogic.core.evaluate
-import research2016.propositionallogic.core.generateFrom
 import research2016.propositionallogic.core.models
-import research2016.propositionallogic.core.models2
 
 /**
  * Created by surpl on 5/4/2016.
@@ -100,18 +98,9 @@ class PropositionsTest
     }
 
     @Test
-    fun models2Test()
+    fun modelsOfBigTree()
     {
-        val proposition = Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r")))
-        val models = setOf(
-            Situation(mapOf("p" to false,"q" to false,"r" to false)),
-            Situation(mapOf("p" to false,"q" to false,"r" to true )),
-            Situation(mapOf("p" to false,"q" to true ,"r" to false)),
-            Situation(mapOf("p" to false,"q" to true ,"r" to true )),
-            Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
-        )
-        println(proposition)
+        val proposition = Nand(Xor(Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r")))),BasicProposition("s")),BasicProposition("t")),BasicProposition("u")),BasicProposition("v")),BasicProposition("w")),BasicProposition("x")),BasicProposition("y")),BasicProposition("z")),BasicProposition("a")),BasicProposition("b")),BasicProposition("c")),BasicProposition("d"))
         println(proposition.models)
-        assert(proposition.models2.trueSituations == models)
     }
 }
