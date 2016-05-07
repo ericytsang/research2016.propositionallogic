@@ -6,24 +6,27 @@ import research2016.propositionallogic.Proposition.Operator
 /**
  * Created by surpl on 5/4/2016.
  */
-class BasicProposition(_friendly:String):AtomicProposition(_friendly,setOf(Situation(mapOf(_friendly to true)),Situation(mapOf(_friendly to false))))
+class BasicProposition private constructor(_friendly:String):AtomicProposition(_friendly)
 {
     init
     {
         assert(_friendly.length == 1,{"only strings of length 1 are allowed to be used as the friendly string for atomic propositions"})
         assert(_friendly[0].isLetter(),{"atomic proposition must be a letter"})
     }
-    override fun truthValue(situation:Situation):Boolean = situation.getValue(this)
+    override fun truthValue(situation:Situation):Boolean = situation[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
+    override val allSituations:Set<Situation> = setOf(Situation(mapOf(this to true)),Situation(mapOf(this to false)))
 }
 
-class Tautology:AtomicProposition("1",setOf(Situation(emptyMap())))
+val Tautology = object:AtomicProposition("1")
 {
     override fun truthValue(situation:Situation):Boolean = true
+    override val allSituations:Set<Situation> = setOf(Situation(emptyMap()))
 }
 
-class Contradiction:AtomicProposition("0",setOf(Situation(emptyMap())))
+val Contradiction = object:AtomicProposition("0")
 {
     override fun truthValue(situation:Situation):Boolean = false
+    override val allSituations:Set<Situation> = setOf(Situation(emptyMap()))
 }
 
 abstract class UnaryOperator(val operand:Proposition,val friendly:String,truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(operand),truthTable)

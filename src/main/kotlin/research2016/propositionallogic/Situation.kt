@@ -1,36 +1,31 @@
 package research2016.propositionallogic
 
+import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 
 /**
  * Created by surpl on 5/4/2016.
  */
-class Situation(val propositionValues:Map<String,Boolean>)
+class Situation(propositionValues:Map<BasicProposition,Boolean>):Map<BasicProposition,Boolean>
 {
     companion object;
+    private val map = LinkedHashMap(propositionValues)
+    override val entries:Set<Map.Entry<BasicProposition,Boolean>> get() = map.entries
+    override val keys:Set<BasicProposition> get() = map.keys
+    override val size:Int get() = map.size
+    override val values:Collection<Boolean> get() = map.values
+    override fun containsKey(key:BasicProposition):Boolean = map.containsKey(key)
+    override fun containsValue(value:Boolean):Boolean = map.containsValue(value)
+    override fun get(key:BasicProposition):Boolean? = map[key]
+    override fun isEmpty():Boolean = map.isEmpty()
+    override fun toString():String = map.toString()
+    override fun hashCode():Int = map.hashCode()
+    override fun equals(other:Any?):Boolean = map.equals(other)
+}
 
-    /**
-     * returns the value of the proposition for this [Situation].
-     */
-    fun getValue(proposition:BasicProposition):Boolean
-    {
-        return propositionValues[proposition.friendly] ?: throw IllegalArgumentException("no value specified for given proposition (${proposition.friendly})")
-    }
-
-    override fun toString():String
-    {
-        return propositionValues.toString()
-    }
-
-    override fun hashCode():Int
-    {
-        return propositionValues.hashCode()
-    }
-
-    override fun equals(other:Any?):Boolean
-    {
-        return other is Situation && other.propositionValues == propositionValues
-    }
+fun Situation.Companion.make(propositionValues:Map<String,Boolean>):Situation
+{
+    return Situation(propositionValues.mapKeys {BasicProposition.make(it.key)})
 }
 
 fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Set<Situation>
@@ -45,12 +40,12 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
         {
             val string = Integer.toBinaryString(seed).padStart(basicPropositions.size,'0')
             val map = propositionKeys.mapIndexed { i, s -> s to (string[i] == '1') }.toMap()
-            return@run Situation(map)
+            return@run Situation.make(map)
         }
         allSituations.add(newSituation)
         seed++
     }
-    assert(allSituations.size == numSituationsToGenerate,{"failed to generate all situations! D: situations generated: ${allSituations}"})
+    assert(allSituations.size == numSituationsToGenerate,{"failed to generate all situations! D: situations generated: $allSituations"})
     return allSituations
 }
 
@@ -63,7 +58,7 @@ fun Situation.Companion.permute(situationSets:List<Set<Situation>>):Set<Situatio
         situationSet -> situationSet.forEach()
         {
             situation ->
-            if (situation.propositionValues.keys != situationSet.first().propositionValues.keys)
+            if (situation.keys != situationSet.first().keys)
                 throw IllegalArgumentException("every basic propositions specified in every situation in each set should be present in every other situation in the same set....but it is not. situationSets: $situationSets")
         }
     }
@@ -82,11 +77,11 @@ fun Situation.Companion.permute(situationSets:List<Set<Situation>>):Set<Situatio
                     situationSet.mapNotNull()
                     {
                         situation2 ->
-                        val combinedSituation = Situation(situation1.propositionValues+situation2.propositionValues)
+                        val combinedSituation = Situation(situation1+situation2)
                         val isCombinedSituationConsistent =
-                            combinedSituation.propositionValues.entries.all()
+                            combinedSituation.entries.all()
                             {
-                                situation1.propositionValues[it.key] ?: it.value == it.value && situation2.propositionValues[it.key] ?: it.value == it.value
+                                situation1[it.key] ?: it.value == it.value && situation2[it.key] ?: it.value == it.value
                             }
                         if (isCombinedSituationConsistent)
                         {

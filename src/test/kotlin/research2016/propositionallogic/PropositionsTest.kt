@@ -54,14 +54,14 @@ class PropositionsTest
     {
         val proposition = Oif(And(Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r"))),Not(BasicProposition("q"))),Not(BasicProposition("p")))
         val allSituations = setOf(
-            Situation(mapOf("p" to false,"q" to false,"r" to false)),
-            Situation(mapOf("p" to false,"q" to false,"r" to true )),
-            Situation(mapOf("p" to false,"q" to true ,"r" to false)),
-            Situation(mapOf("p" to false,"q" to true ,"r" to true )),
-            Situation(mapOf("p" to true ,"q" to false,"r" to false)),
-            Situation(mapOf("p" to true ,"q" to false,"r" to true )),
-            Situation(mapOf("p" to true ,"q" to true ,"r" to false)),
-            Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
+            Situation.make(mapOf("p" to false,"q" to false,"r" to false)),
+            Situation.make(mapOf("p" to false,"q" to false,"r" to true )),
+            Situation.make(mapOf("p" to false,"q" to true ,"r" to false)),
+            Situation.make(mapOf("p" to false,"q" to true ,"r" to true )),
+            Situation.make(mapOf("p" to true ,"q" to false,"r" to false)),
+            Situation.make(mapOf("p" to true ,"q" to false,"r" to true )),
+            Situation.make(mapOf("p" to true ,"q" to true ,"r" to false)),
+            Situation.make(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
         allSituations.forEach()
         {
@@ -74,11 +74,11 @@ class PropositionsTest
     {
         val proposition = Oif(BasicProposition("p"),And(BasicProposition("q"),BasicProposition("r")))
         val models = setOf(
-            Situation(mapOf("p" to false,"q" to false,"r" to false)),
-            Situation(mapOf("p" to false,"q" to false,"r" to true )),
-            Situation(mapOf("p" to false,"q" to true ,"r" to false)),
-            Situation(mapOf("p" to false,"q" to true ,"r" to true )),
-            Situation(mapOf("p" to true ,"q" to true ,"r" to true ))
+            Situation.make(mapOf("p" to false,"q" to false,"r" to false)),
+            Situation.make(mapOf("p" to false,"q" to false,"r" to true )),
+            Situation.make(mapOf("p" to false,"q" to true ,"r" to false)),
+            Situation.make(mapOf("p" to false,"q" to true ,"r" to true )),
+            Situation.make(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -90,10 +90,10 @@ class PropositionsTest
     {
         val proposition = Oif(BasicProposition("p"),Or(BasicProposition("q"),Tautology()))
         val models = setOf(
-            Situation(mapOf("p" to false,"q" to false)),
-            Situation(mapOf("p" to false,"q" to true )),
-            Situation(mapOf("p" to true ,"q" to false)),
-            Situation(mapOf("p" to true ,"q" to true ))
+            Situation.make(mapOf("p" to false,"q" to false)),
+            Situation.make(mapOf("p" to false,"q" to true )),
+            Situation.make(mapOf("p" to true ,"q" to false)),
+            Situation.make(mapOf("p" to true ,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -105,8 +105,8 @@ class PropositionsTest
     {
         val proposition = Oif(BasicProposition("p"),And(BasicProposition("q"),Contradiction()))
         val models = setOf(
-            Situation(mapOf("p" to false,"q" to false)),
-            Situation(mapOf("p" to false,"q" to true ))
+            Situation.make(mapOf("p" to false,"q" to false)),
+            Situation.make(mapOf("p" to false,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
