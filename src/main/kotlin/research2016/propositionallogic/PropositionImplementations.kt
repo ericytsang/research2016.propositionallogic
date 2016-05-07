@@ -2,12 +2,18 @@ package research2016.propositionallogic
 
 import research2016.propositionallogic.Proposition.AtomicProposition
 import research2016.propositionallogic.Proposition.Operator
+import java.util.WeakHashMap
 
 /**
  * Created by surpl on 5/4/2016.
  */
 class BasicProposition private constructor(_friendly:String):AtomicProposition(_friendly)
 {
+    companion object
+    {
+        val allInstances = WeakHashMap<String,BasicProposition>()
+        fun make(friendly:String) = allInstances.getOrPut(friendly,{BasicProposition(friendly)})
+    }
     init
     {
         assert(_friendly.length == 1,{"only strings of length 1 are allowed to be used as the friendly string for atomic propositions"})
