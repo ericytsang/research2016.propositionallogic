@@ -91,6 +91,9 @@ val Proposition.models:Models by LazyWithReceiver<Proposition,Models>()
                 val operandModels = children
                     .map {it.models}
 
+                // throw interrupted exception if interrupted...
+                if (Thread.interrupted()) throw InterruptedException("thread was interrupted")
+
                 // set of situations that would make this proposition true
                 val trueSituations =
                     // {[0,0],[0,1],[1,1]}
