@@ -79,10 +79,23 @@ fun Situation.Companion.permute(situationSets:List<Set<Situation>>):Set<Situatio
                 .flatMap()
                 {
                     situation1 ->
-                    situationSet.map()
+                    situationSet.mapNotNull()
                     {
                         situation2 ->
-                        Situation(situation1.propositionValues+situation2.propositionValues)
+                        val combinedSituation = Situation(situation1.propositionValues+situation2.propositionValues)
+                        val isCombinedSituationConsistent =
+                            combinedSituation.propositionValues.entries.all()
+                            {
+                                situation1.propositionValues[it.key] ?: it.value == it.value && situation2.propositionValues[it.key] ?: it.value == it.value
+                            }
+                        if (isCombinedSituationConsistent)
+                        {
+                            combinedSituation
+                        }
+                        else
+                        {
+                            null
+                        }
                     }
                 }
                 .toSet()
