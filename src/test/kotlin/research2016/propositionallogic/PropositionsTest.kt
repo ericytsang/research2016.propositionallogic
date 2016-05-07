@@ -113,11 +113,54 @@ class PropositionsTest
         assert(proposition.models.trueSituations == models)
     }
 
+    val bigProposition1 = Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d"))
+    val bigProposition2 = Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d")),BasicProposition.make("e"))
+    val bigProposition3 = Xor(Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d")),BasicProposition.make("e")),BasicProposition.make("f"))
+
     @Test
-    fun modelsOfBigTree()
+    fun evaluateProp1()
     {
-        val proposition = Xor(Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d")),BasicProposition.make("e")),BasicProposition.make("f"))
+        allModels(bigProposition1)
+    }
+
+    @Test
+    fun evaluateProp2()
+    {
+        allModels(bigProposition2)
+    }
+
+    @Test
+    fun evaluateProp3()
+    {
+        allModels(bigProposition3)
+    }
+
+    @Test
+    fun modelProp1()
+    {
+        evaluateEach(bigProposition1)
+    }
+
+    @Test
+    fun modelProp2()
+    {
+        evaluateEach(bigProposition2)
+    }
+
+    @Test
+    fun modelProp3()
+    {
+        evaluateEach(bigProposition3)
+    }
+
+    fun allModels(proposition:Proposition)
+    {
         proposition.models
+    }
+
+    fun evaluateEach(proposition:Proposition)
+    {
+        Situation.generateFrom(proposition.basicPropositions).partition {proposition.evaluate(it)}
     }
 
     @Test
