@@ -1,6 +1,7 @@
 package research2016.propositionallogic
 
 import java.util.ArrayList
+import java.util.Arrays
 import java.util.LinkedHashSet
 import kotlin.collections.AbstractIterator
 
@@ -8,46 +9,125 @@ import kotlin.collections.AbstractIterator
  * Created by surpl on 5/7/2016.
  */
 
-class PermutedSituationSet private constructor(val situationSetList:List<Set<Situation>>):Set<Situation>
+abstract class AbstractSet<T>():Set<T>
+{
+    override val size:Int = 0
+
+    private val generatedElementsList = ArrayList<T>()
+    private val generatedElementsSet = LinkedHashSet<T>()
+    private var allElementsGenerated = false
+
+    abstract protected fun hasNext():Boolean
+
+    abstract protected fun next():T
+
+    override fun contains(element:T):Boolean
+    {
+        if (!allElementsGenerated) generateAllElements()
+        return generatedElementsSet.contains(element)
+    }
+
+    override fun containsAll(elements:Collection<T>):Boolean
+    {
+        if (!allElementsGenerated) generateAllElements()
+        return generatedElementsSet.containsAll(elements)
+    }
+
+    override fun isEmpty():Boolean = !iterator().hasNext()
+
+    private fun generateAllElements()
+    {
+        for (t in this) {}
+    }
+
+    override fun equals(other:Any?):Boolean
+    {
+        if (!allElementsGenerated) generateAllElements()
+        return generatedElementsSet.equals(other)
+    }
+
+    override fun hashCode():Int
+    {
+        if (!allElementsGenerated) generateAllElements()
+        return generatedElementsSet.hashCode()
+    }
+
+    override fun toString():String
+    {
+        if (!allElementsGenerated) generateAllElements()
+        return generatedElementsSet.toString()
+    }
+
+    override fun iterator():Iterator<T> = object:AbstractIterator<T>()
+    {
+        var nextElementIndex = 0
+        override fun computeNext()
+        {
+            // generate the next element if it doesn't exist yet
+            if (!allElementsGenerated && nextElementIndex !in generatedElementsList.indices)
+            {
+                synchronized(generatedElementsList)
+                {
+                    if (this@AbstractSet.hasNext())
+                    {
+                        val generatedElement = this@AbstractSet.next()
+                        generatedElementsList.add(generatedElement)
+                        generatedElementsSet.add(generatedElement)
+                    }
+                    else
+                    {
+                        allElementsGenerated = true
+                    }
+                }
+            }
+
+            // set the next element
+            if (nextElementIndex in generatedElementsList.indices)
+            {
+                setNext(generatedElementsList[nextElementIndex++])
+            }
+            else
+            {
+                done()
+            }
+        }
+    }
+}
+
+class PermutedSituationSet private constructor(val situationSetList:List<Set<Situation>>):AbstractSet<Situation>()
 {
     companion object
     {
         fun make(situationSetList:List<Set<Situation>>):Set<Situation>
         {
-            if (situationSetList.any {it.isEmpty()})
-            {
-                return emptySet()
-            }
-            else
-            {
-                return PermutedSituationSet(situationSetList)
-            }
+            return PermutedSituationSet(situationSetList)
         }
     }
-
-    private var _realSet:Set<Situation>? = null
-    private val realSet:Set<Situation> get() =  _realSet ?: run {_realSet = toCollection(LinkedHashSet()); _realSet!!}
-    override val size:Int get() = realSet.size
-    override fun contains(element:Situation):Boolean = realSet.contains(element)
-    override fun containsAll(elements:Collection<Situation>):Boolean = realSet.containsAll(elements)
-    override fun isEmpty():Boolean = _realSet?.let {it.isEmpty()} ?: !iterator().hasNext()
-    override fun toString():String = realSet.toString()
-    override fun hashCode():Int = realSet.hashCode()
-    override fun equals(other:Any?):Boolean = realSet.equals(other)
-    override fun iterator():Iterator<Situation> = object:AbstractIterator<Situation>()
+    override fun next():Situation = iterator.next()
+    override fun hasNext():Boolean = iterator.hasNext()
+    private val iterator = object:AbstractIterator<Situation>()
     {
-        val returnedElements = mutableSetOf<Situation>()
         val situationSetIterators = situationSetList.map {it.iterator()}.toTypedArray()
-        val situationsToCombine = Array(situationSetIterators.size,{situationSetIterators[it].next()})
+        lateinit var situationsToCombine:Array<Situation>
         var isFirstIteration = true
         override fun computeNext()
         {
+            if (Thread.interrupted()) throw InterruptedException("interrupted!")
             while (true)
             {
                 // compute the next situations to combine
                 if (isFirstIteration)
                 {
                     isFirstIteration = false
+                    if (situationSetList.any {it.isEmpty()})
+                    {
+                        done()
+                        return
+                    }
+                    else
+                    {
+                        situationsToCombine = Array(situationSetIterators.size,{situationSetIterators[it].next()})
+                    }
                 }
                 else
                 {
@@ -57,7 +137,6 @@ class PermutedSituationSet private constructor(val situationSetList:List<Set<Sit
                         if (i !in situationSetIterators.indices)
                         {
                             done()
-                            if (_realSet == null) _realSet = returnedElements
                             return
                         }
 
@@ -90,7 +169,6 @@ class PermutedSituationSet private constructor(val situationSetList:List<Set<Sit
                 if (isCombinedSituationConsistent)
                 {
                     setNext(combinedSituation)
-                    returnedElements.add(combinedSituation)
                     return
                 }
             }
@@ -98,44 +176,30 @@ class PermutedSituationSet private constructor(val situationSetList:List<Set<Sit
     }
 }
 
-class CombinedSituationSet private constructor(val situationSetList:List<Set<Situation>>):Set<Situation>
+class CombinedSituationSet private constructor(val situationSetList:List<Set<Situation>>):AbstractSet<Situation>()
 {
     companion object
     {
         fun make(situationSetList:List<Set<Situation>>):Set<Situation>
         {
-            @Suppress("NAME_SHADOWING")
-            val situationSetList = situationSetList.filter {it.isNotEmpty()}
-            if (situationSetList.isEmpty())
-            {
-                return emptySet()
-            }
-            else
-            {
-                return CombinedSituationSet(situationSetList)
-            }
+            return CombinedSituationSet(situationSetList)
         }
     }
-
-    private var _realSet:Set<Situation>? = null
-    private val realSet:Set<Situation> get() =  _realSet ?: run {_realSet = toCollection(LinkedHashSet()); _realSet!!}
-    override val size:Int get() = realSet.size
-    override fun contains(element:Situation):Boolean = situationSetList.any {it.contains(element)}
-    override fun containsAll(elements:Collection<Situation>):Boolean = elements.all {contains(it)}
-    override fun isEmpty():Boolean = !iterator().hasNext()
-    override fun iterator():Iterator<Situation> = object:AbstractIterator<Situation>()
+    override fun next():Situation = iterator.next()
+    override fun hasNext():Boolean = iterator.hasNext()
+    private val iterator = object:AbstractIterator<Situation>()
     {
-        private val iterators = situationSetList.map {it.iterator()}
+        private val iterators = situationSetList.map {it.iterator()}.toMutableList()
         private val returnedElements = LinkedHashSet<Situation>()
         override fun computeNext()
         {
+            if (Thread.interrupted()) throw InterruptedException("interrupted!")
             while (true)
             {
-                val iterators = iterators.filter {it.hasNext()}
+                iterators.removeAll {!it.hasNext()}
                 if (iterators.isEmpty())
                 {
                     done()
-                    if (_realSet == null) _realSet = returnedElements
                     return
                 }
                 else
@@ -151,7 +215,4 @@ class CombinedSituationSet private constructor(val situationSetList:List<Set<Sit
             }
         }
     }
-    override fun toString():String = realSet.toString()
-    override fun hashCode():Int = realSet.hashCode()
-    override fun equals(other:Any?):Boolean = realSet.equals(other)
 }

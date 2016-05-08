@@ -1,6 +1,5 @@
 package research2016.propositionallogic
 
-import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 
 /**

@@ -115,7 +115,6 @@ class PropositionsTest
 
     val bigProposition1 = Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d"))
     val bigProposition2 = Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d")),BasicProposition.make("e"))
-    val bigProposition3 = Xor(Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d")),BasicProposition.make("e")),BasicProposition.make("f"))
 
     @Test
     fun evaluateProp1()
@@ -127,12 +126,6 @@ class PropositionsTest
     fun evaluateProp2()
     {
         evaluateEach(bigProposition2)
-    }
-
-    @Test
-    fun evaluateProp3()
-    {
-        evaluateEach(bigProposition3)
     }
 
     @Test
@@ -148,9 +141,23 @@ class PropositionsTest
     }
 
     @Test
-    fun modelProp3()
+    fun printModelsProp1()
     {
-        allModels(bigProposition3)
+        println(bigProposition1.models)
+    }
+
+    @Test
+    fun printModelsProp2()
+    {
+        println(bigProposition2.models)
+    }
+
+    @Test
+    fun modelsOfContradiction()
+    {
+        val contradiction = And(Tautology,And(And(BasicProposition.make("a"),BasicProposition.make("b")),Not(BasicProposition.make("b"))))
+        println(contradiction)
+        contradiction.models.trueSituations.firstOrNull()
     }
 
     fun evaluateEach(proposition:Proposition)
