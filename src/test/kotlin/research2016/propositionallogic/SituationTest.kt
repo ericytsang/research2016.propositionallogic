@@ -1,6 +1,7 @@
 package research2016.propositionallogic
 
 import org.junit.Test
+import java.util.AbstractSet
 import java.util.HashMap
 import java.util.LinkedHashMap
 import java.util.TreeMap

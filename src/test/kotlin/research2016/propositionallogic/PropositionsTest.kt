@@ -120,47 +120,47 @@ class PropositionsTest
     @Test
     fun evaluateProp1()
     {
-        allModels(bigProposition1)
+        evaluateEach(bigProposition1)
     }
 
     @Test
     fun evaluateProp2()
     {
-        allModels(bigProposition2)
+        evaluateEach(bigProposition2)
     }
 
     @Test
     fun evaluateProp3()
     {
-        allModels(bigProposition3)
+        evaluateEach(bigProposition3)
     }
 
     @Test
     fun modelProp1()
     {
-        evaluateEach(bigProposition1)
+        allModels(bigProposition1)
     }
 
     @Test
     fun modelProp2()
     {
-        evaluateEach(bigProposition2)
+        allModels(bigProposition2)
     }
 
     @Test
     fun modelProp3()
     {
-        evaluateEach(bigProposition3)
-    }
-
-    fun allModels(proposition:Proposition)
-    {
-        proposition.models
+        allModels(bigProposition3)
     }
 
     fun evaluateEach(proposition:Proposition)
     {
         Situation.generateFrom(proposition.basicPropositions).partition {proposition.evaluate(it)}
+    }
+
+    fun allModels(proposition:Proposition)
+    {
+        proposition.models
     }
 
     @Test

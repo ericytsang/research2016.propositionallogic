@@ -6,10 +6,10 @@ import java.util.LinkedHashSet
 /**
  * Created by surpl on 5/4/2016.
  */
-class Situation(propositionValues:Map<BasicProposition,Boolean>):Map<BasicProposition,Boolean>
+class Situation(val propositionValues:Map<BasicProposition,Boolean>):Map<BasicProposition,Boolean>
 {
     companion object;
-    private val map = LinkedHashMap(propositionValues)
+    private val map:Map<BasicProposition,Boolean> get() = propositionValues
     override val entries:Set<Map.Entry<BasicProposition,Boolean>> get() = map.entries
     override val keys:Set<BasicProposition> get() = map.keys
     override val size:Int get() = map.size
@@ -49,70 +49,7 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
     return allSituations
 }
 
-fun Situation.Companion.permute(situationSets:List<Set<Situation>>):Set<Situation>
+fun Situation.Companion.permute(situationSetList:List<Set<Situation>>):Set<Situation>
 {
-    // verify that every basic propositions specified in every situation in each
-    // set is present in every other situation in the same set.
-    situationSets.forEach()
-    {
-        situationSet -> situationSet.forEach()
-        {
-            situation ->
-            if (situation.keys != situationSet.first().keys)
-            {
-                throw IllegalArgumentException("every basic propositions specified in every situation in each set should be present in every other situation in the same set....but it is not. situationSets: $situationSets")
-            }
-
-            // throw interrupted exception if interrupted...
-            if (Thread.interrupted())
-            {
-                throw InterruptedException("thread was interrupted")
-            }
-        }
-    }
-
-    // permute every situation with every other situation, and return a set of
-    // all permutations...
-    return situationSets
-        .sortedBy {situationSet -> situationSet.size}
-        .fold(setOf(Situation(emptyMap())))
-        {
-            combinedSituationSet,situationSet ->
-            combinedSituationSet
-                .flatMap()
-                {
-                    situation1 ->
-                    situationSet.mapNotNull()
-                    {
-                        situation2 ->
-
-                        // throw interrupted exception if interrupted...
-                        if (Thread.interrupted())
-                        {
-                            throw InterruptedException("thread was interrupted")
-                        }
-
-                        // combine the situations
-                        val combinedSituation = Situation(situation1+situation2)
-
-                        // verify if the combined situation is consistent...
-                        // (combining {[a]} and {[!a]} should result in {}) if
-                        // it is, return it, return null otherwise
-                        val isCombinedSituationConsistent =
-                            combinedSituation.entries.all()
-                            {
-                                situation1[it.key] ?: it.value == it.value && situation2[it.key] ?: it.value == it.value
-                            }
-                        if (isCombinedSituationConsistent)
-                        {
-                            combinedSituation
-                        }
-                        else
-                        {
-                            null
-                        }
-                    }
-                }
-                .toSet()
-        }
+    return PermutedSituationSet.make(situationSetList)
 }
