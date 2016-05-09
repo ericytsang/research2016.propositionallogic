@@ -1,5 +1,6 @@
 package research2016.propositionallogic
 
+import lib.collections.IteratorToSetAdapter
 import java.util.LinkedHashSet
 
 /**
@@ -50,5 +51,10 @@ fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Se
 
 fun Situation.Companion.permute(situationSetList:List<Set<Situation>>):Set<Situation>
 {
-    return PermutedSituationSet.make(situationSetList)
+    return IteratorToSetAdapter(SituationSetPermutingIterator(situationSetList))
+}
+
+fun Situation.Companion.combine(situationSetList:List<Set<Situation>>):Set<Situation>
+{
+    return IteratorToSetAdapter(SituationSetCombiningIterator(situationSetList))
 }

@@ -107,13 +107,13 @@ val Proposition.models:Models get()
                     // [{},{p!q,pq},{!p!q,!pq}]
                     .map {situationSetList -> Situation.permute(situationSetList)}
                     // {p!q,pq,!p!q,!pq}
-                    .let {CombinedSituationSet.make(it)}
+                    .let {Situation.combine(it)}
 
             // set of situations that would make this proposition false
             val falseSituations = inputsForFalse
                 .map {booleanList -> booleanList.mapIndexed {i,b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations}}
                 .map {situationSetList -> Situation.permute(situationSetList)}
-                .let {CombinedSituationSet.make(it)}
+                .let {Situation.combine(it)}
 
             Models(trueSituations,falseSituations)
         }
