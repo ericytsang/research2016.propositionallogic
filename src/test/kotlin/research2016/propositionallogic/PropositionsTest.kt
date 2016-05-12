@@ -232,4 +232,58 @@ class PropositionsTest
         models.trueSituations.forEach {assert(proposition.evaluate(it))}
         models.falseSituations.forEach {assert(!proposition.evaluate(it))}
     }
+
+    @Test
+    fun modelsCrossCheckWithEvaluateTest8()
+    {
+        val proposition = And(BasicProposition.make("p"),BasicProposition.make("q"))
+        val models = proposition.models
+        models.trueSituations.forEach {assert(proposition.evaluate(it))}
+        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
+
+    @Test
+    fun modelsCrossCheckWithEvaluateTest9()
+    {
+        val proposition = Nand(BasicProposition.make("p"),BasicProposition.make("q"))
+        val models = proposition.models
+        models.trueSituations.forEach {assert(proposition.evaluate(it))}
+        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
+
+    @Test
+    fun modelsCrossCheckWithEvaluateTest10()
+    {
+        val proposition = Or(BasicProposition.make("p"),BasicProposition.make("q"))
+        val models = proposition.models
+        models.trueSituations.forEach {assert(proposition.evaluate(it))}
+        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
+
+    @Test
+    fun modelsCrossCheckWithEvaluateTest11()
+    {
+        val proposition = Xor(BasicProposition.make("p"),BasicProposition.make("q"))
+        val models = proposition.models
+        models.trueSituations.forEach {assert(proposition.evaluate(it))}
+        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
+
+    @Test
+    fun modelsCrossCheckWithEvaluateTest12()
+    {
+        val proposition = Iff(BasicProposition.make("p"),BasicProposition.make("q"))
+        val models = proposition.models
+        models.trueSituations.forEach {assert(proposition.evaluate(it))}
+        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
+
+    @Test
+    fun modelsCrossCheckWithEvaluateTest13()
+    {
+        val proposition = Oif(BasicProposition.make("p"),BasicProposition.make("q"))
+        val models = proposition.models
+        models.trueSituations.forEach {assert(proposition.evaluate(it))}
+        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
 }
