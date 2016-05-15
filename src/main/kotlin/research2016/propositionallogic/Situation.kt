@@ -67,3 +67,22 @@ fun Situation.Companion.combine(situationSetList:List<Set<Situation>>):Set<Situa
 {
     return IteratorToSetAdapter(SituationSetCombiningIterator(situationSetList))
 }
+
+/**
+ * returns the hamming distance between this [Situation] and the [other]
+ * [Situation]; the number of mappings of [BasicProposition]s to truth values
+ * that they disagree with.
+ */
+fun Situation.hammingDistance(other:Situation):Int
+{
+    val commonKeys = if (other.keys.size < keys.size)
+    {
+        other.keys.intersect(keys)
+    }
+    else
+    {
+        keys.intersect(other.keys)
+    }
+
+    return commonKeys.count {this[it] != other[it]}
+}

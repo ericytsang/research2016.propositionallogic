@@ -121,6 +121,15 @@ val Proposition.models:Models get()
 data class Models(val trueSituations:Set<Situation>,val falseSituations:Set<Situation>)
 
 /**
+ * returns true if there is at least one model for this [Proposition]; false
+ * otherwise.
+ */
+val Proposition.isSatisfiable:Boolean get()
+{
+    return models.trueSituations.firstOrNull()?.let {true} ?: false
+}
+
+/**
  * returns the truth value of this [Proposition] for the given [Situation].
  */
 fun Proposition.evaluate(situation:Situation):Boolean = when (this)

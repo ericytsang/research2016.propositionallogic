@@ -70,7 +70,7 @@ class PropositionsTest
     }
 
     @Test
-    fun modelsTest()
+    fun modelsOfPropositionTest()
     {
         val proposition = Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))
         val models = setOf(
@@ -117,47 +117,39 @@ class PropositionsTest
     val bigProposition2 = Xor(Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))),BasicProposition.make("s")),BasicProposition.make("t")),BasicProposition.make("u")),BasicProposition.make("v")),BasicProposition.make("w")),BasicProposition.make("x")),BasicProposition.make("y")),BasicProposition.make("z")),BasicProposition.make("a")),BasicProposition.make("b")),BasicProposition.make("c")),BasicProposition.make("d")),BasicProposition.make("e"))
 
     @Test
-    fun evaluateProp1()
+    fun benchmark_evaluateProp1()
     {
         evaluateEach(bigProposition1)
     }
 
     @Test
-    fun evaluateProp2()
+    fun benchmark_evaluateProp2()
     {
         evaluateEach(bigProposition2)
     }
 
     @Test
-    fun modelProp1()
+    fun benchmark_modelProp1()
     {
         allModels(bigProposition1)
     }
 
     @Test
-    fun modelProp2()
+    fun benchmark_modelProp2()
     {
         allModels(bigProposition2)
     }
 
     @Test
-    fun printModelsProp1()
+    fun benchmark_printModelsProp1()
     {
         println(bigProposition1.models)
     }
 
     @Test
-    fun printModelsProp2()
+    fun benchmark_printModelsProp2()
     {
         println(bigProposition2.models)
-    }
-
-    @Test
-    fun modelsOfContradiction()
-    {
-        val contradiction = And(Tautology,And(And(BasicProposition.make("a"),BasicProposition.make("b")),Not(BasicProposition.make("b"))))
-        println(contradiction)
-        contradiction.models.trueSituations.firstOrNull()
     }
 
     fun evaluateEach(proposition:Proposition)
@@ -168,6 +160,14 @@ class PropositionsTest
     fun allModels(proposition:Proposition)
     {
         proposition.models
+    }
+
+    @Test
+    fun modelsOfContradiction()
+    {
+        val contradiction = And(Tautology,And(And(BasicProposition.make("a"),BasicProposition.make("b")),Not(BasicProposition.make("b"))))
+        println(contradiction)
+        assert(contradiction.models.trueSituations.isEmpty())
     }
 
     @Test
@@ -285,5 +285,19 @@ class PropositionsTest
         val models = proposition.models
         models.trueSituations.forEach {assert(proposition.evaluate(it))}
         models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+    }
+
+    @Test
+    fun isSatisfiableOfContradictionIsFalse()
+    {
+        val contradiction = And(Tautology,And(And(BasicProposition.make("a"),BasicProposition.make("b")),Not(BasicProposition.make("b"))))
+        assert(!contradiction.isSatisfiable)
+    }
+
+    @Test
+    fun isSatisfiableOfPropositionIsFalse()
+    {
+        val proposition = Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))
+        assert(proposition.isSatisfiable)
     }
 }
