@@ -30,8 +30,6 @@ sealed class Proposition
     {
         abstract fun truthValue(situation:Situation):Boolean
         override fun toString():String = friendly.toString()
-        override fun hashCode():Int = friendly.hashCode()
-        override fun equals(other:Any?):Boolean = other is AtomicProposition && other.friendly == friendly
         override val children:List<Proposition> = emptyList()
         abstract val allSituations:Set<Situation>
     }
