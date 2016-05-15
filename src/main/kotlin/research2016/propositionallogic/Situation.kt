@@ -4,7 +4,7 @@ import lib.collections.IteratorToSetAdapter
 import java.util.LinkedHashSet
 
 /**
- * Created by surpl on 5/4/2016.
+ * maps [BasicProposition]s to truth values [Boolean]s.
  */
 class Situation(val propositionValues:Map<BasicProposition,Boolean>):Map<BasicProposition,Boolean>
 {
@@ -28,6 +28,10 @@ fun Situation.Companion.make(propositionValues:Map<String,Boolean>):Situation
     return Situation(propositionValues.mapKeys {BasicProposition.make(it.key)})
 }
 
+/**
+ * returns all possible permutations of [Situation]s (truth value assignments)
+ * that involve variables from [basicPropositions].
+ */
 fun Situation.Companion.generateFrom(basicPropositions:Set<BasicProposition>):Set<Situation>
 {
     val numSituationsToGenerate = Math.round(Math.pow(2.toDouble(),basicPropositions.size.toDouble())).toInt()
@@ -54,6 +58,11 @@ fun Situation.Companion.permute(situationSetList:List<Set<Situation>>):Set<Situa
     return IteratorToSetAdapter(SituationSetPermutingIterator(situationSetList))
 }
 
+/**
+ * combines multiple sets of situations into one. like the union set operator,
+ * except the computation of unifying the sets is deferred to when the resulting
+ * unified set is queried.
+ */
 fun Situation.Companion.combine(situationSetList:List<Set<Situation>>):Set<Situation>
 {
     return IteratorToSetAdapter(SituationSetCombiningIterator(situationSetList))

@@ -112,6 +112,12 @@ val Proposition.models:Models get()
     }
 }
 
+/**
+ * data class used as return value of the models function. [trueSituations] is
+ * the [Set] of [Situation]s where this [Proposition] [evaluate]s to true, while
+ * [falseSituations] is the [Set] of [Situation]s where this [Proposition]
+ * [evaluate]s to false.
+ */
 data class Models(val trueSituations:Set<Situation>,val falseSituations:Set<Situation>)
 
 /**
