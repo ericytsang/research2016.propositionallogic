@@ -84,9 +84,6 @@ val Proposition.models:Models get()
                 .partition {truthTable[it]!!}
                 .let {it.first.toSet() to it.second.toSet()}
 
-            // throw interrupted exception if interrupted...
-            if (Thread.interrupted()) throw InterruptedException("thread was interrupted")
-
             // list of models for each operand in the order that they appear
             // in the operand list. each model contains situations
             // partitioned into ones that satisfy the operand, and ones that
@@ -94,9 +91,6 @@ val Proposition.models:Models get()
             // i.e.: [{q,!q} to {},{p} to {!p}]
             val operandModels = children
                 .map {it.models}
-
-            // throw interrupted exception if interrupted...
-            if (Thread.interrupted()) throw InterruptedException("thread was interrupted")
 
             // set of situations that would make this proposition true
             val trueSituations =
