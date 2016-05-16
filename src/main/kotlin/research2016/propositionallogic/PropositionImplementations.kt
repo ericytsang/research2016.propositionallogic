@@ -16,8 +16,8 @@ class BasicProposition private constructor(_friendly:String):AtomicProposition(_
     }
     init
     {
-        assert(_friendly.length == 1,{"only strings of length 1 are allowed to be used as the friendly string for atomic propositions"})
-        assert(_friendly[0].isLetter(),{"atomic proposition must be a letter"})
+        assert(_friendly.length >= 1,{"only strings of length 1 or longer are allowed to be used as the friendly string for atomic propositions"})
+        assert(_friendly.all {it.isLetter()},{"atomic proposition must be composed only of letters"})
     }
     override fun truthValue(situation:Situation):Boolean = situation[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
     override val allSituations:Set<Situation> = setOf(Situation(mapOf(this to true)),Situation(mapOf(this to false)))
