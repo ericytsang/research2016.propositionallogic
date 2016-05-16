@@ -300,4 +300,13 @@ class PropositionsTest
         val proposition = Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))
         assert(proposition.isSatisfiable)
     }
+
+    @Test
+    fun makePropositionsFromSituationsTest()
+    {
+        val models = Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r"))).models
+        assert(Proposition.makeFrom(models.trueSituations).models == models)
+        assert(Proposition.makeFrom(emptySet()) == Contradiction)
+        assert(Proposition.makeFrom(setOf(Situation(emptyMap()),Situation(emptyMap()),Situation(emptyMap()))) == Tautology)
+    }
 }
