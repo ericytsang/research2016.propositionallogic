@@ -76,6 +76,51 @@ fun Proposition.Companion.makeFrom(situations:Iterable<Situation>):Proposition
     } ?: Contradiction
 }
 
+private enum class OperatorId(val numOperands:Int,val generator:(List<Proposition>)->Proposition)
+{
+    NOT(1,{Not(it.single())}),
+    AND(2,{And(it.first(),it.last())}),
+    OR(2,{Or(it.first(),it.last())}),
+    IFF(2,{Iff(it.first(),it.last())}),
+    THEN(2,{Oif(it.first(),it.last())}),
+    XOR(2,{Xor(it.first(),it.last())}),
+    NAND(2,{Nand(it.first(),it.last())});
+    companion object
+    {
+        fun random():OperatorId
+        {
+            return values()[(Math.random()*values().size).toInt()]
+        }
+    }
+}
+
+fun Proposition.Companion.makeRandom(basicPropositions:List<BasicProposition>):Proposition
+{
+    loop@ while (true)
+    {
+        if (basicPropositions.size == 1)
+        {
+            return basicPropositions.single()
+        }
+        else
+        {
+            assert(basicPropositions.isNotEmpty(),{throw IllegalArgumentException("cannot pass in empty list of basic propositions")})
+            val randomOperator = OperatorId.random()
+            if (basicPropositions.size < randomOperator.numOperands)
+            {
+                continue@loop
+            }
+            val iterator = basicPropositions.iterator()
+            val lists = Array(randomOperator.numOperands,{mutableListOf(iterator.next())})
+            while (iterator.hasNext())
+            {
+                lists[(Math.random()*lists.size).toInt()].add(iterator.next())
+            }
+            return randomOperator.generator(lists.map {makeRandom(it)})
+        }
+    }
+}
+
 /**
  * returns all the basic propositions in this [Proposition].
  */

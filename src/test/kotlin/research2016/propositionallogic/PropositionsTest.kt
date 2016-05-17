@@ -349,4 +349,73 @@ class PropositionsTest
     {
         assert(!Or(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isContradiction)
     }
+
+    @Test
+    fun makeRandom0()
+    {
+        val basicPropositions = emptyList<BasicProposition>()
+        try
+        {
+            println(Proposition.makeRandom(basicPropositions))
+            assert(false,{"no exception thrown...was expecting an illegal argument exception"})
+        }
+        catch (ex:IllegalArgumentException)
+        {
+            // test passed
+        }
+    }
+
+    @Test
+    fun makeRandom1()
+    {
+        val basicPropositions = listOf(BasicProposition.make("a"))
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.basicPropositions.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom2()
+    {
+        val basicPropositions = listOf(BasicProposition.make("a"),BasicProposition.make("b"))
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.basicPropositions.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom3()
+    {
+        val basicPropositions = listOf(BasicProposition.make("a"),BasicProposition.make("b"),BasicProposition.make("c"))
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.basicPropositions.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom4()
+    {
+        val basicPropositions = listOf(BasicProposition.make("a"),BasicProposition.make("b"),BasicProposition.make("c"),BasicProposition.make("d"))
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.basicPropositions.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom5()
+    {
+        val basicPropositions = listOf(BasicProposition.make("a"),BasicProposition.make("b"),BasicProposition.make("c"),BasicProposition.make("d"),BasicProposition.make("e"))
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.basicPropositions.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom6()
+    {
+        val basicPropositions = listOf(BasicProposition.make("a"),BasicProposition.make("b"),BasicProposition.make("c"),BasicProposition.make("d"),BasicProposition.make("e"),BasicProposition.make("f"))
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.basicPropositions.size == basicPropositions.size)
+    }
 }
