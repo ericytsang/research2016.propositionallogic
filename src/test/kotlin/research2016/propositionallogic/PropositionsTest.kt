@@ -290,15 +290,19 @@ class PropositionsTest
     @Test
     fun isSatisfiableOfContradictionIsFalse()
     {
-        val contradiction = And(Tautology,And(And(BasicProposition.make("a"),BasicProposition.make("b")),Not(BasicProposition.make("b"))))
-        assert(!contradiction.isSatisfiable)
+        assert(!And(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isSatisfiable)
     }
 
     @Test
-    fun isSatisfiableOfPropositionIsFalse()
+    fun isSatisfiableOfPropositionIsTrue()
     {
-        val proposition = Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r")))
-        assert(proposition.isSatisfiable)
+        assert(BasicProposition.make("a").isSatisfiable)
+    }
+
+    @Test
+    fun isSatisfiableOfTautologyIsTrue()
+    {
+        assert(Or(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isSatisfiable)
     }
 
     @Test
@@ -308,5 +312,41 @@ class PropositionsTest
         assert(Proposition.makeFrom(models.trueSituations).models == models)
         assert(Proposition.makeFrom(emptySet()) == Contradiction)
         assert(Proposition.makeFrom(setOf(Situation(emptyMap()),Situation(emptyMap()),Situation(emptyMap()))) == Tautology)
+    }
+
+    @Test
+    fun isTautologyOfContradictionIsFalse()
+    {
+        assert(!And(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isTautology)
+    }
+
+    @Test
+    fun isTautologyOfPropositionIsFalse()
+    {
+        assert(!BasicProposition.make("a").isTautology)
+    }
+
+    @Test
+    fun isTautologyOfTautologyIsTrue()
+    {
+        assert(Or(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isTautology)
+    }
+
+    @Test
+    fun isContradictionOfContradictionIsTrue()
+    {
+        assert(And(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isContradiction)
+    }
+
+    @Test
+    fun isContradictionOfPropositionIsFalse()
+    {
+        assert(!BasicProposition.make("a").isContradiction)
+    }
+
+    @Test
+    fun isContradictionOfTautologyIsFalse()
+    {
+        assert(!Or(BasicProposition.make("a"),Not(BasicProposition.make("a"))).isContradiction)
     }
 }

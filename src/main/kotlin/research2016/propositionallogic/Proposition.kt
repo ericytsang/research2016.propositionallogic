@@ -157,7 +157,25 @@ data class Models(val trueSituations:Set<Situation>,val falseSituations:Set<Situ
  */
 val Proposition.isSatisfiable:Boolean get()
 {
-    return models.trueSituations.firstOrNull()?.let {true} ?: false
+    return models.trueSituations.isNotEmpty()
+}
+
+/**
+ * returns true if this [Proposition] would [evaluate] to true in any situation;
+ * false otherwise.
+ */
+val Proposition.isTautology:Boolean get()
+{
+    return models.falseSituations.isEmpty()
+}
+
+/**
+ * returns true if this [Proposition] would [evaluate] to false in any
+ * situation; false otherwise.
+ */
+val Proposition.isContradiction:Boolean get()
+{
+    return models.trueSituations.isEmpty()
 }
 
 /**
