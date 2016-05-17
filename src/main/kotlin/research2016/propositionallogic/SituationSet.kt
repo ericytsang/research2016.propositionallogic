@@ -1,7 +1,6 @@
 package research2016.propositionallogic
 
 import lib.collections.permutedIterator
-import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 import kotlin.collections.AbstractIterator
 
@@ -13,37 +12,35 @@ class SituationSetPermutingIterator(val situationSetList:List<Set<Situation>>):A
     private val permutedSituationIterator = situationSetList.permutedIterator()
     override fun computeNext()
     {
-        loop@ while (true)
+        while (true)
         {
             if (Thread.interrupted()) throw InterruptedException("interrupted!")
 
             // if there is a permutation remaining to combine and check, do so
             if (permutedSituationIterator.hasNext())
             {
-                // try to combine situations...while combining, make sure there
-                // are no conflicting values e.g., combined situation "ab" is
-                // not conflicting with with situations "a" and "b", but is in
-                // conflict with "ab" and "b not".
+                // try to combine situations
                 val situationsToCombine = permutedSituationIterator.next()
-                val combinedMap = LinkedHashMap<BasicProposition,Boolean>()
-                for (situation in situationsToCombine)
-                {
-                    for (entry in situation)
+                val combinedSituation = situationsToCombine.fold(Situation(emptyMap())) {prev,next -> Situation(prev+next)}
+
+                // return combined situation if it is consistent with the
+                // situations it is made up of, e.g., combined situation "ab" is
+                // consistent with situations "a" and "b", but is not consistent
+                // with "ab" and "b not"
+                val isCombinedSituationConsistent = combinedSituation.entries.all()
                     {
-                        val prevMapping = combinedMap.put(entry.key,entry.value)
-                        if (prevMapping == null || prevMapping == entry.value)
+                        combinedSituationEntry ->
+                        situationsToCombine.all()
                         {
-                            continue
-                        }
-                        else
-                        {
-                            continue@loop
+                            situation ->
+                            situation[combinedSituationEntry.key] ?: combinedSituationEntry.value == combinedSituationEntry.value
                         }
                     }
+                if (isCombinedSituationConsistent)
+                {
+                    setNext(combinedSituation)
+                    return
                 }
-
-                setNext(Situation(combinedMap))
-                return
             }
 
             // finish otherwise
