@@ -135,42 +135,4 @@ class SituationTest
 
         assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
     }
-
-    @Test
-    fun hammingDistanceof0()
-    {
-        val pqr = Situation.make(mapOf(
-            "p" to true,
-            "q" to true,
-            "r" to true
-        ))
-        val pqrnot = Situation.make(mapOf(
-            "p" to true,
-            "q" to true,
-            "r" to false
-        ))
-        val any = Situation(emptyMap())
-        assert(pqr.hammingDistance(pqr) == 0)
-        assert(any.hammingDistance(pqr) == 0)
-        assert(any.hammingDistance(pqrnot) == 0)
-        assert(pqrnot.hammingDistance(pqrnot) == 0)
-        assert(any.hammingDistance(any) == 0)
-    }
-
-    @Test
-    fun hammingDistanceof1()
-    {
-        val pqr = Situation.make(mapOf(
-            "p" to true,
-            "q" to true,
-            "r" to true
-        ))
-        val pqrnot = Situation.make(mapOf(
-            "p" to true,
-            "q" to true,
-            "r" to false
-        ))
-        assert(pqrnot.hammingDistance(pqr) == 1)
-        assert(pqr.hammingDistance(pqrnot) == 1)
-    }
 }
