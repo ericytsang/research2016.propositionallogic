@@ -45,35 +45,25 @@ sealed class Proposition
     }
 }
 
-fun Proposition.Companion.makeFrom(situations:Iterable<Situation>):Proposition
+fun Proposition.Companion.makeFrom(situation:Situation):Proposition
 {
-    val situationSet = situations.toSet()
-    val propositions = situationSet.mapNotNull()
+    val propositions = situation.keys.map()
     {
-        situation ->
-        val propositions = situation.keys.map()
+        basicProposition ->
+        if (situation[basicProposition]!!)
         {
-            basicProposition ->
-            if (situation[basicProposition]!!)
-            {
-                basicProposition
-            }
-            else
-            {
-                Not(basicProposition)
-            }
+            basicProposition
         }
-        propositions.fold<Proposition,Proposition?>(null)
+        else
         {
-            initial,next ->
-            initial?.let {And(initial,next)} ?: next
-        } ?: Tautology
+            Not(basicProposition)
+        }
     }
     return propositions.fold<Proposition,Proposition?>(null)
     {
         initial,next ->
-        initial?.let {Or(initial,next)} ?: next
-    } ?: Contradiction
+        initial?.let {And(initial,next)} ?: next
+    } ?: Tautology
 }
 
 {
