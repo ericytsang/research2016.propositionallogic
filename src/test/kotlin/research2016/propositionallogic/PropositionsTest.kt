@@ -309,9 +309,7 @@ class PropositionsTest
     fun makePropositionsFromSituationsTest()
     {
         val models = Oif(BasicProposition.make("p"),And(BasicProposition.make("q"),BasicProposition.make("r"))).models
-        assert(Proposition.makeFrom(models.trueSituations).models == models)
-        assert(Proposition.makeFrom(emptySet()) == Contradiction)
-        assert(Proposition.makeFrom(setOf(Situation(emptyMap()),Situation(emptyMap()),Situation(emptyMap()))) == Tautology)
+        assert(models.trueSituations.map {Proposition.makeFrom(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {Or(initial,next)} ?: next}?.models == models)
     }
 
     @Test

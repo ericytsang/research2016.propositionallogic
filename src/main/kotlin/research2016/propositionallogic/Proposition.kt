@@ -1,5 +1,6 @@
 package research2016.propositionallogic
 
+import lib.collections.getRandom
 import lib.delegates.LazyWithReceiver
 import java.util.LinkedHashSet
 import research2016.propositionallogic.Proposition.AtomicProposition
@@ -26,25 +27,53 @@ sealed class Proposition
      */
     abstract val children:List<Proposition>
 
+    /**
+     * leaf node.
+     */
     abstract class AtomicProposition(val friendly:String):Proposition()
     {
+        /**
+         * returns the truth value of this [AtomicProposition] for the
+         * [situation].
+         */
         abstract fun truthValue(situation:Situation):Boolean
+
+        /**
+         * returns all [Situation]s that
+         */
+        abstract val allSituations:Set<Situation>
+
         override fun toString():String = friendly.toString()
         override val children:List<Proposition> = emptyList()
-        abstract val allSituations:Set<Situation>
     }
 
+    /**
+     * has child nodes.
+     */
     abstract class Operator(val operands:List<Proposition>,val truthTable:Map<List<Boolean>,Boolean>):Proposition()
     {
         init
         {
-            assert(truthTable.keys.all {it.size == operands.size},{"length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands"})
+            assert(truthTable.keys.all {it.size == operands.size})
+            {
+                throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
+            }
         }
-        fun operate(operands:List<Boolean>):Boolean = truthTable[operands]!!
+
+        /**
+         * returns the truth value of the operation for the given [operands].
+         */
+        fun operate(operands:List<Boolean>):Boolean = truthTable[operands]
+            ?: throw IllegalArgumentException("truth table entry for operands not found. truth table may be missing an entry, or the number of provided operands is too much or too little for this operator. truth table: $truthTable, operands: $operands")
+
         override val children:List<Proposition> = operands
     }
 }
 
+/**
+ * creates a [Proposition] in disjunctive normal form from the provided
+ * [Situation].
+ */
 fun Proposition.Companion.makeFrom(situation:Situation):Proposition
 {
     val propositions = situation.keys.map()
@@ -66,7 +95,14 @@ fun Proposition.Companion.makeFrom(situation:Situation):Proposition
     } ?: Tautology
 }
 
+/**
+ * generates a [List] of [BasicProposition]s of length [numPropositions]. each
+ * generated [BasicProposition]'s [String] is randomly chosen from
+ * [basicPropositionStrings].
+ */
+fun BasicProposition.Companion.makeRandom(basicPropositionStrings:List<String>,numPropositions:Int):List<BasicProposition>
 {
+    return (1..numPropositions).map {BasicProposition.make(basicPropositionStrings.getRandom())}
 }
 
 /**
