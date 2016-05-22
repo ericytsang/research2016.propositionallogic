@@ -1,7 +1,10 @@
 package research2016.propositionallogic
 
+import lib.collections.permutedIterator
+import lib.collections.toIterable
 import research2016.propositionallogic.Proposition.AtomicProposition
 import research2016.propositionallogic.Proposition.Operator
+import java.util.Arrays
 import java.util.WeakHashMap
 
 /**
@@ -35,14 +38,40 @@ val Contradiction = object:AtomicProposition("0")
     override val allSituations:Set<Situation> = setOf(Situation(emptyMap()))
 }
 
-abstract class UnaryOperator(val operand:Proposition,val friendly:String,truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(operand),truthTable)
+abstract class UnaryOperator(val operand:Proposition,val friendly:String,override val truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(operand))
 {
+    init
+    {
+        assert(truthTable.keys.all {it.size == operands.size})
+        {
+            throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
+        }
+    }
     override fun toString():String = "($friendly$operand)"
 }
 
-abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Proposition,val friendly:String,truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(leftOperand,rightOperand),truthTable)
+abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Proposition,val friendly:String,override val truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(leftOperand,rightOperand))
 {
+    init
+    {
+        assert(truthTable.keys.all {it.size == operands.size})
+        {
+            throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
+        }
+    }
     override fun toString():String = "($leftOperand$friendly$rightOperand)"
+}
+
+abstract class AssociativeOperator(operands:List<Proposition>,val friendly:String):Operator(operands)
+{
+    override val truthTable:Map<List<Boolean>,Boolean> by lazy()
+    {
+        val truthValues = listOf(true,false)
+        val mapKeys = Array(operands.size,{truthValues}).toList().permutedIterator().toIterable()
+        mapKeys.associate {it to operate(it)}
+    }
+    abstract override fun operate(operands:List<Boolean>):Boolean
+    override fun toString():String = operands.joinToString(separator = friendly,prefix = "(",postfix = ")")
 }
 
 val Proposition.not:Not get() = Not(this)
@@ -58,29 +87,61 @@ class Not(operand:Proposition):UnaryOperator(operand,"¬",truthTable)
     }
 }
 
-class And(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"∧",truthTable)
+infix fun Proposition.and(other:Proposition) = And.make(listOf(this,other))
+
+class And private constructor(operands:List<Proposition>):AssociativeOperator(operands,"∧")
 {
     companion object
     {
-        val truthTable = mapOf(
-            listOf(false,false) to false,
-            listOf(false,true ) to false,
-            listOf(true ,false) to false,
-            listOf(true ,true ) to true
-        )
+        fun make(operands:List<Proposition>):And
+        {
+            val newOperands = operands.flatMap()
+            {
+                if (it is And)
+                {
+                    it.operands
+                }
+                else
+                {
+                    listOf(it)
+                }
+            }
+            return And(newOperands)
+        }
+    }
+
+    override fun operate(operands:List<Boolean>):Boolean
+    {
+        return operands.all {it}
     }
 }
 
-class Or(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"∨",truthTable)
+infix fun Proposition.or(other:Proposition) = Or.make(listOf(this,other))
+
+class Or private constructor(operands:List<Proposition>):AssociativeOperator(operands,"∨")
 {
     companion object
     {
-        val truthTable = mapOf(
-            listOf(false,false) to false,
-            listOf(false,true ) to true,
-            listOf(true ,false) to true,
-            listOf(true ,true ) to true
-        )
+        fun make(operands:List<Proposition>):Or
+        {
+            val newOperands = operands.flatMap()
+            {
+                if (it is Or)
+                {
+                    it.operands
+                }
+                else
+                {
+                    listOf(it)
+                }
+            }
+            return Or(newOperands)
+        }
+    }
+
+    override fun operate(operands:List<Boolean>):Boolean
+    {
+        return operands.any {it}
     }
 }
 

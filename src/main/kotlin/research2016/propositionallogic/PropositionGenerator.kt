@@ -8,8 +8,8 @@ import lib.collections.getRandom
 private enum class Operator(val numOperands:Int,val generator:(List<Proposition>)->Proposition)
 {
     NOT(1,{Not(it.single())}),
-    AND(2,{And(it.first(),it.last())}),
-    OR(2,{Or(it.first(),it.last())});
+    AND(2,{And.make(it)}),
+    OR(2,{Or.make(it)});
     //IFF(2,{Iff(it.first(),it.last())}),
     //THEN(2,{Oif(it.first(),it.last())}),
     //XOR(2,{Xor(it.first(),it.last())}),
