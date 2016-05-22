@@ -29,7 +29,7 @@ class PropositionsTest
     fun toStringTest1()
     {
         val generatedString = ((p.not or q) oif r).toString()
-        val expectedString = "(((¬p)∨q)→r)"
+        val expectedString = "(¬p∨q)→r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
@@ -37,7 +37,7 @@ class PropositionsTest
     fun toStringTest2()
     {
         val generatedString = ((p and q)iff r).toString()
-        val expectedString = "((p∧q)↔r)"
+        val expectedString = "(p∧q)↔r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
@@ -45,7 +45,7 @@ class PropositionsTest
     fun toStringTest3()
     {
         val generatedString = ((p nand q)xor r).toString()
-        val expectedString = "((p|q)⊕r)"
+        val expectedString = "(p|q)⊕r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
@@ -53,7 +53,7 @@ class PropositionsTest
     fun toStringTest4()
     {
         val generatedString = (p and q and r).toString()
-        val expectedString = "(p∧q∧r)"
+        val expectedString = "p∧q∧r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
@@ -61,7 +61,7 @@ class PropositionsTest
     fun toStringTest5()
     {
         val generatedString = (p or q or r).toString()
-        val expectedString = "(p∨q∨r)"
+        val expectedString = "p∨q∨r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
@@ -69,7 +69,7 @@ class PropositionsTest
     fun toStringTest6()
     {
         val generatedString = ((p or q or r)and(p.not or q or r)and(p.not or q.not or r)and(p.not or q.not or r.not)).toString()
-        val expectedString = "((p∨q∨r)∧((¬p)∨q∨r)∧((¬p)∨(¬q)∨r)∧((¬p)∨(¬q)∨(¬r)))"
+        val expectedString = "(p∨q∨r)∧(¬p∨q∨r)∧(¬p∨¬q∨r)∧(¬p∨¬q∨¬r)"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 

@@ -47,7 +47,18 @@ abstract class UnaryOperator(val operand:Proposition,val friendly:String,overrid
             throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
         }
     }
-    override fun toString():String = "($friendly$operand)"
+
+    override fun toString():String
+    {
+        if (operand.children.size > 1)
+        {
+            return "$friendly($operand)"
+        }
+        else
+        {
+            return "$friendly$operand"
+        }
+    }
 }
 
 abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Proposition,val friendly:String,override val truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(leftOperand,rightOperand))
@@ -59,19 +70,28 @@ abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Propo
             throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
         }
     }
-    override fun toString():String = "($leftOperand$friendly$rightOperand)"
+
+    override fun toString():String
+    {
+        return operands.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
+    }
 }
 
 abstract class AssociativeOperator(operands:List<Proposition>,val friendly:String):Operator(operands)
 {
+    abstract override fun operate(operands:List<Boolean>):Boolean
+
     override val truthTable:Map<List<Boolean>,Boolean> by lazy()
     {
         val truthValues = listOf(true,false)
         val mapKeys = Array(operands.size,{truthValues}).toList().permutedIterator().toIterable()
         mapKeys.associate {it to operate(it)}
     }
-    abstract override fun operate(operands:List<Boolean>):Boolean
-    override fun toString():String = operands.joinToString(separator = friendly,prefix = "(",postfix = ")")
+
+    override fun toString():String
+    {
+        return operands.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
+    }
 }
 
 val Proposition.not:Not get() = Not(this)
