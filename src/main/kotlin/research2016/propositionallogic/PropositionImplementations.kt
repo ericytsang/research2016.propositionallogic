@@ -82,6 +82,8 @@ class Or(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOp
     }
 }
 
+infix fun Proposition.oif(other:Proposition) = Oif(this,other)
+
 class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"→",truthTable)
 {
     companion object
@@ -94,6 +96,8 @@ class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
         )
     }
 }
+
+infix fun Proposition.iff(other:Proposition) = Iff(this,other)
 
 class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"↔",truthTable)
 {
@@ -108,6 +112,8 @@ class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
+infix fun Proposition.xor(other:Proposition) = Xor(this,other)
+
 class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"⊕",truthTable)
 {
     companion object
@@ -120,6 +126,8 @@ class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
         )
     }
 }
+
+infix fun Proposition.nand(other:Proposition) = Nand(this,other)
 
 class Nand(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"|",truthTable)
 {
