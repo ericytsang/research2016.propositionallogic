@@ -45,6 +45,8 @@ abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Propo
     override fun toString():String = "($leftOperand$friendly$rightOperand)"
 }
 
+val Proposition.not:Not get() = Not(this)
+
 class Not(operand:Proposition):UnaryOperator(operand,"¬",truthTable)
 {
     companion object
