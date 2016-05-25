@@ -1,10 +1,7 @@
 package research2016.propositionallogic
 
-import lib.collections.permutedIterator
-import lib.collections.toIterable
 import research2016.propositionallogic.Proposition.AtomicProposition
 import research2016.propositionallogic.Proposition.Operator
-import java.util.Arrays
 import java.util.WeakHashMap
 
 /**
@@ -38,7 +35,7 @@ val Contradiction = object:AtomicProposition("0")
     override val allSituations:Set<Situation> = setOf(Situation(emptyMap()))
 }
 
-abstract class UnaryOperator(val operand:Proposition,val friendly:String,override val truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(operand))
+abstract class TruthTableOperator(operands:List<Proposition>):Operator(operands)
 {
     init
     {
@@ -48,6 +45,28 @@ abstract class UnaryOperator(val operand:Proposition,val friendly:String,overrid
         }
     }
 
+    abstract val truthTable:Map<List<Boolean>,Boolean>
+
+    override fun operate(operands:List<Boolean>):Boolean = truthTable[operands]
+        ?: throw IllegalArgumentException("truth table entry for operands not found. truth table may be missing an entry, or the number of provided operands is too much or too little for this operator. truth table: $truthTable, operands: $operands")
+
+    override fun operate(operands:List<Double>):Double
+    {
+        return truthTable
+            // rows to evaluate to true in the truth table
+            .entries.filter {it.value}.map {it.key}
+            // mapping each boolean to the truthiness of the operand
+            .map {it.mapIndexed {i,b -> if (b) operands[i] else 1-operands[i] }}
+            // multiplying all the doubles together for each list into one double
+            .map {it.fold(1.0) {i,n -> i*n}}
+            // sum...
+            .sum()
+    }
+}
+
+abstract class UnaryOperator(val operand:Proposition):TruthTableOperator(listOf(operand))
+{
+    abstract val friendly:String
     override fun toString():String
     {
         if (operand.children.size > 1)
@@ -61,33 +80,18 @@ abstract class UnaryOperator(val operand:Proposition,val friendly:String,overrid
     }
 }
 
-abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Proposition,val friendly:String,override val truthTable:Map<List<Boolean>,Boolean>):Operator(listOf(leftOperand,rightOperand))
+abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Proposition):TruthTableOperator(listOf(leftOperand,rightOperand))
 {
-    init
-    {
-        assert(truthTable.keys.all {it.size == operands.size})
-        {
-            throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
-        }
-    }
-
+    abstract val friendly:String
     override fun toString():String
     {
         return operands.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
     }
 }
 
-abstract class AssociativeOperator(operands:List<Proposition>,val friendly:String):Operator(operands)
+abstract class AssociativeOperator(operands:List<Proposition>):Operator(operands)
 {
-    abstract override fun operate(operands:List<Boolean>):Boolean
-
-    override val truthTable:Map<List<Boolean>,Boolean> by lazy()
-    {
-        val truthValues = listOf(true,false)
-        val mapKeys = Array(operands.size,{truthValues}).toList().permutedIterator().toIterable()
-        mapKeys.associate {it to operate(it)}
-    }
-
+    abstract val friendly:String
     override fun toString():String
     {
         return operands.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
@@ -96,8 +100,10 @@ abstract class AssociativeOperator(operands:List<Proposition>,val friendly:Strin
 
 val Proposition.not:Not get() = Not(this)
 
-class Not(operand:Proposition):UnaryOperator(operand,"¬",truthTable)
+class Not(operand:Proposition):UnaryOperator(operand)
 {
+    override val friendly:String get() = "¬"
+    override val truthTable:Map<List<Boolean>,Boolean> get() = Companion.truthTable
     companion object
     {
         val truthTable = mapOf(
@@ -109,7 +115,7 @@ class Not(operand:Proposition):UnaryOperator(operand,"¬",truthTable)
 
 infix fun Proposition.and(other:Proposition) = And.make(listOf(this,other))
 
-class And private constructor(operands:List<Proposition>):AssociativeOperator(operands,"∧")
+class And private constructor(operands:List<Proposition>):AssociativeOperator(operands)
 {
     companion object
     {
@@ -130,15 +136,22 @@ class And private constructor(operands:List<Proposition>):AssociativeOperator(op
         }
     }
 
+    override val friendly:String get() = "∧"
+
     override fun operate(operands:List<Boolean>):Boolean
     {
         return operands.all {it}
+    }
+
+    override fun operate(operands:List<Double>):Double
+    {
+        return operands.fold(1.0) {i,n -> i*n}
     }
 }
 
 infix fun Proposition.or(other:Proposition) = Or.make(listOf(this,other))
 
-class Or private constructor(operands:List<Proposition>):AssociativeOperator(operands,"∨")
+class Or private constructor(operands:List<Proposition>):AssociativeOperator(operands)
 {
     companion object
     {
@@ -159,16 +172,25 @@ class Or private constructor(operands:List<Proposition>):AssociativeOperator(ope
         }
     }
 
+    override val friendly:String get() = "∨"
+
     override fun operate(operands:List<Boolean>):Boolean
     {
         return operands.any {it}
+    }
+
+    override fun operate(operands:List<Double>):Double
+    {
+        return operands.fold(1.0) {i,n -> i*(1-n)}.let {1-it}
     }
 }
 
 infix fun Proposition.oif(other:Proposition) = Oif(this,other)
 
-class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"→",truthTable)
+class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand)
 {
+    override val friendly:String get() = "→"
+    override val truthTable:Map<List<Boolean>,Boolean> get() = Companion.truthTable
     companion object
     {
         val truthTable = mapOf(
@@ -182,8 +204,10 @@ class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
 
 infix fun Proposition.iff(other:Proposition) = Iff(this,other)
 
-class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"↔",truthTable)
+class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand)
 {
+    override val friendly:String get() = "↔"
+    override val truthTable:Map<List<Boolean>,Boolean> get() = Companion.truthTable
     companion object
     {
         val truthTable = mapOf(
@@ -197,8 +221,10 @@ class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
 
 infix fun Proposition.xor(other:Proposition) = Xor(this,other)
 
-class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"⊕",truthTable)
+class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand)
 {
+    override val friendly:String get() = "⊕"
+    override val truthTable:Map<List<Boolean>,Boolean> get() = Companion.truthTable
     companion object
     {
         val truthTable = mapOf(
@@ -212,8 +238,10 @@ class Xor(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
 
 infix fun Proposition.nand(other:Proposition) = Nand(this,other)
 
-class Nand(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand,"|",truthTable)
+class Nand(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand)
 {
+    override val friendly:String get() = "|"
+    override val truthTable:Map<List<Boolean>,Boolean> get() = Companion.truthTable
     companion object
     {
         val truthTable = mapOf(

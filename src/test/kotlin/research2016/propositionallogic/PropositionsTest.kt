@@ -124,7 +124,7 @@ class PropositionsTest
         )
         println(proposition)
         println(proposition.models)
-        assert(proposition.models.trueSituations == models,{"${proposition.models.trueSituations} != $models"})
+        assert(proposition.models == models,{"${proposition.models} != $models"})
     }
 
     @Test
@@ -139,7 +139,7 @@ class PropositionsTest
         )
         println(proposition)
         println(proposition.models)
-        assert(proposition.models.trueSituations == models)
+        assert(proposition.models == models)
     }
 
     @Test
@@ -152,7 +152,7 @@ class PropositionsTest
         )
         println(proposition)
         println(proposition.models)
-        assert(proposition.models.trueSituations == models)
+        assert(proposition.models == models)
     }
 
     val bigProposition1 = Xor(Oif(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Iff(Nand(Xor(Not(Oif(p,(q and r))),s),t),u),v),w),x),y),z),a),b),c),d)
@@ -209,7 +209,7 @@ class PropositionsTest
     {
         val contradiction = (Tautology and a and b and b.not)
         println(contradiction)
-        assert(contradiction.models.trueSituations.isEmpty())
+        assert(contradiction.models.isEmpty())
     }
 
     @Test
@@ -217,8 +217,9 @@ class PropositionsTest
     {
         val proposition = Not(q)
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -226,8 +227,9 @@ class PropositionsTest
     {
         val proposition = q and q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -235,8 +237,9 @@ class PropositionsTest
     {
         val proposition = Nand(q,q)
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -244,8 +247,9 @@ class PropositionsTest
     {
         val proposition = q or q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -253,8 +257,9 @@ class PropositionsTest
     {
         val proposition = Xor(q,q)
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -262,8 +267,9 @@ class PropositionsTest
     {
         val proposition = Iff(q,q)
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -271,8 +277,9 @@ class PropositionsTest
     {
         val proposition = Oif(q,q)
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -280,8 +287,9 @@ class PropositionsTest
     {
         val proposition = p and q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -289,8 +297,9 @@ class PropositionsTest
     {
         val proposition = Nand(p,q)
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -298,35 +307,39 @@ class PropositionsTest
     {
         val proposition = p or q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
     fun modelsCrossCheckWithEvaluateTest11()
     {
-        val proposition = Xor(p,q)
+        val proposition = p xor q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
     fun modelsCrossCheckWithEvaluateTest12()
     {
-        val proposition = Iff(p,q)
+        val proposition = p iff q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
     fun modelsCrossCheckWithEvaluateTest13()
     {
-        val proposition = Oif(p,q)
+        val proposition = p oif q
         val models = proposition.models
-        models.trueSituations.forEach {assert(proposition.evaluate(it))}
-        models.falseSituations.forEach {assert(!proposition.evaluate(it))}
+        val notModels = proposition.not.models
+        models.forEach {assert(proposition.evaluate(it))}
+        notModels.forEach {assert(!proposition.evaluate(it))}
     }
 
     @Test
@@ -351,7 +364,7 @@ class PropositionsTest
     fun makePropositionsFromSituationsTest()
     {
         val models = Oif(p,(q and r)).models
-        assert(models.trueSituations.map {Proposition.makeFrom(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
+        assert(models.map {Proposition.makeFrom(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
     }
 
     @Test

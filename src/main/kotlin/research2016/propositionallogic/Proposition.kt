@@ -1,6 +1,7 @@
 package research2016.propositionallogic
 
 import lib.collections.getRandom
+import lib.collections.IteratorToSetAdapter
 import lib.delegates.LazyWithReceiver
 import java.util.LinkedHashSet
 import research2016.propositionallogic.Proposition.AtomicProposition
@@ -52,13 +53,15 @@ sealed class Proposition
      */
     abstract class Operator(val operands:List<Proposition>):Proposition()
     {
-        abstract val truthTable:Map<List<Boolean>,Boolean>
-
         /**
          * returns the truth value of the operation for the given [operands].
          */
-        open fun operate(operands:List<Boolean>):Boolean = truthTable[operands]
-            ?: throw IllegalArgumentException("truth table entry for operands not found. truth table may be missing an entry, or the number of provided operands is too much or too little for this operator. truth table: $truthTable, operands: $operands")
+        abstract fun operate(operands:List<Boolean>):Boolean
+
+        /**
+         * returns the truthiness of the operation for the given [operands].
+         */
+        abstract fun operate(operands:List<Double>):Double
 
         override val children:List<Proposition> = operands
     }
@@ -117,64 +120,86 @@ val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Prop
  * returns all the models of this [Proposition], i.e., all the [Situation] that
  * satisfy this [Proposition].
  */
-val Proposition.models:Models by LazyWithReceiver<Proposition,Models>()
+val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situation>>()
 {
-    with (it) {
-        when (this)
+    with(it)
+    {
+        // get all the basic propositions in descending order of influence
+        val basicPropositions = basicPropositionToInfluence.entries
+            .sortedBy {it.value}.map {it.key}
+
+        val branch = fun(situation:Situation):Map<Situation,Double>
         {
-            is AtomicProposition ->
+            val nextVariable = basicPropositions.minus(situation.keys).firstOrNull()
+            if (nextVariable != null)
             {
-                val (trueSituations,falseSituations) = allSituations.partition {truthValue(it)}
-                Models(trueSituations.toSet(),falseSituations.toSet())
+                val node1 = Situation(situation+mapOf(nextVariable to true))
+                val node2 = Situation(situation+mapOf(nextVariable to false))
+                return listOf(node1 to truthiness(node1),node2 to truthiness(node2))
+                    .filter {it.second != 0.0}
+                    .map {it.first to it.first.keys.size.toDouble()}
+                    .toMap()
             }
-            is Operator ->
+            else
             {
-                // two sets. each set is a set of lists of booleans that will
-                // yield true or false respectively when evaluated by this
-                // operator
-                // e.g. one of the sets may look like this: {[1,0,0],[1,1,1]}
-                val (inputsForTrue,inputsForFalse) = truthTable.keys
-                    .partition {truthTable[it]!!}
-                    .let {it.first.toSet() to it.second.toSet()}
-
-                // list of models for each operand in the order that they appear
-                // in the operand list. each model contains situations
-                // partitioned into ones that satisfy the operand, and ones that
-                // do not.
-                // i.e.: [{q,!q} to {},{p} to {!p}]
-                val operandModels = children
-                    .map {it.models}
-
-                // set of situations that would make this proposition true
-                val trueSituations =
-                    // {[0,0],[0,1],[1,1]}
-                    inputsForTrue
-                        // [[{p},{}],[{p},{!q,q}],[{!p},{!q,q}]]
-                        .map {booleanList -> booleanList.mapIndexed {i,b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations}}
-                        // [{},{p!q,pq},{!p!q,!pq}]
-                        .map {situationSetList -> Situation.permute(situationSetList)}
-                        // {p!q,pq,!p!q,!pq}
-                        .let {Situation.combine(it)}
-
-                // set of situations that would make this proposition false
-                val falseSituations = inputsForFalse
-                    .map {booleanList -> booleanList.mapIndexed {i,b -> if (b) operandModels[i].trueSituations else operandModels[i].falseSituations}}
-                    .map {situationSetList -> Situation.permute(situationSetList)}
-                    .let {Situation.combine(it)}
-
-                Models(trueSituations,falseSituations)
+                return emptyMap()
             }
         }
+
+        // returns true if the situation is a solution; false otherwise
+        val checkSolution = fun(situation:Situation):Boolean
+        {
+            return truthiness(situation) == 1.0 && situation.keys.containsAll(basicPropositions)
+        }
+
+        val iterator = object:AbstractIterator<Situation>()
+        {
+            val unbranchedSituations = mutableMapOf(Situation(emptyMap()) to 0.0)
+            override fun computeNext()
+            {
+                val next = branchAndBound(unbranchedSituations,branch,checkSolution)
+                if (next == null)
+                {
+                    done()
+                }
+                else
+                {
+                    setNext(next)
+                }
+            }
+        }
+
+        return@with IteratorToSetAdapter(iterator)
     }
 }
 
 /**
- * data class used as return value of the models function. [trueSituations] is
- * the [Set] of [Situation]s where this [Proposition] [evaluate]s to true, while
- * [falseSituations] is the [Set] of [Situation]s where this [Proposition]
- * [evaluate]s to false.
+ * returns a map of [BasicProposition] to [Double]s. the value mapped to each
+ * [BasicProposition] should be between 1.0 and 0.0. the value represents an
+ * estimate of how much the truth value of that [BasicProposition] is able to
+ * affect the truth value of the whole [Proposition].
  */
-data class Models(val trueSituations:Set<Situation>,val falseSituations:Set<Situation>)
+val Proposition.basicPropositionToInfluence by LazyWithReceiver<Proposition,Map<BasicProposition,Double>> {it.basicPropositionToInfluence()}
+private fun Proposition.basicPropositionToInfluence(influence:Double = 1.0):Map<BasicProposition,Double> = when(this)
+{
+    is BasicProposition -> mapOf(this to influence)
+    is Operator ->
+    {
+        // distribute the influence among the children of the operator
+        val dividedInfluence = influence/(children.size)
+        val influences = children.map {it.basicPropositionToInfluence(dividedInfluence)}
+
+        // sum up all the influence for each basic proposition together
+        influences
+            // put all the entries into a list
+            .flatMap {it.entries}
+            // group entries by their keys (Basic Proposition)
+            .groupBy {it.key}
+            // sum the influence for each entry together
+            .mapValues {it.value.sumByDouble {it.value}}
+    }
+    else -> emptyMap()
+}
 
 /**
  * returns true if there is at least one model for this [Proposition]; false
@@ -182,7 +207,7 @@ data class Models(val trueSituations:Set<Situation>,val falseSituations:Set<Situ
  */
 val Proposition.isSatisfiable:Boolean get()
 {
-    return models.trueSituations.isNotEmpty()
+    return models.isNotEmpty()
 }
 
 /**
@@ -191,7 +216,7 @@ val Proposition.isSatisfiable:Boolean get()
  */
 val Proposition.isTautology:Boolean get()
 {
-    return models.falseSituations.isEmpty()
+    return !not.isSatisfiable
 }
 
 /**
@@ -200,14 +225,47 @@ val Proposition.isTautology:Boolean get()
  */
 val Proposition.isContradiction:Boolean get()
 {
-    return models.trueSituations.isEmpty()
+    return !isSatisfiable
 }
 
 /**
- * returns the truth value of this [Proposition] for the given [Situation].
+ * returns the truth value of this [Proposition] for the given [situation].
  */
 fun Proposition.evaluate(situation:Situation):Boolean = when (this)
 {
     is AtomicProposition -> truthValue(situation)
     is Operator -> operate(operands.map {it.evaluate(situation)})
+}
+
+/**
+ * returns the truthiness of this [Proposition] for the given [situation].
+ * if the proposition is more likely to be true for the given [situation], it
+ * will return a value closer to 1.0. if the value is more likely to be false,
+ * it will return a value closer to 0.0. is the returned value is 1 or 0,
+ * [evaluate] should return true or false respectively if it is passed the same
+ * [situation], assuming that there are no missing value mappings.
+ */
+fun Proposition.truthiness(situation:Situation):Double = when (this)
+{
+    is BasicProposition ->
+    {
+        if (this in situation.keys)
+        {
+            if (truthValue(situation)) 1.0 else 0.0
+        }
+        else
+        {
+            0.5
+        }
+    }
+    is AtomicProposition ->
+    {
+        when
+        {
+            this == Tautology -> 1.0
+            this == Contradiction -> 0.0
+            else -> throw IllegalArgumentException("unknown atomic proposition! $this")
+        }
+    }
+    is Operator -> operate(operands.map {it.truthiness(situation)})
 }
