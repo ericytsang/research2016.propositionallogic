@@ -24,6 +24,15 @@ class PropositionsTest
     val d = BasicProposition.make("d")
     val e = BasicProposition.make("e")
     val f = BasicProposition.make("f")
+    val g = BasicProposition.make("g")
+    val h = BasicProposition.make("h")
+    val i = BasicProposition.make("i")
+    val j = BasicProposition.make("j")
+    val k = BasicProposition.make("k")
+    val l = BasicProposition.make("l")
+    val m = BasicProposition.make("m")
+    val n = BasicProposition.make("n")
+    val o = BasicProposition.make("o")
 
     @Test
     fun toStringTest1()
