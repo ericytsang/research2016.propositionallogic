@@ -480,4 +480,11 @@ class PropositionsTest
         println(proposition)
         assert(proposition.basicPropositions.size == basicPropositions.size)
     }
+
+    @Test
+    fun toParsableString()
+    {
+        val proposition = a and b or c xor d iff e nand f oif g.not
+        assert(Proposition.makeFrom(proposition.toParsableString()) == proposition)
+    }
 }
