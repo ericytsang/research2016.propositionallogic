@@ -1,12 +1,13 @@
 package research2016.propositionallogic
 
 import lib.collections.IteratorToSetAdapter
+import java.io.Serializable
 import java.util.LinkedHashSet
 
 /**
  * maps [BasicProposition]s to truth values [Boolean]s.
  */
-class Situation(val propositionValues:Map<BasicProposition,Boolean>):Map<BasicProposition,Boolean>
+class Situation(val propositionValues:Map<BasicProposition,Boolean>):Map<BasicProposition,Boolean>,Serializable
 {
     companion object;
     private val map:Map<BasicProposition,Boolean> get() = propositionValues

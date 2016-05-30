@@ -6,11 +6,12 @@ import lib.delegates.LazyWithReceiver
 import java.util.LinkedHashSet
 import research2016.propositionallogic.Proposition.AtomicProposition
 import research2016.propositionallogic.Proposition.Operator
+import java.io.Serializable
 
 /**
  * Created by surpl on 5/4/2016.
  */
-sealed class Proposition
+sealed class Proposition:Serializable
 {
     companion object;
 
