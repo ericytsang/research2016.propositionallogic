@@ -69,3 +69,19 @@ private val propositionFactory = FormulaTreeFactory(
             }
         }
     })
+
+fun Proposition.toParsableString():String
+{
+    return when (this)
+    {
+        is Proposition.AtomicProposition -> friendly
+        is Iff -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " iff ")
+        is Or -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " or ")
+        is And -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " and ")
+        is Oif -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " then ")
+        is Xor -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " xor ")
+        is Nand -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " nand ")
+        is Not -> if (operand.children.size > 1) "-(${operand.toParsableString()})" else "-${operand.toParsableString()}"
+        else -> throw NotImplementedError()
+    }
+}
