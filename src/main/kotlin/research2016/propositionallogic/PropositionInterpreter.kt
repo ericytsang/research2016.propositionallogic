@@ -58,7 +58,7 @@ private val propositionFactory = FormulaTreeFactory(
             val preprocessedWord = word.toLowerCase().trim()
             return when
             {
-                Pattern.matches("(iff){1}",preprocessedWord) -> Iff(operands.first(),operands.last())
+                Pattern.matches("(iff){1}",preprocessedWord) -> Iff.make(operands)
                 Pattern.matches("(then){1}",preprocessedWord) -> Oif(operands.first(),operands.last())
                 Pattern.matches("(or){1}",preprocessedWord) -> Or.make(operands)
                 Pattern.matches("(xor){1}",preprocessedWord) -> Xor(operands.first(),operands.last())

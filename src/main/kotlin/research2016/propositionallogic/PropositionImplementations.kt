@@ -91,6 +91,29 @@ abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Propo
 
 abstract class AssociativeOperator(operands:List<Proposition>):Operator(operands)
 {
+    companion object
+    {
+        fun make(operands:List<Proposition>,isSameOperator:(Proposition)->Boolean,operatorFactory:(List<Proposition>)->Proposition):Proposition
+        {
+            val newOperands = operands.flatMap()
+            {
+                if (isSameOperator(it))
+                {
+                    it.children
+                }
+                else
+                {
+                    listOf(it)
+                }
+            }
+            return when (newOperands.size)
+            {
+                0 -> throw IllegalArgumentException("not enough operands")
+                1 -> newOperands.single()
+                else -> operatorFactory(newOperands)
+            }
+        }
+    }
     abstract val friendly:String
     override fun toString():String
     {
@@ -119,20 +142,11 @@ class And private constructor(operands:List<Proposition>):AssociativeOperator(op
 {
     companion object
     {
-        fun make(operands:List<Proposition>):And
+        fun make(operands:List<Proposition>):Proposition
         {
-            val newOperands = operands.flatMap()
-            {
-                if (it is And)
-                {
-                    it.operands
-                }
-                else
-                {
-                    listOf(it)
-                }
-            }
-            return And(newOperands)
+            val isSameFunction = {proposition:Proposition -> proposition is And}
+            val operatorFactory = {operands:List<Proposition> -> And(operands)}
+            return AssociativeOperator.make(operands,isSameFunction,operatorFactory)
         }
     }
 
@@ -155,20 +169,11 @@ class Or private constructor(operands:List<Proposition>):AssociativeOperator(ope
 {
     companion object
     {
-        fun make(operands:List<Proposition>):Or
+        fun make(operands:List<Proposition>):Proposition
         {
-            val newOperands = operands.flatMap()
-            {
-                if (it is Or)
-                {
-                    it.operands
-                }
-                else
-                {
-                    listOf(it)
-                }
-            }
-            return Or(newOperands)
+            val isSameFunction = {proposition:Proposition -> proposition is Or}
+            val operatorFactory = {operands:List<Proposition> -> Or(operands)}
+            return AssociativeOperator.make(operands,isSameFunction,operatorFactory)
         }
     }
 
@@ -202,20 +207,32 @@ class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
-infix fun Proposition.iff(other:Proposition) = Iff(this,other)
+infix fun Proposition.iff(other:Proposition) = Iff.make(listOf(this,other))
 
-class Iff(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand)
+class Iff private constructor(operands:List<Proposition>):AssociativeOperator(operands)
 {
-    override val friendly:String get() = "↔"
-    override val truthTable:Map<List<Boolean>,Boolean> get() = Companion.truthTable
     companion object
     {
-        val truthTable = mapOf(
-            listOf(false,false) to true,
-            listOf(false,true ) to false,
-            listOf(true ,false) to false,
-            listOf(true ,true ) to true
-        )
+        fun make(operands:List<Proposition>):Proposition
+        {
+            val isSameFunction = {proposition:Proposition -> proposition is Iff}
+            val operatorFactory = {operands:List<Proposition> -> Iff(operands)}
+            return AssociativeOperator.make(operands,isSameFunction,operatorFactory)
+        }
+    }
+
+    override val friendly:String get() = "↔"
+
+    override fun operate(operands:List<Boolean>):Boolean
+    {
+        return operands.all {it == operands.first()}
+    }
+
+    override fun operate(operands:List<Double>):Double
+    {
+        val allTrue = operands.fold(1.0) {i,n -> i*n}
+        val allFalse = operands.fold(1.0) {i,n -> i*(1-n)}
+        return 1-((1-allTrue)*(1-allFalse))
     }
 }
 
