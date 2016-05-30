@@ -7,6 +7,7 @@ import java.util.LinkedHashSet
 import research2016.propositionallogic.Proposition.AtomicProposition
 import research2016.propositionallogic.Proposition.Operator
 import java.io.Serializable
+import java.util.LinkedHashMap
 
 /**
  * Created by surpl on 5/4/2016.
@@ -269,4 +270,106 @@ fun Proposition.truthiness(situation:Situation):Double = when (this)
         }
     }
     is Operator -> operate(operands.map {it.truthiness(situation)})
+}
+
+/**
+ * returns a logically equivalent [Proposition] in full disjunctive normal form.
+ *
+ * (a and b and c) or (a and -b and -c)
+ */
+fun Proposition.toFullDnf():Proposition
+{
+    // list of literals (or negations of literals) and'd together
+    val literalConjunctions = models
+        .mapNotNull()
+        {
+            situation ->
+            situation.keys
+                // return the proposition if it is mapped to true, and the
+                // negation of it otherwise
+                .map {if (situation[it]!!) it else it.not}
+                // and everything together
+                .let {if (it.isNotEmpty()) And.make(it) else Tautology}
+        }
+    return if (literalConjunctions.isEmpty())
+    {
+        Contradiction
+    }
+    else
+    {
+        Or.make(literalConjunctions)
+    }
+}
+
+/**
+ * returns a logically equivalent [Proposition] in disjunctive normal form...
+ * simplified as much as possible as if one was using Karnaugh maps...
+ *
+ * (a and b) or -a
+ */
+fun Proposition.toDnf():Proposition
+{
+    val hammingDistance = fun(situation1:Situation,situation2:Situation):Int
+    {
+        return situation1.keys.count {situation1[it] != situation2[it]}
+    }
+
+    val basicPropositionsToSituations = LinkedHashMap(models.groupBy {it.keys}.mapValues {it.value.toMutableSet()})
+    val unprocessedKeys = basicPropositionsToSituations.keys.toMutableSet()
+
+    while (unprocessedKeys.isNotEmpty())
+    {
+        val basicPropositions = unprocessedKeys.maxBy {it.size}!!
+        val situations = basicPropositionsToSituations[basicPropositions]!!
+        var situation1:Situation? = null
+        var situation2:Situation? = null
+        loop@for (situationA in situations)
+        {
+            for (situationB in situations)
+            {
+                if (hammingDistance(situationA,situationB) == 1)
+                {
+                    situation1 = situationA
+                    situation2 = situationB
+                    break@loop
+                }
+            }
+        }
+        if (situation1 == null && situation2 == null)
+        {
+            unprocessedKeys.remove(basicPropositions)
+        }
+        else
+        {
+            situations.remove(situation1)
+            situations.remove(situation2)
+
+            val commonMappings = situation1!!.entries.filter {situation1!![it.key] == situation2!![it.key]}
+            val newSituation = Situation(commonMappings.associate {it.key to it.value})
+            basicPropositionsToSituations.getOrPut(newSituation.keys,{mutableSetOf()}).add(newSituation)
+            unprocessedKeys.add(newSituation.keys)
+        }
+    }
+
+    // list of literals (or negations of literals) and'd together
+    val literalConjunctions = basicPropositionsToSituations
+        .flatMap {it.value}
+        .mapNotNull()
+        {
+            situation ->
+            situation.keys
+                // return the proposition if it is mapped to true, and the
+                // negation of it otherwise
+                .map {if (situation[it]!!) it else it.not}
+                // and everything together
+                .let {if (it.isNotEmpty()) And.make(it) else Tautology}
+        }
+    return if (literalConjunctions.isEmpty())
+    {
+        Contradiction
+    }
+    else
+    {
+        Or.make(literalConjunctions)
+    }
 }

@@ -482,6 +482,20 @@ class PropositionsTest
     }
 
     @Test
+    fun toDnfTest()
+    {
+        val proposition = a or b and c oif d
+        assert(proposition.toDnf().models == proposition.models)
+    }
+
+    @Test
+    fun toFullDnfTest()
+    {
+        val proposition = a or b and c oif d
+        assert(proposition.toFullDnf().models == proposition.models)
+    }
+
+    @Test
     fun toParsableString()
     {
         val proposition = a and b or c xor d iff e nand f oif g.not
