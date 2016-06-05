@@ -16,9 +16,9 @@ private enum class Operator(val numOperands:Int,val generator:(List<Proposition>
     //NAND(2,{Nand(it.first(),it.last())});
 }
 
-fun Proposition.Companion.makeRandom(basicPropositions:List<BasicProposition>):Proposition
+fun Proposition.Companion.makeRandom(variables:List<Variable>):Proposition
 {
-    val scrambledBasicPropositions = basicPropositions.sortedBy {Math.random()}
+    val scrambledBasicPropositions = variables.sortedBy {Math.random()}
     loop@ while (true)
     {
         if (scrambledBasicPropositions.size == 1)
@@ -27,7 +27,10 @@ fun Proposition.Companion.makeRandom(basicPropositions:List<BasicProposition>):P
         }
         else
         {
-            assert(scrambledBasicPropositions.isNotEmpty(),{throw IllegalArgumentException("cannot pass in empty list of basic propositions")})
+            if(scrambledBasicPropositions.isEmpty())
+            {
+                throw IllegalArgumentException("cannot pass in empty list of basic propositions")
+            }
             val randomOperator = Operator.values().getRandom()
             if (scrambledBasicPropositions.size < randomOperator.numOperands)
             {

@@ -5,41 +5,50 @@ import research2016.propositionallogic.Proposition.Operator
 import java.util.WeakHashMap
 
 /**
- * Created by surpl on 5/4/2016.
+ * an [AtomicProposition] which is mapped to a truth value by a [Situation].
  */
-class BasicProposition private constructor(_friendly:String):AtomicProposition(_friendly)
+class Variable private constructor(_friendly:String):AtomicProposition(_friendly)
 {
     companion object
     {
-        val allInstances = WeakHashMap<String,BasicProposition>()
-        fun make(friendly:String) = allInstances.getOrPut(friendly,{BasicProposition(friendly)})
+        private val allInstances = WeakHashMap<String,Variable>()
+        fun make(friendly:String) = allInstances.getOrPut(friendly,{Variable(friendly)})
     }
     init
     {
-        assert(_friendly.length >= 1,{"only strings of length 1 or longer are allowed to be used as the friendly string for atomic propositions"})
-        assert(_friendly.all {it.isLetter()},{"atomic proposition must be composed only of letters"})
+        if(_friendly.length < 1)
+        {
+            throw IllegalArgumentException("only strings of length 1 or longer are allowed to be used as the friendly string for atomic propositions")
+        }
+        if(_friendly.any {!it.isLetter()})
+        {
+            throw IllegalArgumentException("atomic proposition must be composed only of letters")
+        }
     }
     override fun truthValue(situation:Situation):Boolean = situation[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
-    override val allSituations:Set<Situation> = setOf(Situation(mapOf(this to true)),Situation(mapOf(this to false)))
 }
 
+/**
+ * an [AtomicProposition] that evaluates to true in any [Situation].
+ */
 val Tautology = object:AtomicProposition("1")
 {
     override fun truthValue(situation:Situation):Boolean = true
-    override val allSituations:Set<Situation> = setOf(Situation(emptyMap()))
 }
 
+/**
+ * an [AtomicProposition] that evaluates to false in every [Situation].
+ */
 val Contradiction = object:AtomicProposition("0")
 {
     override fun truthValue(situation:Situation):Boolean = false
-    override val allSituations:Set<Situation> = setOf(Situation(emptyMap()))
 }
 
 abstract class TruthTableOperator(operands:List<Proposition>):Operator(operands)
 {
     init
     {
-        assert(truthTable.keys.all {it.size == operands.size})
+        if(truthTable.keys.any {it.size != operands.size})
         {
             throw IllegalArgumentException("length of list for truth table keys should match length of list of operands. truth table: $truthTable, operands: $operands")
         }
@@ -85,7 +94,7 @@ abstract class BinaryOperator(val leftOperand:Proposition,val rightOperand:Propo
     abstract val friendly:String
     override fun toString():String
     {
-        return operands.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
+        return children.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
     }
 }
 
@@ -117,7 +126,7 @@ abstract class AssociativeOperator(operands:List<Proposition>):Operator(operands
     abstract val friendly:String
     override fun toString():String
     {
-        return operands.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
+        return children.map {if (it.children.size > 1) "($it)" else "$it"}.joinToString(friendly)
     }
 }
 

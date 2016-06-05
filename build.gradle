@@ -3,20 +3,28 @@ version '1.0'
 
 buildscript {
     ext.kotlin_version = '1.0.1'
+    ext.dokka_version = '0.9.8'
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
     }
 }
 
+apply plugin: 'org.jetbrains.dokka'
 apply plugin: "kotlin"
 apply plugin: "application"
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = "1.6"
     targetCompatibility = "1.6"
+}
+
+dokka {
+    outputFormat = 'javadoc'
 }
 
 repositories {

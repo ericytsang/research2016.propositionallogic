@@ -7,32 +7,32 @@ import org.junit.Test
  */
 class PropositionsTest
 {
-    val p = BasicProposition.make("p")
-    val q = BasicProposition.make("q")
-    val r = BasicProposition.make("r")
-    val x = BasicProposition.make("x")
-    val y = BasicProposition.make("y")
-    val z = BasicProposition.make("z")
-    val s = BasicProposition.make("s")
-    val t = BasicProposition.make("t")
-    val u = BasicProposition.make("u")
-    val v = BasicProposition.make("v")
-    val w = BasicProposition.make("w")
-    val a = BasicProposition.make("a")
-    val b = BasicProposition.make("b")
-    val c = BasicProposition.make("c")
-    val d = BasicProposition.make("d")
-    val e = BasicProposition.make("e")
-    val f = BasicProposition.make("f")
-    val g = BasicProposition.make("g")
-    val h = BasicProposition.make("h")
-    val i = BasicProposition.make("i")
-    val j = BasicProposition.make("j")
-    val k = BasicProposition.make("k")
-    val l = BasicProposition.make("l")
-    val m = BasicProposition.make("m")
-    val n = BasicProposition.make("n")
-    val o = BasicProposition.make("o")
+    val p = Variable.make("p")
+    val q = Variable.make("q")
+    val r = Variable.make("r")
+    val x = Variable.make("x")
+    val y = Variable.make("y")
+    val z = Variable.make("z")
+    val s = Variable.make("s")
+    val t = Variable.make("t")
+    val u = Variable.make("u")
+    val v = Variable.make("v")
+    val w = Variable.make("w")
+    val a = Variable.make("a")
+    val b = Variable.make("b")
+    val c = Variable.make("c")
+    val d = Variable.make("d")
+    val e = Variable.make("e")
+    val f = Variable.make("f")
+    val g = Variable.make("g")
+    val h = Variable.make("h")
+    val i = Variable.make("i")
+    val j = Variable.make("j")
+    val k = Variable.make("k")
+    val l = Variable.make("l")
+    val m = Variable.make("m")
+    val n = Variable.make("n")
+    val o = Variable.make("o")
 
     @Test
     fun toStringTest1()
@@ -86,7 +86,7 @@ class PropositionsTest
     fun basicPropositionsFromPropositionTest1()
     {
         val proposition = ((p.not or q)oif r)
-        val actualResult = proposition.basicPropositions.map {it.friendly}.toSet()
+        val actualResult = proposition.variables.map {it.friendly}.toSet()
         val expectedResult = setOf(p,q,r).map {it.friendly}.toSet()
         assert(actualResult == expectedResult,{"$actualResult != $expectedResult"})
     }
@@ -95,7 +95,7 @@ class PropositionsTest
     fun basicPropositionsFromPropositionTest2()
     {
         val proposition = (((x oif(y and z))and y.not)oif x.not)
-        val actualResult = proposition.basicPropositions.map {it.friendly}.toSet()
+        val actualResult = proposition.variables.map {it.friendly}.toSet()
         val expectedResult = setOf(x,y,z).map {it.friendly}.toSet()
         assert(actualResult == expectedResult,{"basicPropositionsFromPropositionTest2 failed: $actualResult != $expectedResult"})
     }
@@ -205,7 +205,7 @@ class PropositionsTest
 
     fun evaluateEach(proposition:Proposition)
     {
-        Situation.generateFrom(proposition.basicPropositions).partition {proposition.evaluate(it)}
+        Situation.generateFrom(proposition.variables).partition {proposition.evaluate(it)}
     }
 
     fun allModels(proposition:Proposition)
@@ -415,7 +415,7 @@ class PropositionsTest
     @Test
     fun makeRandom0()
     {
-        val basicPropositions = emptyList<BasicProposition>()
+        val basicPropositions = emptyList<Variable>()
         try
         {
             println(Proposition.makeRandom(basicPropositions))
@@ -433,7 +433,7 @@ class PropositionsTest
         val basicPropositions = listOf(a)
         val proposition = Proposition.makeRandom(basicPropositions)
         println(proposition)
-        assert(proposition.basicPropositions.size == basicPropositions.size)
+        assert(proposition.variables.size == basicPropositions.size)
     }
 
     @Test
@@ -442,7 +442,7 @@ class PropositionsTest
         val basicPropositions = listOf(a,b)
         val proposition = Proposition.makeRandom(basicPropositions)
         println(proposition)
-        assert(proposition.basicPropositions.size == basicPropositions.size)
+        assert(proposition.variables.size == basicPropositions.size)
     }
 
     @Test
@@ -451,7 +451,7 @@ class PropositionsTest
         val basicPropositions = listOf(a,b,c)
         val proposition = Proposition.makeRandom(basicPropositions)
         println(proposition)
-        assert(proposition.basicPropositions.size == basicPropositions.size)
+        assert(proposition.variables.size == basicPropositions.size)
     }
 
     @Test
@@ -460,7 +460,7 @@ class PropositionsTest
         val basicPropositions = listOf(a,b,c,d)
         val proposition = Proposition.makeRandom(basicPropositions)
         println(proposition)
-        assert(proposition.basicPropositions.size == basicPropositions.size)
+        assert(proposition.variables.size == basicPropositions.size)
     }
 
     @Test
@@ -469,7 +469,7 @@ class PropositionsTest
         val basicPropositions = listOf(a,b,c,d,e)
         val proposition = Proposition.makeRandom(basicPropositions)
         println(proposition)
-        assert(proposition.basicPropositions.size == basicPropositions.size)
+        assert(proposition.variables.size == basicPropositions.size)
     }
 
     @Test
@@ -478,7 +478,7 @@ class PropositionsTest
         val basicPropositions = listOf(a,b,c,d,e,f)
         val proposition = Proposition.makeRandom(basicPropositions)
         println(proposition)
-        assert(proposition.basicPropositions.size == basicPropositions.size)
+        assert(proposition.variables.size == basicPropositions.size)
     }
 
     @Test

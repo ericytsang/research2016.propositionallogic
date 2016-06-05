@@ -62,7 +62,7 @@ class SituationTest
     @Test
     fun nextReturnsAllUniqueSituationsTest()
     {
-        val basicPropositions = setOf(BasicProposition.make("p"),BasicProposition.make("q"),BasicProposition.make("r"))
+        val basicPropositions = setOf(Variable.make("p"),Variable.make("q"),Variable.make("r"))
         var allSituations = Situation.generateFrom(basicPropositions)
         assert(allSituations.size == 8,{"allSituations size is not 8. it should be 8 if there are 3 basic propositions... allSituations: $allSituations"})
     }

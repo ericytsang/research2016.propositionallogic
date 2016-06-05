@@ -2,6 +2,8 @@ package research2016.propositionallogic
 
 import lib.collections.getRandom
 import lib.collections.IteratorToSetAdapter
+import lib.collections.branchAndBound
+import lib.collections.rootNodeMetaData
 import lib.delegates.LazyWithReceiver
 import java.util.LinkedHashSet
 import research2016.propositionallogic.Proposition.AtomicProposition
@@ -31,7 +33,7 @@ sealed class Proposition:Serializable
     abstract val children:List<Proposition>
 
     /**
-     * leaf node.
+     * a [Proposition] that cannot be further decomposed into more [Proposition] objects leaf node.
      */
     abstract class AtomicProposition(val friendly:String):Proposition()
     {
@@ -41,11 +43,6 @@ sealed class Proposition:Serializable
          */
         abstract fun truthValue(situation:Situation):Boolean
 
-        /**
-         * returns all [Situation]s that
-         */
-        abstract val allSituations:Set<Situation>
-
         override fun toString():String = friendly.toString()
         override val children:List<Proposition> = emptyList()
     }
@@ -53,7 +50,7 @@ sealed class Proposition:Serializable
     /**
      * has child nodes.
      */
-    abstract class Operator(val operands:List<Proposition>):Proposition()
+    abstract class Operator(override val children:List<Proposition>):Proposition()
     {
         /**
          * returns the truth value of the operation for the given [operands].
@@ -64,8 +61,6 @@ sealed class Proposition:Serializable
          * returns the truthiness of the operation for the given [operands].
          */
         abstract fun operate(operands:List<Double>):Double
-
-        override val children:List<Proposition> = operands
     }
 }
 
@@ -95,25 +90,25 @@ fun Proposition.Companion.makeFrom(situation:Situation):Proposition
 }
 
 /**
- * generates a [List] of [BasicProposition]s of length [numPropositions]. each
- * generated [BasicProposition]'s [String] is randomly chosen from
+ * generates a [List] of [Variable]s of length [numPropositions]. each
+ * generated [Variable]'s [String] is randomly chosen from
  * [basicPropositionStrings].
  */
-fun BasicProposition.Companion.makeRandom(basicPropositionStrings:List<String>,numPropositions:Int):List<BasicProposition>
+fun Variable.Companion.makeRandom(basicPropositionStrings:List<String>,numPropositions:Int):List<Variable>
 {
-    return (1..numPropositions).map {BasicProposition.make(basicPropositionStrings.getRandom())}
+    return (1..numPropositions).map {Variable.make(basicPropositionStrings.getRandom())}
 }
 
 /**
  * returns all the basic propositions in this [Proposition].
  */
-val Proposition.basicPropositions:Set<BasicProposition> by LazyWithReceiver<Proposition,Set<BasicProposition>>()
+val Proposition.variables:Set<Variable> by LazyWithReceiver<Proposition,Set<Variable>>()
 {
     with (it)
     {
-        val candidates = LinkedHashSet<BasicProposition>()
-        if (this is BasicProposition) candidates.add(this)
-        candidates.addAll(children.flatMap {it.basicPropositions})
+        val candidates = LinkedHashSet<Variable>()
+        if (this is Variable) candidates.add(this)
+        candidates.addAll(children.flatMap {it.variables})
         return@LazyWithReceiver candidates
     }
 }
@@ -130,23 +125,24 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
         val basicPropositions = basicPropositionToInfluence.entries
             .sortedBy {it.value}.map {it.key}
 
-        val branch = fun(situation:Situation):Map<Situation,Double>
+        val branch = fun(situation:Situation):Set<Situation>
         {
             val nextVariable = basicPropositions.minus(situation.keys).firstOrNull()
             if (nextVariable != null)
             {
                 val node1 = Situation(situation+mapOf(nextVariable to true))
                 val node2 = Situation(situation+mapOf(nextVariable to false))
-                return listOf(node1 to truthiness(node1),node2 to truthiness(node2))
-                    .filter {it.second != 0.0}
-                    .map {it.first to it.first.keys.size.toDouble()}
-                    .toMap()
+                return listOf(node1,node2)
+                    .filter {truthiness(it) != 0.0}
+                    .toSet()
             }
             else
             {
-                return emptyMap()
+                return emptySet()
             }
         }
+
+        val upperBound = fun(situation:Situation):Double = 1.0
 
         // returns true if the situation is a solution; false otherwise
         val checkSolution = fun(situation:Situation):Boolean
@@ -156,10 +152,10 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
 
         val iterator = object:AbstractIterator<Situation>()
         {
-            val unbranchedSituations = mutableMapOf(Situation(emptyMap()) to 0.0)
+            val unbranchedSituations = mutableMapOf(Situation(emptyMap()) to rootNodeMetaData)
             override fun computeNext()
             {
-                val next = branchAndBound(unbranchedSituations,branch,checkSolution)
+                val next = branchAndBound(unbranchedSituations,branch,upperBound,checkSolution)
                 if (next == null)
                 {
                     done()
@@ -176,15 +172,15 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
 }
 
 /**
- * returns a map of [BasicProposition] to [Double]s. the value mapped to each
- * [BasicProposition] should be between 1.0 and 0.0. the value represents an
- * estimate of how much the truth value of that [BasicProposition] is able to
+ * returns a map of [Variable] to [Double]s. the value mapped to each
+ * [Variable] should be between 1.0 and 0.0. the value represents an
+ * estimate of how much the truth value of that [Variable] is able to
  * affect the truth value of the whole [Proposition].
  */
-val Proposition.basicPropositionToInfluence by LazyWithReceiver<Proposition,Map<BasicProposition,Double>> {it.basicPropositionToInfluence()}
-private fun Proposition.basicPropositionToInfluence(influence:Double = 1.0):Map<BasicProposition,Double> = when(this)
+val Proposition.basicPropositionToInfluence by LazyWithReceiver<Proposition,Map<Variable,Double>> {it.basicPropositionToInfluence()}
+private fun Proposition.basicPropositionToInfluence(influence:Double = 1.0):Map<Variable,Double> = when(this)
 {
-    is BasicProposition -> mapOf(this to influence)
+    is Variable -> mapOf(this to influence)
     is Operator ->
     {
         // distribute the influence among the children of the operator
@@ -236,20 +232,20 @@ val Proposition.isContradiction:Boolean get()
 fun Proposition.evaluate(situation:Situation):Boolean = when (this)
 {
     is AtomicProposition -> truthValue(situation)
-    is Operator -> operate(operands.map {it.evaluate(situation)})
+    is Operator -> operate(children.map {it.evaluate(situation)})
 }
 
 /**
- * returns the truthiness of this [Proposition] for the given [situation].
+ * returns the [truthiness] of this [Proposition] for the given [situation].
  * if the proposition is more likely to be true for the given [situation], it
  * will return a value closer to 1.0. if the value is more likely to be false,
- * it will return a value closer to 0.0. is the returned value is 1 or 0,
+ * it will return a value closer to 0.0. if the returned value is 1 or 0,
  * [evaluate] should return true or false respectively if it is passed the same
  * [situation], assuming that there are no missing value mappings.
  */
 fun Proposition.truthiness(situation:Situation):Double = when (this)
 {
-    is BasicProposition ->
+    is Variable ->
     {
         if (this in situation.keys)
         {
@@ -269,7 +265,7 @@ fun Proposition.truthiness(situation:Situation):Double = when (this)
             else -> throw IllegalArgumentException("unknown atomic proposition! $this")
         }
     }
-    is Operator -> operate(operands.map {it.truthiness(situation)})
+    is Operator -> operate(children.map {it.truthiness(situation)})
 }
 
 /**

@@ -48,7 +48,7 @@ private val propositionFactory = FormulaTreeFactory(
             {
                 Pattern.matches("(1){1}",preprocessedWord) -> Tautology
                 Pattern.matches("(0){1}",preprocessedWord) -> Contradiction
-                Pattern.matches("[a-zA-Z]+",preprocessedWord) -> BasicProposition.make(preprocessedWord)
+                Pattern.matches("[a-zA-Z]+",preprocessedWord) -> Variable.make(preprocessedWord)
                 else -> throw IllegalArgumentException("unrecognized token: $word")
             }
         }
