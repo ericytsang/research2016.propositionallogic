@@ -1,5 +1,6 @@
 package research2016.propositionallogic
 
+import lib.collections.Bounds
 import lib.collections.getRandom
 import lib.collections.IteratorToSetAdapter
 import lib.collections.branchAndBound
@@ -12,61 +13,90 @@ import java.io.Serializable
 import java.util.LinkedHashMap
 
 /**
- * Created by surpl on 5/4/2016.
+ * this class is the component in the Composite pattern.
  */
 sealed class Proposition:Serializable
 {
     companion object;
 
     /**
-     * returns the expression as a human-readable string, e.g., (0∨1)→1
+     * returns the expression as a human-readable string, e.g., (0 or 1) then 1
      */
     abstract override fun toString():String
 
+    /**
+     * returns a hashcode that should equal to the hashcode of other
+     * [Proposition]s with an identical structure, [Operator]s and
+     * [AtomicProposition]s.
+     */
     override fun hashCode():Int = toString().hashCode()
 
+    /**
+     * returns true when this [Proposition] structurally equals to [other].
+     *
+     * @param other [Proposition] to compare with for structural equality.
+     */
     override fun equals(other:Any?):Boolean = other is Proposition && other.toString() == toString()
 
     /**
-     * list of the children associated with this node.
+     * [List] of children of this node.
      */
     abstract val children:List<Proposition>
 
     /**
-     * a [Proposition] that cannot be further decomposed into more [Proposition] objects leaf node.
+     * a [Proposition] that cannot be further decomposed into more [Proposition]
+     * objects; a leaf node.
+     *
+     * @param friendly the string returned when [toString] is called.
      */
     abstract class AtomicProposition(val friendly:String):Proposition()
     {
         /**
-         * returns the truth value of this [AtomicProposition] for the
+         * returns the [Boolean] truth value of this [AtomicProposition] for the
          * [situation].
          */
         abstract fun truthValue(situation:Situation):Boolean
 
+        /**
+         * returns [friendly].
+         */
         override fun toString():String = friendly.toString()
+
+        /**
+         * [List] of children of this node. leaf nodes do not have children; an
+         * empty [List] is returned in this implementation.
+         */
         override val children:List<Proposition> = emptyList()
     }
 
     /**
-     * has child nodes.
+     * a logical connective that connects its [children] together forming a
+     * compound sentence; an internal node.
      */
     abstract class Operator(override val children:List<Proposition>):Proposition()
     {
         /**
-         * returns the truth value of the operation for the given [operands].
+         * returns the [Boolean] truth value of the operation for the given
+         * [operands].
+         *
+         * @param operands truth value of ordered operands to operate on.
          */
         abstract fun operate(operands:List<Boolean>):Boolean
 
         /**
-         * returns the truthiness of the operation for the given [operands].
+         * returns the truthiness of the operation for the given [operands]; the
+         * probability that this operation would return true.
+         *
+         * @param operands probability of truth of ordered operands to operate
+         * on.
          */
         abstract fun operate(operands:List<Double>):Double
     }
 }
 
 /**
- * creates a [Proposition] in disjunctive normal form from the provided
- * [Situation].
+ * creates a [Proposition] in conjunctive normal form from the provided
+ * [situation], e.g. the situation {a, -b, c} would yield "a and -b and c".
  */
 fun Proposition.Companion.makeFrom(situation:Situation):Proposition
 {
@@ -122,7 +152,7 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
     with(it)
     {
         // get all the basic propositions in descending order of influence
-        val basicPropositions = basicPropositionToInfluence.entries
+        val basicPropositions = variablesToInfluence.entries
             .sortedBy {it.value}.map {it.key}
 
         val branch = fun(situation:Situation):Set<Situation>
@@ -142,7 +172,10 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
             }
         }
 
-        val upperBound = fun(situation:Situation):Double = 1.0
+        val bounds = fun(situation:Situation):Bounds
+        {
+            return Bounds(1.0,Math.floor(truthiness(situation)))
+        }
 
         // returns true if the situation is a solution; false otherwise
         val checkSolution = fun(situation:Situation):Boolean
@@ -155,7 +188,7 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
             val unbranchedSituations = mutableMapOf(Situation(emptyMap()) to rootNodeMetaData)
             override fun computeNext()
             {
-                val next = branchAndBound(unbranchedSituations,branch,upperBound,checkSolution)
+                val next = branchAndBound(unbranchedSituations,branch,bounds,checkSolution)
                 if (next == null)
                 {
                     done()
@@ -177,15 +210,15 @@ val Proposition.models:Set<Situation> by LazyWithReceiver<Proposition,Set<Situat
  * estimate of how much the truth value of that [Variable] is able to
  * affect the truth value of the whole [Proposition].
  */
-val Proposition.basicPropositionToInfluence by LazyWithReceiver<Proposition,Map<Variable,Double>> {it.basicPropositionToInfluence()}
-private fun Proposition.basicPropositionToInfluence(influence:Double = 1.0):Map<Variable,Double> = when(this)
+private val Proposition.variablesToInfluence by LazyWithReceiver<Proposition,Map<Variable,Double>> {it.variablesToInfluence()}
+private fun Proposition.variablesToInfluence(influence:Double = 1.0):Map<Variable,Double> = when(this)
 {
     is Variable -> mapOf(this to influence)
     is Operator ->
     {
         // distribute the influence among the children of the operator
         val dividedInfluence = influence/(children.size)
-        val influences = children.map {it.basicPropositionToInfluence(dividedInfluence)}
+        val influences = children.map {it.variablesToInfluence(dividedInfluence)}
 
         // sum up all the influence for each basic proposition together
         influences

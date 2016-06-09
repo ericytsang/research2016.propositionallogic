@@ -24,7 +24,7 @@ tasks.withType(JavaCompile) {
 }
 
 dokka {
-    outputFormat = 'javadoc'
+    outputFormat = 'html'
 }
 
 repositories {
