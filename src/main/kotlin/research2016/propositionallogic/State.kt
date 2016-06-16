@@ -7,7 +7,7 @@ import java.util.LinkedHashSet
 /**
  * maps [Variable]s to truth values [Boolean]s.
  */
-class Situation(val propositionValues:Map<Variable,Boolean>):Map<Variable,Boolean>,Serializable
+class State(val propositionValues:Map<Variable,Boolean>):Map<Variable,Boolean>,Serializable
 {
     companion object;
     private val map:Map<Variable,Boolean> get() = propositionValues
@@ -24,19 +24,19 @@ class Situation(val propositionValues:Map<Variable,Boolean>):Map<Variable,Boolea
     override fun equals(other:Any?):Boolean = map.equals(other)
 }
 
-fun Situation.Companion.make(propositionValues:Map<String,Boolean>):Situation
+fun State.Companion.make(propositionValues:Map<String,Boolean>):State
 {
-    return Situation(propositionValues.mapKeys {Variable.make(it.key)})
+    return State(propositionValues.mapKeys {Variable.make(it.key)})
 }
 
 /**
- * returns all possible permutations of [Situation]s (truth value assignments)
+ * returns all possible permutations of [State]s (truth value assignments)
  * that involve variables from [variables].
  */
-fun Situation.Companion.generateFrom(variables:Set<Variable>):Set<Situation>
+fun State.Companion.generateFrom(variables:Set<Variable>):Set<State>
 {
     val numSituationsToGenerate = Math.round(Math.pow(2.toDouble(),variables.size.toDouble())).toInt()
-    val allSituations = LinkedHashSet<Situation>()
+    val allSituations = LinkedHashSet<State>()
     val propositionKeys = variables.map {it.friendly}.toList().sorted()
     var seed = 0
     while (seed != numSituationsToGenerate)
@@ -45,21 +45,21 @@ fun Situation.Companion.generateFrom(variables:Set<Variable>):Set<Situation>
         {
             val string = Integer.toBinaryString(seed).padStart(variables.size,'0')
             val map = propositionKeys.mapIndexed { i, s -> s to (string[i] == '1') }.toMap()
-            return@run Situation.make(map)
+            return@run State.make(map)
         }
         allSituations.add(newSituation)
         seed++
     }
     if(allSituations.size != numSituationsToGenerate)
     {
-        throw RuntimeException("failed to generate all situations! D: situations generated: $allSituations")
+        throw RuntimeException("failed to generate all states! D: situations generated: $allSituations")
     }
     return allSituations
 }
 
-fun Situation.Companion.permute(situationSetList:List<Set<Situation>>):Set<Situation>
+fun State.Companion.permute(stateSetList:List<Set<State>>):Set<State>
 {
-    return IteratorToSetAdapter(SituationSetPermutingIterator(situationSetList))
+    return IteratorToSetAdapter(StateSetPermutingIterator(stateSetList))
 }
 
 /**
@@ -67,7 +67,7 @@ fun Situation.Companion.permute(situationSetList:List<Set<Situation>>):Set<Situa
  * except the computation of unifying the sets is deferred to when the resulting
  * unified set is queried.
  */
-fun Situation.Companion.combine(situationSetList:List<Set<Situation>>):Set<Situation>
+fun State.Companion.combine(stateSetList:List<Set<State>>):Set<State>
 {
-    return IteratorToSetAdapter(SituationSetCombiningIterator(situationSetList))
+    return IteratorToSetAdapter(StateSetCombiningIterator(stateSetList))
 }

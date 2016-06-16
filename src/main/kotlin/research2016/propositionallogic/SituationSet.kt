@@ -7,9 +7,9 @@ import kotlin.collections.AbstractIterator
 /**
  * Created by surpl on 5/7/2016.
  */
-class SituationSetPermutingIterator(val situationSetList:List<Set<Situation>>):AbstractIterator<Situation>()
+class StateSetPermutingIterator(val stateSetList:List<Set<State>>):AbstractIterator<State>()
 {
-    private val permutedSituationIterator = situationSetList.permutedIterator()
+    private val permutedSituationIterator = stateSetList.permutedIterator()
     override fun computeNext()
     {
         while (true)
@@ -21,7 +21,7 @@ class SituationSetPermutingIterator(val situationSetList:List<Set<Situation>>):A
             {
                 // try to combine situations
                 val situationsToCombine = permutedSituationIterator.next()
-                val combinedSituation = situationsToCombine.fold(Situation(emptyMap())) {prev,next -> Situation(prev+next)}
+                val combinedSituation = situationsToCombine.fold(State(emptyMap())) {prev,next -> State(prev+next)}
 
                 // return combined situation if it is consistent with the
                 // situations it is made up of, e.g., combined situation "ab" is
@@ -53,10 +53,10 @@ class SituationSetPermutingIterator(val situationSetList:List<Set<Situation>>):A
     }
 }
 
-class SituationSetCombiningIterator(val situationSetList:List<Set<Situation>>):AbstractIterator<Situation>()
+class StateSetCombiningIterator(val stateSetList:List<Set<State>>):AbstractIterator<State>()
 {
-    private val iterators = situationSetList.map {it.iterator()}.toMutableList()
-    private val returnedElements = LinkedHashSet<Situation>()
+    private val iterators = stateSetList.map {it.iterator()}.toMutableList()
+    private val returnedElements = LinkedHashSet<State>()
     override fun computeNext()
     {
         if (Thread.interrupted()) throw InterruptedException("interrupted!")

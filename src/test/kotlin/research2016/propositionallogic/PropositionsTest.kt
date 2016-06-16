@@ -105,14 +105,14 @@ class PropositionsTest
     {
         val proposition = (((p oif(q and r))and q.not)oif p.not)
         val allSituations = setOf(
-            Situation.make(mapOf("p" to false,"q" to false,"r" to false)),
-            Situation.make(mapOf("p" to false,"q" to false,"r" to true )),
-            Situation.make(mapOf("p" to false,"q" to true ,"r" to false)),
-            Situation.make(mapOf("p" to false,"q" to true ,"r" to true )),
-            Situation.make(mapOf("p" to true ,"q" to false,"r" to false)),
-            Situation.make(mapOf("p" to true ,"q" to false,"r" to true )),
-            Situation.make(mapOf("p" to true ,"q" to true ,"r" to false)),
-            Situation.make(mapOf("p" to true ,"q" to true ,"r" to true ))
+            State.make(mapOf("p" to false,"q" to false,"r" to false)),
+            State.make(mapOf("p" to false,"q" to false,"r" to true )),
+            State.make(mapOf("p" to false,"q" to true ,"r" to false)),
+            State.make(mapOf("p" to false,"q" to true ,"r" to true )),
+            State.make(mapOf("p" to true ,"q" to false,"r" to false)),
+            State.make(mapOf("p" to true ,"q" to false,"r" to true )),
+            State.make(mapOf("p" to true ,"q" to true ,"r" to false)),
+            State.make(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
         allSituations.forEach()
         {
@@ -125,11 +125,11 @@ class PropositionsTest
     {
         val proposition = (p oif(q and r))
         val models = setOf(
-            Situation.make(mapOf("p" to false,"q" to false,"r" to false)),
-            Situation.make(mapOf("p" to false,"q" to false,"r" to true )),
-            Situation.make(mapOf("p" to false,"q" to true ,"r" to false)),
-            Situation.make(mapOf("p" to false,"q" to true ,"r" to true )),
-            Situation.make(mapOf("p" to true ,"q" to true ,"r" to true ))
+            State.make(mapOf("p" to false,"q" to false,"r" to false)),
+            State.make(mapOf("p" to false,"q" to false,"r" to true )),
+            State.make(mapOf("p" to false,"q" to true ,"r" to false)),
+            State.make(mapOf("p" to false,"q" to true ,"r" to true )),
+            State.make(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -141,10 +141,10 @@ class PropositionsTest
     {
         val proposition = Oif(p,(q or Tautology))
         val models = setOf(
-            Situation.make(mapOf("p" to false,"q" to false)),
-            Situation.make(mapOf("p" to false,"q" to true )),
-            Situation.make(mapOf("p" to true ,"q" to false)),
-            Situation.make(mapOf("p" to true ,"q" to true ))
+            State.make(mapOf("p" to false,"q" to false)),
+            State.make(mapOf("p" to false,"q" to true )),
+            State.make(mapOf("p" to true ,"q" to false)),
+            State.make(mapOf("p" to true ,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -156,8 +156,8 @@ class PropositionsTest
     {
         val proposition = Oif(p,(q and Contradiction))
         val models = setOf(
-            Situation.make(mapOf("p" to false,"q" to false)),
-            Situation.make(mapOf("p" to false,"q" to true ))
+            State.make(mapOf("p" to false,"q" to false)),
+            State.make(mapOf("p" to false,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -205,7 +205,7 @@ class PropositionsTest
 
     fun evaluateEach(proposition:Proposition)
     {
-        Situation.generateFrom(proposition.variables).partition {proposition.evaluate(it)}
+        State.generateFrom(proposition.variables).partition {proposition.evaluate(it)}
     }
 
     fun allModels(proposition:Proposition)

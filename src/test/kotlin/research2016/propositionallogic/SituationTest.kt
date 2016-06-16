@@ -16,8 +16,8 @@ class SituationTest
     {
         val map1 = LinkedHashMap(mapOf("p" to true,"q" to false,"r" to true))
         val map2 = HashMap(mapOf("p" to true,"q" to true,"r" to true))
-        val situation1 = Situation.make(map1)
-        val situation2 = Situation.make(map2)
+        val situation1 = State.make(map1)
+        val situation2 = State.make(map2)
         println("situation1.hashCode(): ${situation1.hashCode()}")
         println("situation2.hashCode(): ${situation2.hashCode()}")
         assert(situation1.hashCode() == map1.hashCode(),{"equivalent hash codes should have matched. situation1.hashCode(): ${situation1.hashCode()}, map1.hashCode(): ${map1.hashCode()}"})
@@ -29,8 +29,8 @@ class SituationTest
     {
         val map1 = TreeMap(mapOf("p" to true,"q" to false,"r" to true))
         val map2 = LinkedHashMap(mapOf("p" to true,"q" to true,"r" to true))
-        val situation1 = Situation.make(map1)
-        val situation2 = Situation.make(map2)
+        val situation1 = State.make(map1)
+        val situation2 = State.make(map2)
         println("situation1.toString(): ${situation1.toString()}")
         println("situation2.toString(): ${situation2.toString()}")
         assert(situation1.toString() == map1.toString(),{"equivalent strings should have matched. situation1.toString(): ${situation1.toString()}, map1.toString(): ${map1.toString()}"})
@@ -42,8 +42,8 @@ class SituationTest
     {
         val map1 = HashMap(mapOf("p" to true,"q" to false,"r" to true))
         val map2 = mapOf("p" to true,"q" to false,"r" to true)
-        val situation1 = Situation.make(map1)
-        val situation2 = Situation.make(map2)
+        val situation1 = State.make(map1)
+        val situation2 = State.make(map2)
 
         assert(situation1 == situation2,{"equivalent situations returned false when compared with equals(). situation1: $situation1, situation2: $situation2"})
     }
@@ -53,8 +53,8 @@ class SituationTest
     {
         val map1 = mapOf("p" to true,"q" to false,"r" to true)
         val map2 = TreeMap(mapOf("p" to true,"q" to true,"r" to true))
-        val situation1 = Situation.make(map1)
-        val situation2 = Situation.make(map2)
+        val situation1 = State.make(map1)
+        val situation2 = State.make(map2)
 
         assert(situation1 != situation2,{"equivalent situations returned false when compared with equals(). situation1: $situation1, situation2: $situation2"})
     }
@@ -63,7 +63,7 @@ class SituationTest
     fun nextReturnsAllUniqueSituationsTest()
     {
         val basicPropositions = setOf(Variable.make("p"),Variable.make("q"),Variable.make("r"))
-        var allSituations = Situation.generateFrom(basicPropositions)
+        var allSituations = State.generateFrom(basicPropositions)
         assert(allSituations.size == 8,{"allSituations size is not 8. it should be 8 if there are 3 basic propositions... allSituations: $allSituations"})
     }
 
@@ -71,11 +71,11 @@ class SituationTest
     fun combineWithEmptySet()
     {
         val situationSet = setOf(
-            Situation.make(mapOf("p" to false)),
-            Situation.make(mapOf("p" to true ))
+            State.make(mapOf("p" to false)),
+            State.make(mapOf("p" to true ))
         )
 
-        val combinedSituationSet = Situation.permute(listOf(situationSet,emptySet()))
+        val combinedSituationSet = State.permute(listOf(situationSet,emptySet()))
 
         assert(combinedSituationSet.isEmpty(),{"combined set should have been empty... but it is not. combinedSituationSet: $combinedSituationSet"})
     }
@@ -84,13 +84,13 @@ class SituationTest
     fun combineWithEmptySituation()
     {
         val situationSet = setOf(
-            Situation.make(mapOf("p" to false)),
-            Situation.make(mapOf("p" to true ))
+            State.make(mapOf("p" to false)),
+            State.make(mapOf("p" to true ))
         )
 
-        val emptySituation = Situation(emptyMap())
+        val emptySituation = State(emptyMap())
 
-        val combinedSituationSet = Situation.permute(listOf(situationSet,setOf(emptySituation)))
+        val combinedSituationSet = State.permute(listOf(situationSet,setOf(emptySituation)))
 
         assert(combinedSituationSet == situationSet,{"combined set should equal its original set...but it is not. combinedSituationSet: $combinedSituationSet"})
     }
@@ -99,17 +99,17 @@ class SituationTest
     fun combineWithAnotherSituation1()
     {
         val situationSet1 = setOf(
-            Situation.make(mapOf("p" to false)),
-            Situation.make(mapOf("p" to true ))
+            State.make(mapOf("p" to false)),
+            State.make(mapOf("p" to true ))
         )
         val situationSet2 = setOf(
-            Situation.make(mapOf("q" to false))
+            State.make(mapOf("q" to false))
         )
         val expectedResult = setOf(
-            Situation.make(mapOf("p" to false,"q" to false)),
-            Situation.make(mapOf("p" to true ,"q" to false))
+            State.make(mapOf("p" to false,"q" to false)),
+            State.make(mapOf("p" to true ,"q" to false))
         )
-        val actualResult = Situation.permute(listOf(situationSet1,situationSet2))
+        val actualResult = State.permute(listOf(situationSet1,situationSet2))
 
         assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
     }
@@ -118,20 +118,20 @@ class SituationTest
     fun combineWithAnotherSituation2()
     {
         val situationSet1 = setOf(
-            Situation.make(mapOf("p" to false,"q" to false)),
-            Situation.make(mapOf("p" to true ,"q" to false))
+            State.make(mapOf("p" to false,"q" to false)),
+            State.make(mapOf("p" to true ,"q" to false))
         )
         val situationSet2 = setOf(
-            Situation.make(mapOf("r" to false)),
-            Situation.make(mapOf("r" to true ))
+            State.make(mapOf("r" to false)),
+            State.make(mapOf("r" to true ))
         )
         val expectedResult = setOf(
-            Situation.make(mapOf("p" to false,"q" to false,"r" to true)),
-            Situation.make(mapOf("p" to true ,"q" to false,"r" to false)),
-            Situation.make(mapOf("p" to false,"q" to false,"r" to false)),
-            Situation.make(mapOf("p" to true ,"q" to false,"r" to true ))
+            State.make(mapOf("p" to false,"q" to false,"r" to true)),
+            State.make(mapOf("p" to true ,"q" to false,"r" to false)),
+            State.make(mapOf("p" to false,"q" to false,"r" to false)),
+            State.make(mapOf("p" to true ,"q" to false,"r" to true ))
         )
-        val actualResult = Situation.permute(listOf(situationSet1,situationSet2))
+        val actualResult = State.permute(listOf(situationSet1,situationSet2))
 
         assert(actualResult == expectedResult,{"combined set should equal its original set...but it is not. actualResult: $actualResult"})
     }

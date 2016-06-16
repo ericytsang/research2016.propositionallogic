@@ -5,7 +5,7 @@ import research2016.propositionallogic.Proposition.Operator
 import java.util.WeakHashMap
 
 /**
- * an [AtomicProposition] which is mapped to a truth value by a [Situation].
+ * an [AtomicProposition] which is mapped to a truth value by a [State].
  */
 class Variable private constructor(_friendly:String):AtomicProposition(_friendly)
 {
@@ -25,23 +25,23 @@ class Variable private constructor(_friendly:String):AtomicProposition(_friendly
             throw IllegalArgumentException("atomic proposition must be composed only of letters")
         }
     }
-    override fun truthValue(situation:Situation):Boolean = situation[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
+    override fun truthValue(state:State):Boolean = state[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
 }
 
 /**
- * an [AtomicProposition] that evaluates to true in any [Situation].
+ * an [AtomicProposition] that evaluates to true in any [State].
  */
 val Tautology = object:AtomicProposition("1")
 {
-    override fun truthValue(situation:Situation):Boolean = true
+    override fun truthValue(state:State):Boolean = true
 }
 
 /**
- * an [AtomicProposition] that evaluates to false in every [Situation].
+ * an [AtomicProposition] that evaluates to false in every [State].
  */
 val Contradiction = object:AtomicProposition("0")
 {
-    override fun truthValue(situation:Situation):Boolean = false
+    override fun truthValue(state:State):Boolean = false
 }
 
 abstract class TruthTableOperator(operands:List<Proposition>):Operator(operands)
