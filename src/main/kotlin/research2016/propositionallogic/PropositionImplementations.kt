@@ -31,7 +31,7 @@ class Variable private constructor(_friendly:String):AtomicProposition(_friendly
 /**
  * an [AtomicProposition] that evaluates to true in any [State].
  */
-val Tautology = object:AtomicProposition("1")
+val tautology = object:AtomicProposition("1")
 {
     override fun truthValue(state:State):Boolean = true
 }
@@ -39,7 +39,7 @@ val Tautology = object:AtomicProposition("1")
 /**
  * an [AtomicProposition] that evaluates to false in every [State].
  */
-val Contradiction = object:AtomicProposition("0")
+val contradiction = object:AtomicProposition("0")
 {
     override fun truthValue(state:State):Boolean = false
 }
@@ -102,7 +102,7 @@ abstract class AssociativeOperator(operands:List<Proposition>):Operator(operands
 {
     companion object
     {
-        fun make(operands:List<Proposition>,isSameOperator:(Proposition)->Boolean,operatorFactory:(List<Proposition>)->Proposition):Proposition
+        fun make(operands:Iterable<Proposition>,isSameOperator:(Proposition)->Boolean,operatorFactory:(List<Proposition>)->Proposition):Proposition
         {
             val newOperands = operands.flatMap()
             {
@@ -151,7 +151,7 @@ class And private constructor(operands:List<Proposition>):AssociativeOperator(op
 {
     companion object
     {
-        fun make(operands:List<Proposition>):Proposition
+        fun make(operands:Iterable<Proposition>):Proposition
         {
             val isSameFunction = {proposition:Proposition -> proposition is And}
             val operatorFactory = {operands:List<Proposition> -> And(operands)}
@@ -178,7 +178,7 @@ class Or private constructor(operands:List<Proposition>):AssociativeOperator(ope
 {
     companion object
     {
-        fun make(operands:List<Proposition>):Proposition
+        fun make(operands:Iterable<Proposition>):Proposition
         {
             val isSameFunction = {proposition:Proposition -> proposition is Or}
             val operatorFactory = {operands:List<Proposition> -> Or(operands)}

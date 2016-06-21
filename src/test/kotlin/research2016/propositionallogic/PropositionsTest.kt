@@ -139,7 +139,7 @@ class PropositionsTest
     @Test
     fun modelsOfTreeWithTautologyTest()
     {
-        val proposition = Oif(p,(q or Tautology))
+        val proposition = Oif(p,(q or tautology))
         val models = setOf(
             State.make(mapOf("p" to false,"q" to false)),
             State.make(mapOf("p" to false,"q" to true )),
@@ -154,7 +154,7 @@ class PropositionsTest
     @Test
     fun modelsOfTreeWithContradictionTest()
     {
-        val proposition = Oif(p,(q and Contradiction))
+        val proposition = Oif(p,(q and contradiction))
         val models = setOf(
             State.make(mapOf("p" to false,"q" to false)),
             State.make(mapOf("p" to false,"q" to true ))
@@ -216,7 +216,7 @@ class PropositionsTest
     @Test
     fun modelsOfContradiction()
     {
-        val contradiction = (Tautology and a and b and b.not)
+        val contradiction = (tautology and a and b and b.not)
         println(contradiction)
         assert(contradiction.models.isEmpty())
     }
@@ -482,10 +482,27 @@ class PropositionsTest
     }
 
     @Test
-    fun toDnfTest()
+    fun toDnfTest1()
     {
         val proposition = a or b and c oif d
+        println(proposition)
         assert(proposition.toDnf().models == proposition.models)
+    }
+
+    @Test
+    fun toDnfTest2()
+    {
+        val proposition = a or a.not and b
+        println(proposition.toDnf())
+        assert(proposition.toDnf().models == b.models)
+    }
+
+    @Test
+    fun toDnfTest3()
+    {
+        val proposition = a or a.not
+        println(proposition.toDnf())
+        assert(proposition.toDnf().models == tautology.models)
     }
 
     @Test

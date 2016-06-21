@@ -19,7 +19,10 @@ class State(val propositionValues:Map<Variable,Boolean>):Map<Variable,Boolean>,S
     override fun containsValue(value:Boolean):Boolean = map.containsValue(value)
     override fun get(key:Variable):Boolean? = map[key]
     override fun isEmpty():Boolean = map.isEmpty()
-    override fun toString():String = map.toString()
+    override fun toString():String = entries
+        .sortedBy {it.key.toString()}
+        .map {if (it.value) it.key.toString() else "-${it.key.toString()}"}
+        .joinToString(separator = ", ",prefix = "{",postfix = "}")
     override fun hashCode():Int = map.hashCode()
     override fun equals(other:Any?):Boolean = map.equals(other)
 }

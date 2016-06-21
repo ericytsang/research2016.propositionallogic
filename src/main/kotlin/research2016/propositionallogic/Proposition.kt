@@ -114,12 +114,17 @@ fun Proposition.Companion.makeFrom(state:State):Proposition
     }
     return if (propositions.isEmpty())
     {
-        Tautology
+        tautology
     }
     else
     {
         And.make(propositions)
     }
+}
+
+fun Proposition.Companion.makeDnf(states:Iterable<State>):Proposition
+{
+    return Or.make(states.map {Proposition.makeFrom(it)})
 }
 
 /**
@@ -235,6 +240,19 @@ private fun Proposition.variablesToInfluence(influence:Double = 1.0):Map<Variabl
     else -> emptyMap()
 }
 
+infix fun Proposition.isSubsetOf(that:Proposition):Boolean
+{
+    return (that.not and this).isContradiction
+}
+
+infix fun Proposition.isSatisfiedBy(that:Proposition):Boolean
+{
+    // this is a subset of that
+    return (that isSubsetOf this) &&
+        // and for each model of that there is a model of this which satisfies it
+        this.models.all {(Proposition.makeFrom(it) and that).isSatisfiable}
+}
+
 /**
  * returns true if there is at least one model for this [Proposition]; false
  * otherwise.
@@ -296,8 +314,8 @@ fun Proposition.truthiness(state:State):Double = when (this)
     {
         when
         {
-            this == Tautology -> 1.0
-            this == Contradiction -> 0.0
+            this == tautology -> 1.0
+            this == contradiction -> 0.0
             else -> throw IllegalArgumentException("unknown atomic proposition! $this")
         }
     }
@@ -321,11 +339,11 @@ fun Proposition.toFullDnf():Proposition
                 // negation of it otherwise
                 .map {if (situation[it]!!) it else it.not}
                 // and everything together
-                .let {if (it.isNotEmpty()) And.make(it) else Tautology}
+                .let {if (it.isNotEmpty()) And.make(it) else tautology}
         }
     return if (literalConjunctions.isEmpty())
     {
-        Contradiction
+        contradiction
     }
     else
     {
@@ -394,11 +412,11 @@ fun Proposition.toDnf():Proposition
                 // negation of it otherwise
                 .map {if (situation[it]!!) it else it.not}
                 // and everything together
-                .let {if (it.isNotEmpty()) And.make(it) else Tautology}
+                .let {if (it.isNotEmpty()) And.make(it) else tautology}
         }
     return if (literalConjunctions.isEmpty())
     {
-        Contradiction
+        contradiction
     }
     else
     {

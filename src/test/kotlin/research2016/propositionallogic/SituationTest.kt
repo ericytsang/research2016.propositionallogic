@@ -33,8 +33,8 @@ class SituationTest
         val situation2 = State.make(map2)
         println("situation1.toString(): ${situation1.toString()}")
         println("situation2.toString(): ${situation2.toString()}")
-        assert(situation1.toString() == map1.toString(),{"equivalent strings should have matched. situation1.toString(): ${situation1.toString()}, map1.toString(): ${map1.toString()}"})
-        assert(situation2.toString() == map2.toString(),{"equivalent strings should have matched. situation2.toString(): ${situation2.toString()}, map2.toString(): ${map2.toString()}"})
+        assert(situation1.toString() == "{p, -q, r}",{"equivalent strings should have matched. situation1.toString(): ${situation1.toString()}, map1.toString(): ${map1.toString()}"})
+        assert(situation2.toString() == "{p, q, r}",{"equivalent strings should have matched. situation2.toString(): ${situation2.toString()}, map2.toString(): ${map2.toString()}"})
     }
 
     @Test
