@@ -8,7 +8,7 @@ interface AnnouncementResolutionStrategy
     fun resolve(problemInstances:List<ProblemInstance>):Proposition?
     data class ProblemInstance(val initialBeliefState:Set<Proposition>,val targetBeliefState:Proposition,val beliefRevisionStrategy:BeliefRevisionStrategy)
     {
-        fun reviseWith(sentence:Proposition):Set<Proposition>
+        fun reviseBy(sentence:Proposition):Set<Proposition>
         {
             return beliefRevisionStrategy.revise(initialBeliefState,sentence)
         }
@@ -19,8 +19,15 @@ class SimpleAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
 {
     override fun resolve(problemInstances:List<AnnouncementResolutionStrategy.ProblemInstance>):Proposition?
     {
+        // list of all initial belief states
+        val initialKs = problemInstances.map {it.targetBeliefState}
+
         // the base announcement is a disjunction of all target belief states
-        val baseAnnouncement = problemInstances.map {it.targetBeliefState}.let {Or.make(it)}
+        val baseAnnouncement = initialKs
+            // remove all belief states that are satisfiable by another belief state
+            .filter {k -> initialKs.minus(k).all {anotherK -> !(k isSatisfiedBy anotherK)}}
+            // turn remaining belief states into a disjunction
+            .let {Or.make(it)}
 
         // generate generalized announcements
         val announcements = problemInstances
@@ -39,7 +46,7 @@ class SimpleAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             announcement ->
             problemInstances
                 // perform the belief revision (K * announcement) for each problem instance
-                .associate {problem -> problem.targetBeliefState to problem.reviseWith(announcement)}
+                .associate {problem -> problem.targetBeliefState to problem.reviseBy(announcement)}
                 // make sure all target belief states are satisfied by their corresponding revision result
                 .let {targetsToResults -> targetsToResults.all {it.key isSatisfiedBy And.make(it.value)}}
         }

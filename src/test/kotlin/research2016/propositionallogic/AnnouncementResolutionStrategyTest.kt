@@ -20,12 +20,13 @@ class AnnouncementResolutionStrategyTest
             setOf(breach xor patrol,breach.not),
             patrol.not,
             SatisfiabilityBeliefRevisionStrategy())
-        val announcement = SimpleAnnouncementResolutionStrategy().resolve(listOf(bot1,bot2))
+        val problems = listOf(bot1,bot2)
+        val announcement = SimpleAnnouncementResolutionStrategy().resolve(problems)!!
         println(announcement)
-        if (announcement != null)
+        problems.forEach()
         {
-            println(And.make(bot1.reviseWith(announcement)).models)
-            println(And.make(bot2.reviseWith(announcement)).models)
+            println(And.make(it.reviseBy(announcement)).models)
+            assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement)))
         }
     }
 
@@ -40,15 +41,100 @@ class AnnouncementResolutionStrategyTest
             patrol,
             SatisfiabilityBeliefRevisionStrategy())
         val bot2 = AnnouncementResolutionStrategy.ProblemInstance(
-            setOf(breach oif checkGate,breach.not oif patrol,checkGate xor patrol,breach.not),
+            setOf(breach then checkGate,breach.not then patrol,checkGate xor patrol,breach.not),
             checkGate,
             SatisfiabilityBeliefRevisionStrategy())
-        val announcement = SimpleAnnouncementResolutionStrategy().resolve(listOf(bot1,bot2))
+        val problems = listOf(bot1,bot2)
+        val announcement = SimpleAnnouncementResolutionStrategy().resolve(problems)!!
         println(announcement)
-        if (announcement != null)
+        problems.forEach()
         {
-            println(And.make(bot1.reviseWith(announcement)).models)
-            println(And.make(bot2.reviseWith(announcement)).models)
+            println(And.make(it.reviseBy(announcement)).models)
+            assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement)))
+        }
+    }
+
+    @Test
+    fun guardBots3()
+    {
+        val patrol = Variable.make("patrol")
+        val breach = Variable.make("breach")
+        val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(patrol and breach),
+            patrol,
+            SatisfiabilityBeliefRevisionStrategy())
+        val bot2 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(patrol.not and breach),
+            patrol and breach,
+            SatisfiabilityBeliefRevisionStrategy())
+        val problems = listOf(bot1,bot2)
+        val announcement = SimpleAnnouncementResolutionStrategy().resolve(problems)!!
+        println(announcement)
+        problems.forEach()
+        {
+            println(And.make(it.reviseBy(announcement)).models)
+            assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement)))
+        }
+    }
+
+    @Test
+    fun hammingDistanceImpossible()
+    {
+        val a = Variable.make("a")
+        val b = Variable.make("b")
+        val c = Variable.make("c")
+        val d = Variable.make("d")
+        val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a.not and b and c.not and d.not),
+            a and b.not and c and d,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot2 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a and b and c.not and d.not),
+            a.not and b.not and c and d,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot3 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a.not and b and c.not and d),
+            a and b.not and c and d.not,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot4 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a and b and c.not and d),
+            a.not and b.not and c and d.not,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val problems = listOf(bot1,bot2,bot3,bot4)
+        val announcement = SimpleAnnouncementResolutionStrategy().resolve(problems)
+        assert(announcement == null)
+    }
+
+    @Test
+    fun hammingDistance()
+    {
+        val a = Variable.make("a")
+        val b = Variable.make("b")
+        val c = Variable.make("c")
+        val d = Variable.make("d")
+        val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a.not and b and c.not and d.not),
+            a.not and b.not and c and d.not,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot2 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a and b and c.not and d.not),
+            a and b.not and c and d.not,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot3 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a.not and b and c.not and d),
+            a.not and b.not and c and d,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot4 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(a and b and c.not and d),
+            a and b.not and c and d,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val problems = listOf(bot1,bot2,bot3,bot4)
+        val announcement = SimpleAnnouncementResolutionStrategy().resolve(problems)!!
+        println(announcement)
+        problems.forEach()
+        {
+            println(And.make(it.reviseBy(announcement)).models)
+            assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement)))
         }
     }
 
@@ -73,13 +159,13 @@ class AnnouncementResolutionStrategyTest
             setOf(threadDetected xor eatFood,runAway iff threadDetected,threadDetected.not,scanForThreats.not,fightThreat.not,helpVipEscape.not),
             runAway,
             SatisfiabilityBeliefRevisionStrategy())
-        val announcement = SimpleAnnouncementResolutionStrategy().resolve(listOf(guard1,guard2,vip))
+        val problems = listOf(guard1,guard2,vip)
+        val announcement = SimpleAnnouncementResolutionStrategy().resolve(problems)!!
         println(announcement)
-        if (announcement != null)
+        problems.forEach()
         {
-            println(And.make(guard1.reviseWith(announcement)).models)
-            println(And.make(guard2.reviseWith(announcement)).models)
-            println(And.make(vip.reviseWith(announcement)).models)
+            println(And.make(it.reviseBy(announcement)).models)
+            assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement)))
         }
     }
 }
