@@ -200,6 +200,7 @@ class Or private constructor(operands:List<Proposition>):AssociativeOperator(ope
 }
 
 infix fun Proposition.oif(other:Proposition) = Oif(this,other)
+infix fun Proposition.then(other:Proposition) = Oif(this,other)
 
 class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftOperand,rightOperand)
 {
