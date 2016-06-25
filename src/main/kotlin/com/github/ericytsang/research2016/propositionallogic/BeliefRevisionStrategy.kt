@@ -1,4 +1,4 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
 import java.util.Comparator
 

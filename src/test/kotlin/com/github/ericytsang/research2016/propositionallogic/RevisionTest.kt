@@ -1,4 +1,4 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
 /**
  * Created by Eric on 5/25/2016.

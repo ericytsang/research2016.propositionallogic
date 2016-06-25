@@ -1,6 +1,6 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import lib.formulainterpreter.FormulaTreeFactory
+import com.github.ericytsang.lib.formulainterpreter.FormulaTreeFactory
 import java.util.regex.Pattern
 
 /**

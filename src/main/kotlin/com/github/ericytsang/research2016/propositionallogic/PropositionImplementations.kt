@@ -1,7 +1,7 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import research2016.propositionallogic.Proposition.AtomicProposition
-import research2016.propositionallogic.Proposition.Operator
+import com.github.ericytsang.research2016.propositionallogic.Proposition.AtomicProposition
+import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.util.WeakHashMap
 
 /**

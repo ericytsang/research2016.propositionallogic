@@ -1,6 +1,6 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import lib.collections.getRandom
+import com.github.ericytsang.lib.collections.getRandom
 import java.util.Collections
 import java.util.Comparator
 import java.util.LinkedHashMap
@@ -36,33 +36,35 @@ abstract class ByDistanceComparator(val beliefState:Set<Proposition>):Comparator
     }
 
     /**
-     * used to cache previous calculations produced by the [computeDistance]
+     * used to cache previous calculations produced by the [computeDistanceTo]
      * function.
      */
     private val cachedCalculations = LinkedHashMap<State,Int>()
 
     override fun compare(state1:State,state2:State):Int
     {
-        val situation1Distance = cachedCalculations.getOrPut(state1)
-        {
-            computeDistance(state1)
-        }
-        val situation2Distance = cachedCalculations.getOrPut(state2)
-        {
-            computeDistance(state2)
-        }
+        val situation1Distance = getDistanceTo(state1)
+        val situation2Distance = getDistanceTo(state2)
         return situation1Distance-situation2Distance
+    }
+
+    fun getDistanceTo(state:State):Int
+    {
+        return cachedCalculations.getOrPut(state)
+        {
+            computeDistanceTo(state)
+        }
     }
 
     /**
      * returns the distance from the [state] to the [beliefState].
      */
-    protected abstract fun computeDistance(state:State):Int
+    protected abstract fun computeDistanceTo(state:State):Int
 }
 
 class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparator(beliefState)
 {
-    override fun computeDistance(state:State):Int
+    override fun computeDistanceTo(state:State):Int
     {
         return beliefStateModels.map {hammingDistance(state,it)}.min() ?: 0
     }
@@ -89,7 +91,7 @@ class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparat
 
 class WeightedHammingDistanceComparator(beliefState:Set<Proposition>,val weights:Map<Variable,Int>):ByDistanceComparator(beliefState)
 {
-    override fun computeDistance(state:State):Int
+    override fun computeDistanceTo(state:State):Int
     {
         return beliefStateModels.map {weightedHammingDistance(state,it)}.min() ?: 0
     }
@@ -134,7 +136,7 @@ class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Pr
         }
     }
 
-    override fun computeDistance(state:State):Int
+    override fun computeDistanceTo(state:State):Int
     {
         val completeOrderedSets = listOf(And.make(beliefState.toList()))+orderedSets+tautology
         return completeOrderedSets.indexOfFirst {(it and Proposition.makeFrom(state)).isSatisfiable}

@@ -1,6 +1,6 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import lib.collections.getRandom
+import com.github.ericytsang.lib.collections.getRandom
 
 /**
  * Created by surpl on 5/19/2016.

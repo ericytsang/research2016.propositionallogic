@@ -1,6 +1,6 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import lib.collections.permutedIterator
+import com.github.ericytsang.lib.collections.permutedIterator
 import java.util.LinkedHashSet
 import kotlin.collections.AbstractIterator
 

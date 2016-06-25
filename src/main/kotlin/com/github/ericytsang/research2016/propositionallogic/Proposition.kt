@@ -1,16 +1,16 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import lib.collections.Bounds
-import lib.collections.getRandom
-import lib.collections.IteratorToSetAdapter
-import lib.collections.branchAndBound
-import lib.collections.rootNodeMetaData
-import lib.delegates.LazyWithReceiver
-import java.util.LinkedHashSet
-import research2016.propositionallogic.Proposition.AtomicProposition
-import research2016.propositionallogic.Proposition.Operator
+import com.github.ericytsang.lib.collections.Bounds
+import com.github.ericytsang.lib.collections.getRandom
+import com.github.ericytsang.lib.collections.IteratorToSetAdapter
+import com.github.ericytsang.lib.collections.branchAndBound
+import com.github.ericytsang.lib.collections.rootNodeMetaData
+import com.github.ericytsang.lib.delegates.LazyWithReceiver
+import com.github.ericytsang.research2016.propositionallogic.Proposition.AtomicProposition
+import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.io.Serializable
 import java.util.LinkedHashMap
+import java.util.LinkedHashSet
 
 /**
  * this class is the component in the Composite pattern.
@@ -245,11 +245,15 @@ infix fun Proposition.isSubsetOf(that:Proposition):Boolean
     return (that.not and this).isContradiction
 }
 
+/**
+ * returns true when every model of this is satisfied by a model of that, and
+ * every model of that satisfies a model of this.
+ */
 infix fun Proposition.isSatisfiedBy(that:Proposition):Boolean
 {
     // this is a subset of that
     return (that isSubsetOf this) &&
-        // and for each model of that there is a model of this which satisfies it
+        // and for each model of this there is a model of that which satisfies it
         this.models.all {(Proposition.makeFrom(it) and that).isSatisfiable}
 }
 

@@ -1,6 +1,6 @@
-package research2016.propositionallogic
+package com.github.ericytsang.research2016.propositionallogic
 
-import lib.collections.IteratorToSetAdapter
+import com.github.ericytsang.lib.collections.IteratorToSetAdapter
 import java.io.Serializable
 import java.util.LinkedHashSet
 
