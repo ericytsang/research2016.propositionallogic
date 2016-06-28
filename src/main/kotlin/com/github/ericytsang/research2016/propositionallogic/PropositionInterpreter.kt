@@ -58,11 +58,11 @@ private val propositionFactory = FormulaTreeFactory(
             val preprocessedWord = word.toLowerCase().trim()
             return when
             {
-                Pattern.matches("(iff){1}",preprocessedWord) -> Iff.make(operands)
+                Pattern.matches("(iff){1}",preprocessedWord) -> Iff.make(operands)!!
                 Pattern.matches("(then){1}",preprocessedWord) -> Oif(operands.first(),operands.last())
-                Pattern.matches("(or){1}",preprocessedWord) -> Or.make(operands)
+                Pattern.matches("(or){1}",preprocessedWord) -> Or.make(operands)!!
                 Pattern.matches("(xor){1}",preprocessedWord) -> Xor(operands.first(),operands.last())
-                Pattern.matches("(and){1}",preprocessedWord) -> And.make(operands)
+                Pattern.matches("(and){1}",preprocessedWord) -> And.make(operands)!!
                 Pattern.matches("(nand){1}",preprocessedWord) -> Nand(operands.first(),operands.last())
                 Pattern.matches("(-){1}",preprocessedWord) -> Not(operands.single())
                 else -> throw IllegalArgumentException("unrecognized token: $word")

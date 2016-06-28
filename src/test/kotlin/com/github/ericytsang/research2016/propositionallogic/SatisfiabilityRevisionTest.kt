@@ -38,7 +38,7 @@ class SatisfiabilityRevisionTest():RevisionTest()
     fun reviseContradictionTest()
     {
         val beliefState = setOf(p and q)
-        val sentence = And.make(beliefState.toList()).not
+        val sentence = And.make(beliefState)!!.not
         val expected = sentence.models
         reviseTest(beliefState,sentence,SatisfiabilityBeliefRevisionStrategy(),expected)
     }

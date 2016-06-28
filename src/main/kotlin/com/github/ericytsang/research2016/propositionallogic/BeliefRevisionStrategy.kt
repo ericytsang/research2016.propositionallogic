@@ -39,7 +39,7 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
             // make each one into a tautology
             .map {it or it.not}
             // and them together
-            .let {And.make(it)}
+            .let {And.make(it)!!}
 
         // all models of the sentence..and'd together with
         // basicPropositionTautologies to make sure the resulting models
@@ -47,14 +47,15 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
         val sentenceModels = (sentence and basicPropositionTautologies).models
 
         // find the "first" model in the ordering or models O(n)
-        val nearestModel = sentenceModels.minWith(situationSorter) ?: TODO() // todo
+        val nearestModel = sentenceModels.minWith(situationSorter)
+            ?: return setOf(contradiction)
 
         // keep only the ones with the least distance according to the sorter
         val nearestModels = sentenceModels
             .filter {situationSorter.compare(nearestModel,it) == 0}
 
         // convert into a conjunctive normal form proposition and return
-        return setOf(Or.make(nearestModels.map {Proposition.makeFrom(it)}))
+        return setOf(Or.make(nearestModels.map {Proposition.makeFrom(it)})!!)
     }
 }
 

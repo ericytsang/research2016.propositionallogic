@@ -38,7 +38,7 @@ class HammingDistanceRevisionTest():RevisionTest()
     fun reviseContradictionTest()
     {
         val beliefState = setOf(p and q)
-        val sentence = And.make(beliefState.toList()).not
+        val sentence = And.make(beliefState)!!.not
         val expected = Xor(p,q).models
         reviseTest(beliefState,sentence,ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}),expected)
     }

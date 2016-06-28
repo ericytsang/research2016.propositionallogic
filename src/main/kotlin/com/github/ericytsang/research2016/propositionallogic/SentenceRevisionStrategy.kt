@@ -21,11 +21,11 @@ abstract class TrustPartitionSentenceRevisionStrategy:SentenceRevisionStrategy
         }
         return partitions
             // add partition that catches anything that does not satisfy defined partitions
-            .plus(Or.make(partitions.toList()).not)
+            .plus((Or.make(partitions.toList())?:contradiction).not)
             // get the intersecting partitions
             .filter {(sentence and it).isSatisfiable}
             // take the union of them by or-ing them together and return that
-            .let {Or.make(it)}
+            .let {Or.make(it)!!}
     }
 }
 

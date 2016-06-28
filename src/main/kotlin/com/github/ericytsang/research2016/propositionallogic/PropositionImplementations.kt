@@ -102,7 +102,7 @@ abstract class AssociativeOperator(operands:List<Proposition>):Operator(operands
 {
     companion object
     {
-        fun make(operands:Iterable<Proposition>,isSameOperator:(Proposition)->Boolean,operatorFactory:(List<Proposition>)->Proposition):Proposition
+        fun make(operands:Iterable<Proposition>,isSameOperator:(Proposition)->Boolean,operatorFactory:(List<Proposition>)->Proposition):Proposition?
         {
             val newOperands = operands.flatMap()
             {
@@ -117,7 +117,7 @@ abstract class AssociativeOperator(operands:List<Proposition>):Operator(operands
             }
             return when (newOperands.size)
             {
-                0 -> throw IllegalArgumentException("not enough operands")
+                0 -> null
                 1 -> newOperands.single()
                 else -> operatorFactory(newOperands)
             }
@@ -145,13 +145,13 @@ class Not(operand:Proposition):UnaryOperator(operand)
     }
 }
 
-infix fun Proposition.and(other:Proposition) = And.make(listOf(this,other))
+infix fun Proposition.and(other:Proposition) = And.make(listOf(this,other))!!
 
 class And private constructor(operands:List<Proposition>):AssociativeOperator(operands)
 {
     companion object
     {
-        fun make(operands:Iterable<Proposition>):Proposition
+        fun make(operands:Iterable<Proposition>):Proposition?
         {
             val isSameFunction = {proposition:Proposition -> proposition is And}
             val operatorFactory = {operands:List<Proposition> -> And(operands)}
@@ -172,13 +172,13 @@ class And private constructor(operands:List<Proposition>):AssociativeOperator(op
     }
 }
 
-infix fun Proposition.or(other:Proposition) = Or.make(listOf(this,other))
+infix fun Proposition.or(other:Proposition) = Or.make(listOf(this,other))!!
 
 class Or private constructor(operands:List<Proposition>):AssociativeOperator(operands)
 {
     companion object
     {
-        fun make(operands:Iterable<Proposition>):Proposition
+        fun make(operands:Iterable<Proposition>):Proposition?
         {
             val isSameFunction = {proposition:Proposition -> proposition is Or}
             val operatorFactory = {operands:List<Proposition> -> Or(operands)}
@@ -217,13 +217,13 @@ class Oif(leftOperand:Proposition,rightOperand:Proposition):BinaryOperator(leftO
     }
 }
 
-infix fun Proposition.iff(other:Proposition) = Iff.make(listOf(this,other))
+infix fun Proposition.iff(other:Proposition) = Iff.make(listOf(this,other))!!
 
 class Iff private constructor(operands:List<Proposition>):AssociativeOperator(operands)
 {
     companion object
     {
-        fun make(operands:List<Proposition>):Proposition
+        fun make(operands:List<Proposition>):Proposition?
         {
             val isSameFunction = {proposition:Proposition -> proposition is Iff}
             val operatorFactory = {operands:List<Proposition> -> Iff(operands)}

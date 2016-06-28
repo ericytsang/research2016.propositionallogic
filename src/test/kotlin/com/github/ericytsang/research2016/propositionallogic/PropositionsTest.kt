@@ -164,8 +164,8 @@ class PropositionsTest
         assert(proposition.models == models)
     }
 
-    val bigProposition1 = Xor(Oif(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Nand(Xor(Not(Oif(p,(q and r))),s),t),u)),v)),w)),x)),y)),z)),a)),b)),c),d)
-    val bigProposition2 = Xor(Xor(Oif(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Nand(Xor(Not(Oif(p,(q and r))),s),t),u)),v)),w)),x)),y)),z)),a)),b)),c),d),e)
+    val bigProposition1 = Xor(Oif(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Nand(Xor(Not(Oif(p,(q and r))),s),t),u))!!,v))!!,w))!!,x))!!,y))!!,z))!!,a))!!,b))!!,c),d)
+    val bigProposition2 = Xor(Xor(Oif(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Nand(Xor(Not(Oif(p,(q and r))),s),t),u))!!,v))!!,w))!!,x))!!,y))!!,z))!!,a))!!,b))!!,c),d),e)
 
     @Test
     fun benchmark_evaluateProp1()

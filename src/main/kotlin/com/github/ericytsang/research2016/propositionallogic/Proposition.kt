@@ -112,19 +112,12 @@ fun Proposition.Companion.makeFrom(state:State):Proposition
             Not(basicProposition)
         }
     }
-    return if (propositions.isEmpty())
-    {
-        tautology
-    }
-    else
-    {
-        And.make(propositions)
-    }
+    return And.make(propositions) ?: tautology
 }
 
 fun Proposition.Companion.makeDnf(states:Iterable<State>):Proposition
 {
-    return Or.make(states.map {Proposition.makeFrom(it)})
+    return Or.make(states.map {Proposition.makeFrom(it)}) ?: contradiction
 }
 
 /**
@@ -345,14 +338,7 @@ fun Proposition.toFullDnf():Proposition
                 // and everything together
                 .let {if (it.isNotEmpty()) And.make(it) else tautology}
         }
-    return if (literalConjunctions.isEmpty())
-    {
-        contradiction
-    }
-    else
-    {
-        Or.make(literalConjunctions)
-    }
+    return Or.make(literalConjunctions) ?: contradiction
 }
 
 /**
@@ -418,12 +404,5 @@ fun Proposition.toDnf():Proposition
                 // and everything together
                 .let {if (it.isNotEmpty()) And.make(it) else tautology}
         }
-    return if (literalConjunctions.isEmpty())
-    {
-        contradiction
-    }
-    else
-    {
-        Or.make(literalConjunctions)
-    }
+    return Or.make(literalConjunctions) ?: contradiction
 }

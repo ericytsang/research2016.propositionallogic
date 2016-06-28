@@ -13,7 +13,7 @@ open class RevisionTest
     {
         val actual = beliefRevisionStrategy
             .revise(beliefState,sentence)
-            .let {And.make(it.toList())}
+            .let {And.make(it.toList()) ?: contradiction}
             .models
         println("actual: $actual")
         println("expected: $expected")
