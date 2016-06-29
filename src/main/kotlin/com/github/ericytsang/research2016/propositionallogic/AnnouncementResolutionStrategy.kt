@@ -32,7 +32,46 @@ interface AnnouncementResolutionStrategy
     }
 }
 
-// todo
+class BruteForceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
+{
+    override fun resolve(problemInstances:List<ProblemInstance>):Proposition?
+    {
+        // generate generalized announcements
+        val announcements = problemInstances
+            // get all underlying input variables
+            .flatMap {it.initialBeliefState+it.targetBeliefState}.flatMap {it.variables}
+            // generate all the possible states that involve the variables
+            .let {State.generateFrom(it.toSet())}
+            // turn each state into a conjunction of a combination variables and
+            // negation of variables
+            .map {Proposition.makeFrom(it)}
+            // go through every possible subset of conjunctions that can be made and
+            // turn each into a disjunction of conjunctions
+            .map {setOf(null,it)}.permutedIterator().toIterable()
+            .map {it.filterNotNull().toSet()}
+            .map()
+            {
+                conjunctionList ->
+                if (conjunctionList.isEmpty())
+                {
+                    contradiction
+                }
+                else
+                {
+                    Or.make(conjunctionList)!!
+                }
+            }
+
+        // find the announcement that works and return it; null if none work
+        return announcements
+            .find()
+            {
+                announcement ->
+                problemInstances.all {it.isSolvedBy(announcement)}
+            }
+    }
+}
+
 class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
 {
     override fun resolve(problemInstances:List<ProblemInstance>):Proposition?
