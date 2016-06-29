@@ -2,6 +2,8 @@ package com.github.ericytsang.research2016.propositionallogic
 
 import com.github.ericytsang.lib.collections.permutedIterator
 import com.github.ericytsang.lib.collections.toIterable
+import com.github.ericytsang.research2016.propositionallogic.AnnouncementResolutionStrategy.ProblemInstance
+import java.util.LinkedHashMap
 
 /**
  * Created by surpl on 6/20/2016.
@@ -18,13 +20,13 @@ interface AnnouncementResolutionStrategy
         fun isSolvedBy(sentence:Proposition):Boolean
         {
             val resultK = And.make(reviseBy(sentence)) ?: contradiction
-            return if (targetBeliefState.models.isNotEmpty())
+            return if (targetBeliefState.isSatisfiable)
             {
-                resultK.models.isNotEmpty() && resultK isSubsetOf targetBeliefState
+                resultK.isSatisfiable && resultK isSubsetOf targetBeliefState
             }
             else
             {
-                resultK.models.isEmpty()
+                resultK.isContradiction
             }
         }
     }
@@ -33,7 +35,7 @@ interface AnnouncementResolutionStrategy
 // todo
 class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
 {
-    override fun resolve(problemInstances:List<AnnouncementResolutionStrategy.ProblemInstance>):Proposition?
+    override fun resolve(problemInstances:List<ProblemInstance>):Proposition?
     {
         // get all the distance comparators
         val distanceComparators = try
@@ -45,7 +47,7 @@ class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
         catch (ex:ClassCastException)
         {
             throw IllegalArgumentException("${ByDistanceAnnouncementResolutionStrategy::class.java.simpleName} " +
-                "only supports ${AnnouncementResolutionStrategy.ProblemInstance::class.java} objects with belief " +
+                "only supports ${ProblemInstance::class.java} objects with belief " +
                 "revision strategies of type ${ComparatorBeliefRevisionStrategy::class.java.simpleName} with " +
                 "comparators of type ${ByDistanceComparator::class.java.simpleName}")
         }
@@ -55,7 +57,7 @@ class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             .let {Or.make(it) ?: contradiction}
             .models
 
-        val distanceToModels = problemInstances
+        val instanceDistanceToModels = problemInstances
             .associate()
             {
                 problemInstance ->
@@ -63,12 +65,43 @@ class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
                     .groupBy {distanceComparators[problemInstance]!!.getDistanceTo(it)}
                     .mapValues {it.value.toSet()}
             }
+        fun ProblemInstance.getDistanceToModelsMap():Map<Int,Set<State>> = instanceDistanceToModels[this]!!
+        fun ProblemInstance.getModelsAtDistance(distance:Int):Set<State> = instanceDistanceToModels[this]!![distance] ?: emptySet()
+        fun ProblemInstance.getModelsInRange(range:IntRange):Set<State> = instanceDistanceToModels[this]!!.entries.filter {it.key in range}.flatMap {it.value}.toSet()
 
-        val otherAnnouncements:MutableMap<AnnouncementResolutionStrategy.ProblemInstance,Proposition> = mutableMapOf()
+        val allAnnouncements:Map<ProblemInstance,Map<Int,Announcement>> = problemInstances
+            .associate()
+            {
+                problemInstance ->
+                val distanceToAnnouncementMap = problemInstance.getDistanceToModelsMap().entries.associate()
+                {
+                    val distance = it.key
+                    val (modelsAtDistanceInTargetK,modelsAtDistanceNotInTargetK) = problemInstance
+                        .getModelsAtDistance(distance)
+                        .partition {(Proposition.makeFrom(it) and problemInstance.targetBeliefState).isSatisfiable}
+                    val rejectedStates = problemInstance
+                        .getModelsInRange(0..distance-1)
+                        .plus(modelsAtDistanceNotInTargetK)
+                        .toSet()
+                    val acceptedStates = modelsAtDistanceInTargetK
+                        .toSet()
+                    val announcement = Announcement(rejectedStates,acceptedStates)
+                    distance to announcement
+                }
+                problemInstance to distanceToAnnouncementMap
+            }
+
+        val instanceToSearchDistanceMap = LinkedHashMap<ProblemInstance,Int>()
+        fun ProblemInstance.getSearchDistance():Int? = instanceToSearchDistanceMap[this]
+        fun ProblemInstance.setSearchDistance(distance:Int)
+        {
+            instanceToSearchDistanceMap[this] = distance
+        }
+        val selectedAnnouncements:MutableMap<ProblemInstance,Announcement> = LinkedHashMap()
         var unsolvedProblemInstances = problemInstances.toSet()
 
         // while there are unsolved problem instances
-        while (unsolvedProblemInstances.isNotEmpty())
+        while (true)
         {
             // for each unsolved problem instance, find the announcement of the
             // smallest distance that, in conjunction with the existing
@@ -77,34 +110,50 @@ class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             val newAnnouncements = unsolvedProblemInstances.map()
             {
                 problemInstance ->
-                val potentialAnnouncement = distanceToModels[problemInstance]!!.entries
-                    // sort state sets by distance
-                    .sortedBy {it.key}
-                    // transform state sets into announcements
-                    .map()
-                    {
-                        val disjunctionOfModelsAtDistance = Or.make(it.value.map {Proposition.makeFrom(it)})!!
-                        val announcement = disjunctionOfModelsAtDistance.not or problemInstance.targetBeliefState
-                        (otherAnnouncements+(problemInstance to announcement)).let {And.make(it.values)}!!
-                    }
-                    // find the announcement that would satisfies this problem instance
-                    .find {problemInstance.isSolvedBy(it)} ?: return null
-                problemInstance to potentialAnnouncement
+
+                // expand or initialize search distance
+                var searchDistance = problemInstance.getSearchDistance()
+                if (searchDistance != null)
+                {
+                    searchDistance = allAnnouncements[problemInstance]!!.keys.filter {it > searchDistance!!}.sorted().firstOrNull() ?: return null
+                }
+                else
+                {
+                    searchDistance = allAnnouncements[problemInstance]!!.keys.min()!!
+                }
+                problemInstance.setSearchDistance(searchDistance)
+
+                // get the announcement for the instance at the distance
+                val distanceToAnnouncementMap = allAnnouncements[problemInstance]!!
+                return@map problemInstance to distanceToAnnouncementMap[searchDistance]!!
             }
 
             // check and update which problem instances are unsolved
-            otherAnnouncements.putAll(newAnnouncements)
-            val announcement = And.make(otherAnnouncements.values)!!
+            selectedAnnouncements.putAll(newAnnouncements)
+            val allRejectedStates = selectedAnnouncements
+                .values
+                .flatMap {it.rejectedStates}
+                .map {Proposition.makeFrom(it)}
+            val allAcceptedStates = selectedAnnouncements
+                .values
+                .flatMap {it.acceptedStates}
+                .map {Proposition.makeFrom(it)}
+            val announcement = ((Or.make(allRejectedStates) ?: contradiction).not and (Or.make(allAcceptedStates) ?: contradiction))
             unsolvedProblemInstances = problemInstances
                 .filter {!it.isSolvedBy(announcement)}.toSet()
-        }
 
-        // return the announcement
-        return And.make(otherAnnouncements.values)!!
+            // return the announcement if all problem instances are solved by it
+            if (unsolvedProblemInstances.isEmpty())
+            {
+                return announcement
+            }
+        }
     }
+
+    private data class Announcement(val rejectedStates:Set<State>,val acceptedStates:Set<State>)
 }
 
-fun findAllAnnouncements(problemInstances:List<AnnouncementResolutionStrategy.ProblemInstance>):Set<Proposition>
+fun findAllAnnouncements(problemInstances:List<ProblemInstance>):Set<Proposition>
 {
     // generate generalized announcements
     val announcements = problemInstances

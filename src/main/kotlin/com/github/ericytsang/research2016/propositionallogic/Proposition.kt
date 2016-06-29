@@ -135,13 +135,10 @@ fun Variable.Companion.makeRandom(basicPropositionStrings:List<String>,numPropos
  */
 val Proposition.variables:Set<Variable> by LazyWithReceiver<Proposition,Set<Variable>>()
 {
-    with (it)
-    {
-        val candidates = LinkedHashSet<Variable>()
-        if (this is Variable) candidates.add(this)
-        candidates.addAll(children.flatMap {it.variables})
-        return@LazyWithReceiver candidates
-    }
+    val candidates = LinkedHashSet<Variable>()
+    if (this is Variable) candidates.add(this)
+    candidates.addAll(children.flatMap {it.variables})
+    return@LazyWithReceiver candidates
 }
 
 /**
@@ -150,59 +147,56 @@ val Proposition.variables:Set<Variable> by LazyWithReceiver<Proposition,Set<Vari
  */
 val Proposition.models:Set<State> by LazyWithReceiver<Proposition,Set<State>>()
 {
-    with(it)
-    {
-        // get all the basic propositions in descending order of influence
-        val basicPropositions = variablesToInfluence.entries
-            .sortedBy {it.value}.map {it.key}
+    // get all the basic propositions in descending order of influence
+    val basicPropositions = variablesToInfluence.entries
+        .sortedBy {it.value}.map {it.key}
 
-        val branch = fun(state:State):Set<State>
+    val branch = fun(state:State):Set<State>
+    {
+        val nextVariable = basicPropositions.minus(state.keys).firstOrNull()
+        if (nextVariable != null)
         {
-            val nextVariable = basicPropositions.minus(state.keys).firstOrNull()
-            if (nextVariable != null)
+            val node1 = State(state+mapOf(nextVariable to true))
+            val node2 = State(state+mapOf(nextVariable to false))
+            return listOf(node1,node2)
+                .filter {truthiness(it) != 0.0}
+                .toSet()
+        }
+        else
+        {
+            return emptySet()
+        }
+    }
+
+    val bounds = fun(state:State):Bounds
+    {
+        return Bounds(1.0,Math.floor(truthiness(state)))
+    }
+
+    // returns true if the situation is a solution; false otherwise
+    val checkSolution = fun(state:State):Boolean
+    {
+        return truthiness(state) == 1.0 && state.keys.containsAll(basicPropositions)
+    }
+
+    val iterator = object:AbstractIterator<State>()
+    {
+        val unbranchedSituations = mutableMapOf(State(emptyMap()) to rootNodeMetaData)
+        override fun computeNext()
+        {
+            val next = branchAndBound(unbranchedSituations,branch,bounds,checkSolution)
+            if (next == null)
             {
-                val node1 = State(state+mapOf(nextVariable to true))
-                val node2 = State(state+mapOf(nextVariable to false))
-                return listOf(node1,node2)
-                    .filter {truthiness(it) != 0.0}
-                    .toSet()
+                done()
             }
             else
             {
-                return emptySet()
+                setNext(next)
             }
         }
-
-        val bounds = fun(state:State):Bounds
-        {
-            return Bounds(1.0,Math.floor(truthiness(state)))
-        }
-
-        // returns true if the situation is a solution; false otherwise
-        val checkSolution = fun(state:State):Boolean
-        {
-            return truthiness(state) == 1.0 && state.keys.containsAll(basicPropositions)
-        }
-
-        val iterator = object:AbstractIterator<State>()
-        {
-            val unbranchedSituations = mutableMapOf(State(emptyMap()) to rootNodeMetaData)
-            override fun computeNext()
-            {
-                val next = branchAndBound(unbranchedSituations,branch,bounds,checkSolution)
-                if (next == null)
-                {
-                    done()
-                }
-                else
-                {
-                    setNext(next)
-                }
-            }
-        }
-
-        return@with IteratorToSetAdapter(iterator)
     }
+
+    return@LazyWithReceiver IteratorToSetAdapter(iterator)
 }
 
 /**
@@ -211,7 +205,7 @@ val Proposition.models:Set<State> by LazyWithReceiver<Proposition,Set<State>>()
  * estimate of how much the truth value of that [Variable] is able to
  * affect the truth value of the whole [Proposition].
  */
-private val Proposition.variablesToInfluence by LazyWithReceiver<Proposition,Map<Variable,Double>> {it.variablesToInfluence()}
+private val Proposition.variablesToInfluence by LazyWithReceiver<Proposition,Map<Variable,Double>> {variablesToInfluence()}
 private fun Proposition.variablesToInfluence(influence:Double = 1.0):Map<Variable,Double> = when(this)
 {
     is Variable -> mapOf(this to influence)
