@@ -72,71 +72,85 @@ class BruteForceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
     }
 }
 
-class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
+class OrderedAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
 {
     override fun resolve(problemInstances:List<ProblemInstance>):Proposition?
     {
-        // get all the distance comparators
-        val distanceComparators = try
+        val instanceToStatePartitionsMap = run()
         {
-            problemInstances
-                .map {it to it.beliefRevisionStrategy as ComparatorBeliefRevisionStrategy}
-                .associate {it.first to it.second.situationSorterFactory(it.first.initialBeliefState) as ByDistanceComparator}
-        }
-        catch (ex:ClassCastException)
-        {
-            throw IllegalArgumentException("${ByDistanceAnnouncementResolutionStrategy::class.java.simpleName} " +
-                "only supports ${ProblemInstance::class.java} objects with belief " +
-                "revision strategies of type ${ComparatorBeliefRevisionStrategy::class.java.simpleName} with " +
-                "comparators of type ${ByDistanceComparator::class.java.simpleName}")
-        }
-
-        val unionOfTargetKs = problemInstances
-            .map {it.targetBeliefState}
-            .let {Or.make(it) ?: contradiction}
-            .models
-
-        val instanceDistanceToModels = problemInstances
-            .associate()
+            val comparators = try
             {
-                problemInstance ->
-                problemInstance to unionOfTargetKs
-                    .groupBy {distanceComparators[problemInstance]!!.getDistanceTo(it)}
-                    .mapValues {it.value.toSet()}
+                problemInstances
+                    .map {it to it.beliefRevisionStrategy as ComparatorBeliefRevisionStrategy}
+                    .associate {it.first to it.second.situationSorterFactory(it.first.initialBeliefState)}
             }
-        fun ProblemInstance.getDistanceToModelsMap():Map<Int,Set<State>> = instanceDistanceToModels[this]!!
-        fun ProblemInstance.getModelsAtDistance(distance:Int):Set<State> = instanceDistanceToModels[this]!![distance] ?: emptySet()
-        fun ProblemInstance.getModelsInRange(range:IntRange):Set<State> = instanceDistanceToModels[this]!!.entries.filter {it.key in range}.flatMap {it.value}.toSet()
+            catch (ex:ClassCastException)
+            {
+                throw IllegalArgumentException("${OrderedAnnouncementResolutionStrategy::class.java.simpleName} " +
+                    "only supports ${ProblemInstance::class.java} objects with belief " +
+                    "revision strategies of type ${ComparatorBeliefRevisionStrategy::class.java.simpleName} with " +
+                    "comparators of type ${ByDistanceComparator::class.java.simpleName}")
+            }
 
-        val allAnnouncements:Map<ProblemInstance,Map<Int,Announcement>> = problemInstances
-            .associate()
+            val unionOfTargetKs = problemInstances
+                .map {it.targetBeliefState}
+                .let {Or.make(it) ?: contradiction}
+                .models
+
+            problemInstances.associate()
             {
                 problemInstance ->
-                val distanceToAnnouncementMap = problemInstance.getDistanceToModelsMap().entries.associate()
+                val comparator = comparators[problemInstance]!!
+                val sortedStates = unionOfTargetKs
+                    .sortedWith(comparator)
+                val partitionedStates = mutableListOf<Set<State>>()
+
+                if (sortedStates.isNotEmpty())
                 {
-                    val distance = it.key
-                    val (modelsAtDistanceInTargetK,modelsAtDistanceNotInTargetK) = problemInstance
-                        .getModelsAtDistance(distance)
-                        .partition {(Proposition.makeFrom(it) and problemInstance.targetBeliefState).isSatisfiable}
-                    val rejectedStates = problemInstance
-                        .getModelsInRange(0..distance-1)
-                        .plus(modelsAtDistanceNotInTargetK)
-                        .toSet()
-                    val acceptedStates = modelsAtDistanceInTargetK
-                        .toSet()
-                    val announcement = Announcement(rejectedStates,acceptedStates)
-                    distance to announcement
+                    // todo refactor loop
+                    var markerState = sortedStates.first()
+                    var equalStates = mutableSetOf<State>()
+                    for (state in sortedStates)
+                    {
+                        if (comparator.compare(state,markerState) != 0)
+                        {
+                            partitionedStates.add(equalStates)
+                            equalStates = mutableSetOf()
+                            markerState = state
+                        }
+                        equalStates.add(state)
+                    }
+                    partitionedStates.add(equalStates)
                 }
-                problemInstance to distanceToAnnouncementMap
+
+                problemInstance to partitionedStates
             }
+        }
+        fun ProblemInstance.getStatePartitions():List<Set<State>> = instanceToStatePartitionsMap[this]!!
+        fun ProblemInstance.getStatesInPartition(partition:Int):Set<State> = instanceToStatePartitionsMap[this]!![partition]
+        fun ProblemInstance.getStatesInPartitions(partitions:IntRange):Set<State> = instanceToStatePartitionsMap[this]!!.filterIndexed {i,it -> i in partitions}.flatMap {it}.toSet()
 
         val instanceToSearchDistanceMap = LinkedHashMap<ProblemInstance,Int>()
-        fun ProblemInstance.getSearchDistance():Int? = instanceToSearchDistanceMap[this]
+        fun ProblemInstance.getSearchDistance():Int = instanceToSearchDistanceMap[this] ?: 0
         fun ProblemInstance.setSearchDistance(distance:Int)
         {
             instanceToSearchDistanceMap[this] = distance
         }
-        val selectedAnnouncements:MutableMap<ProblemInstance,Announcement> = LinkedHashMap()
+
+        val instanceToAcceptedStatesMap = LinkedHashMap<ProblemInstance,Set<State>>()
+        fun ProblemInstance.getAcceptedStates():Set<State> = instanceToAcceptedStatesMap[this]!!
+        fun ProblemInstance.setAcceptedStates(states:Set<State>)
+        {
+            instanceToAcceptedStatesMap[this] = states
+        }
+
+        val instanceToRejectedStatesMap = LinkedHashMap<ProblemInstance,Set<State>>()
+        fun ProblemInstance.getRejectedStates():Set<State> = instanceToRejectedStatesMap[this]!!
+        fun ProblemInstance.setRejectedStates(states:Set<State>)
+        {
+            instanceToRejectedStatesMap[this] = states
+        }
+
         var unsolvedProblemInstances = problemInstances.toSet()
 
         // while there are unsolved problem instances
@@ -146,42 +160,53 @@ class ByDistanceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             // smallest distance that, in conjunction with the existing
             // announcements, would solve the problem instance...if none exists,
             // it is unsolvable.
-            val newAnnouncements = unsolvedProblemInstances.map()
+            unsolvedProblemInstances.forEach()
             {
                 problemInstance ->
 
-                // expand or initialize search distance
-                var searchDistance = problemInstance.getSearchDistance()
-                if (searchDistance != null)
-                {
-                    searchDistance = allAnnouncements[problemInstance]!!.keys.filter {it > searchDistance!!}.sorted().firstOrNull() ?: return null
-                }
-                else
-                {
-                    searchDistance = allAnnouncements[problemInstance]!!.keys.min()!!
-                }
-                problemInstance.setSearchDistance(searchDistance)
+                // expand search distance
+                val searchDistance = problemInstance.getSearchDistance()
+                problemInstance.setSearchDistance(searchDistance+1)
 
-                // get the announcement for the instance at the distance
-                val distanceToAnnouncementMap = allAnnouncements[problemInstance]!!
-                return@map problemInstance to distanceToAnnouncementMap[searchDistance]!!
+                if (searchDistance !in problemInstance.getStatePartitions().indices)
+                {
+                    return null
+                }
+
+                // find out which states to accept and which to reject
+                val acceptedStates = problemInstance
+                    .getStatesInPartition(searchDistance)
+                    .map {Proposition.makeFrom(it)}
+                    .let {Or.make(it) ?: contradiction}
+                    .let {it and problemInstance.targetBeliefState}
+                    .models
+                val rejectedStates = problemInstance
+                    .getStatesInPartitions(0..searchDistance)
+                    .map {Proposition.makeFrom(it)}
+                    .let {Or.make(it) ?: contradiction}
+                    .let {it and (Or.make(acceptedStates.map {Proposition.makeFrom(it)})?.not ?: contradiction)}
+                    .models
+                problemInstance.setAcceptedStates(acceptedStates)
+                problemInstance.setRejectedStates(rejectedStates)
+                Unit
             }
 
             // check and update which problem instances are unsolved
-            selectedAnnouncements.putAll(newAnnouncements)
-            val allRejectedStates = selectedAnnouncements
-                .values
-                .flatMap {it.rejectedStates}
+            //selectedAnnouncements.putAll(newAnnouncements)
+            val allRejectedStates = problemInstances
+                .flatMap {it.getRejectedStates()}
+                .toSet()
+            val allAcceptedStates = problemInstances
+                .flatMap {it.getAcceptedStates()}
+                .filter {it !in allRejectedStates}
                 .map {Proposition.makeFrom(it)}
-            val allAcceptedStates = selectedAnnouncements
-                .values
-                .flatMap {it.acceptedStates}
-                .map {Proposition.makeFrom(it)}
-            val announcement = ((Or.make(allRejectedStates) ?: contradiction).not and (Or.make(allAcceptedStates) ?: contradiction))
-            unsolvedProblemInstances = problemInstances
-                .filter {!it.isSolvedBy(announcement)}.toSet()
+                .toSet()
+            val announcement = Or.make(allAcceptedStates) ?: contradiction
 
             // return the announcement if all problem instances are solved by it
+            unsolvedProblemInstances = problemInstances
+                .filter {!it.isSolvedBy(announcement)}
+                .toSet()
             if (unsolvedProblemInstances.isEmpty())
             {
                 return announcement

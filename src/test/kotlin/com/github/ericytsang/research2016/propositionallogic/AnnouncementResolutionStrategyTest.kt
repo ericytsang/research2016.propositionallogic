@@ -101,7 +101,7 @@ class AnnouncementResolutionStrategyTest
             a.not and b.not and c and d.not,
             ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
         val problems = listOf(bot1,bot2,bot3,bot4)
-        assert(ByDistanceAnnouncementResolutionStrategy().resolve(problems) == null)
+        assert(OrderedAnnouncementResolutionStrategy().resolve(problems) == null)
     }
 
     /**
@@ -134,7 +134,7 @@ class AnnouncementResolutionStrategyTest
             a and b.not and c and d,
             ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
         val problems = listOf(bot1,bot2,bot3,bot4)
-        val announcement = ByDistanceAnnouncementResolutionStrategy().resolve(problems)!!
+        val announcement = OrderedAnnouncementResolutionStrategy().resolve(problems)!!
         println(announcement)
         problems.forEach()
         {
@@ -162,7 +162,7 @@ class AnnouncementResolutionStrategyTest
             a and b and c,
             ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
         val problems = listOf(bot1,bot2)
-        val announcement = ByDistanceAnnouncementResolutionStrategy().resolve(problems)!!
+        val announcement = OrderedAnnouncementResolutionStrategy().resolve(problems)!!
         println(announcement)
         problems.forEach()
         {
