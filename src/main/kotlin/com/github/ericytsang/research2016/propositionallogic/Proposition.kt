@@ -98,7 +98,7 @@ sealed class Proposition:Serializable
  * creates a [Proposition] in conjunctive normal form from the provided
  * [state], e.g. the situation {a, -b, c} would yield "a and -b and c".
  */
-fun Proposition.Companion.makeFrom(state:State):Proposition
+fun Proposition.Companion.fromState(state:State):Proposition
 {
     val propositions = state.keys.map()
     {
@@ -117,7 +117,7 @@ fun Proposition.Companion.makeFrom(state:State):Proposition
 
 fun Proposition.Companion.makeDnf(states:Iterable<State>):Proposition
 {
-    return Or.make(states.map {Proposition.makeFrom(it)}) ?: contradiction
+    return Or.make(states.map {Proposition.fromState(it)}) ?: contradiction
 }
 
 /**
@@ -156,8 +156,8 @@ val Proposition.models:Set<State> by LazyWithReceiver<Proposition,Set<State>>()
         val nextVariable = basicPropositions.minus(state.keys).firstOrNull()
         if (nextVariable != null)
         {
-            val node1 = State(state+mapOf(nextVariable to true))
-            val node2 = State(state+mapOf(nextVariable to false))
+            val node1 = State.fromVariableMap(state+mapOf(nextVariable to true))
+            val node2 = State.fromVariableMap(state+mapOf(nextVariable to false))
             return listOf(node1,node2)
                 .filter {truthiness(it) != 0.0}
                 .toSet()
@@ -181,7 +181,7 @@ val Proposition.models:Set<State> by LazyWithReceiver<Proposition,Set<State>>()
 
     val iterator = object:AbstractIterator<State>()
     {
-        val unbranchedSituations = mutableMapOf(State(emptyMap()) to rootNodeMetaData)
+        val unbranchedSituations = mutableMapOf(State.fromVariableMap(emptyMap()) to rootNodeMetaData)
         override fun computeNext()
         {
             val next = branchAndBound(unbranchedSituations,branch,bounds,checkSolution)
@@ -241,7 +241,7 @@ infix fun Proposition.isSatisfiedBy(that:Proposition):Boolean
     // this is a subset of that
     return (that isSubsetOf this) &&
         // and for each model of this there is a model of that which satisfies it
-        this.models.all {(Proposition.makeFrom(it) and that).isSatisfiable}
+        this.models.all {(Proposition.fromState(it) and that).isSatisfiable}
 }
 
 /**
@@ -379,7 +379,7 @@ fun Proposition.toDnf():Proposition
             situations.remove(state2)
 
             val commonMappings = state1!!.entries.filter {state1!![it.key] == state2!![it.key]}
-            val newSituation = State(commonMappings.associate {it.key to it.value})
+            val newSituation = State.fromVariableMap(commonMappings.associate {it.key to it.value})
             basicPropositionsToSituations.getOrPut(newSituation.keys,{mutableSetOf()}).add(newSituation)
             unprocessedKeys.add(newSituation.keys)
         }

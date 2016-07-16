@@ -105,14 +105,14 @@ class PropositionsTest
     {
         val proposition = (((p oif(q and r))and q.not)oif p.not)
         val allSituations = setOf(
-            State.make(mapOf("p" to false,"q" to false,"r" to false)),
-            State.make(mapOf("p" to false,"q" to false,"r" to true )),
-            State.make(mapOf("p" to false,"q" to true ,"r" to false)),
-            State.make(mapOf("p" to false,"q" to true ,"r" to true )),
-            State.make(mapOf("p" to true ,"q" to false,"r" to false)),
-            State.make(mapOf("p" to true ,"q" to false,"r" to true )),
-            State.make(mapOf("p" to true ,"q" to true ,"r" to false)),
-            State.make(mapOf("p" to true ,"q" to true ,"r" to true ))
+            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to false)),
+            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to true )),
+            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to false)),
+            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to true )),
+            State.fromStringMap(mapOf("p" to true ,"q" to false,"r" to false)),
+            State.fromStringMap(mapOf("p" to true ,"q" to false,"r" to true )),
+            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to false)),
+            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
         allSituations.forEach()
         {
@@ -125,11 +125,11 @@ class PropositionsTest
     {
         val proposition = (p oif(q and r))
         val models = setOf(
-            State.make(mapOf("p" to false,"q" to false,"r" to false)),
-            State.make(mapOf("p" to false,"q" to false,"r" to true )),
-            State.make(mapOf("p" to false,"q" to true ,"r" to false)),
-            State.make(mapOf("p" to false,"q" to true ,"r" to true )),
-            State.make(mapOf("p" to true ,"q" to true ,"r" to true ))
+            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to false)),
+            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to true )),
+            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to false)),
+            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to true )),
+            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -141,10 +141,10 @@ class PropositionsTest
     {
         val proposition = Oif(p,(q or tautology))
         val models = setOf(
-            State.make(mapOf("p" to false,"q" to false)),
-            State.make(mapOf("p" to false,"q" to true )),
-            State.make(mapOf("p" to true ,"q" to false)),
-            State.make(mapOf("p" to true ,"q" to true ))
+            State.fromStringMap(mapOf("p" to false,"q" to false)),
+            State.fromStringMap(mapOf("p" to false,"q" to true )),
+            State.fromStringMap(mapOf("p" to true ,"q" to false)),
+            State.fromStringMap(mapOf("p" to true ,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -156,8 +156,8 @@ class PropositionsTest
     {
         val proposition = Oif(p,(q and contradiction))
         val models = setOf(
-            State.make(mapOf("p" to false,"q" to false)),
-            State.make(mapOf("p" to false,"q" to true ))
+            State.fromStringMap(mapOf("p" to false,"q" to false)),
+            State.fromStringMap(mapOf("p" to false,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -205,7 +205,7 @@ class PropositionsTest
 
     fun evaluateEach(proposition:Proposition)
     {
-        State.generateFrom(proposition.variables).partition {proposition.evaluate(it)}
+        State.permutationsOf(proposition.variables).partition {proposition.evaluate(it)}
     }
 
     fun allModels(proposition:Proposition)
@@ -373,7 +373,7 @@ class PropositionsTest
     fun makePropositionsFromSituationsTest()
     {
         val models = Oif(p,(q and r)).models
-        assert(models.map {Proposition.makeFrom(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
+        assert(models.map {Proposition.fromState(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
     }
 
     @Test

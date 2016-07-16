@@ -55,7 +55,7 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
             .filter {situationSorter.compare(nearestModel,it) == 0}
 
         // convert into a conjunctive normal form proposition and return
-        return setOf(Or.make(nearestModels.map {Proposition.makeFrom(it)})!!)
+        return setOf(Or.make(nearestModels.map {Proposition.fromState(it)})!!)
     }
 }
 
