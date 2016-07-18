@@ -16,7 +16,7 @@ class State private constructor(val propositionValues:Map<Variable,Boolean>):Map
         }
         fun fromStringMap(propositionValues:Map<String,Boolean>):State
         {
-            return State.fromVariableMap(propositionValues.mapKeys {Variable.make(it.key)})
+            return State.fromVariableMap(propositionValues.mapKeys {Variable.fromString(it.key)})
         }
 
         /**

@@ -62,7 +62,7 @@ class SituationTest
     @Test
     fun nextReturnsAllUniqueSituationsTest()
     {
-        val basicPropositions = setOf(Variable.make("p"),Variable.make("q"),Variable.make("r"))
+        val basicPropositions = setOf(Variable.fromString("p"),Variable.fromString("q"),Variable.fromString("r"))
         val allSituations = State.permutationsOf(basicPropositions)
         assert(allSituations.size == 8,{"allSituations size is not 8. it should be 8 if there are 3 basic propositions... allSituations: $allSituations"})
     }

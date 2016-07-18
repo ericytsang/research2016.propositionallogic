@@ -48,7 +48,7 @@ private val propositionFactory = FormulaTreeFactory(
             {
                 Pattern.matches("(1){1}",preprocessedWord) -> tautology
                 Pattern.matches("(0){1}",preprocessedWord) -> contradiction
-                Pattern.matches("[a-zA-Z]+",preprocessedWord) -> Variable.make(preprocessedWord)
+                Pattern.matches("[a-zA-Z]+",preprocessedWord) -> Variable.fromString(preprocessedWord)
                 else -> throw IllegalArgumentException("unrecognized token: $word")
             }
         }
@@ -74,7 +74,7 @@ fun Proposition.toParsableString():String
 {
     return when (this)
     {
-        is Proposition.AtomicProposition -> friendly
+        is Proposition.Operand -> friendly
         is Iff -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " iff ")
         is Or -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " or ")
         is And -> children.map {if (it.children.size > 1) "(${it.toParsableString()})" else it.toParsableString()}.joinToString(separator = " and ")
