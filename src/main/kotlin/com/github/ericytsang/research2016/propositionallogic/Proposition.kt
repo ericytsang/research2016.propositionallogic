@@ -5,12 +5,10 @@ import com.github.ericytsang.lib.collections.getRandom
 import com.github.ericytsang.lib.collections.IteratorToSetAdapter
 import com.github.ericytsang.lib.collections.branchAndBound
 import com.github.ericytsang.lib.collections.rootNodeMetaData
-import com.github.ericytsang.lib.delegates.LazyWithReceiver
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operand
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.io.Serializable
 import java.util.LinkedHashMap
-import java.util.LinkedHashSet
 
 /**
  * this class is the component in the composite oo design pattern.
