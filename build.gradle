@@ -32,10 +32,6 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-configurations.compile {
-    resolutionStrategy.cacheChangingModulesFor(0,'seconds')
-}
-
 dependencies {
     compile 'com.github.ericytsang:lib.collections:master-SNAPSHOT'
     compile 'com.github.ericytsang:lib.formulainterpreter:master-SNAPSHOT'

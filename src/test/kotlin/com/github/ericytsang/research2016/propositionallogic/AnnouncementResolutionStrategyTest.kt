@@ -10,8 +10,8 @@ class AnnouncementResolutionStrategyTest
     @Test
     fun guardBots1()
     {
-        val patrol = Variable.make("patrol")
-        val breach = Variable.make("breach")
+        val patrol = Variable.fromString("patrol")
+        val breach = Variable.fromString("breach")
         val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
             setOf(patrol),
             patrol,
@@ -33,9 +33,9 @@ class AnnouncementResolutionStrategyTest
     @Test
     fun guardBots2()
     {
-        val patrol = Variable.make("patrol")
-        val checkGate = Variable.make("checkGate")
-        val breach = Variable.make("breach")
+        val patrol = Variable.fromString("patrol")
+        val checkGate = Variable.fromString("checkGate")
+        val breach = Variable.fromString("breach")
         val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
             setOf(patrol,checkGate xor patrol),
             patrol,
@@ -57,8 +57,8 @@ class AnnouncementResolutionStrategyTest
     @Test
     fun guardBots3()
     {
-        val patrol = Variable.make("patrol")
-        val breach = Variable.make("breach")
+        val patrol = Variable.fromString("patrol")
+        val breach = Variable.fromString("breach")
         val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
             setOf(patrol and breach),
             patrol,
@@ -80,10 +80,10 @@ class AnnouncementResolutionStrategyTest
     @Test
     fun hammingDistanceImpossible()
     {
-        val a = Variable.make("a")
-        val b = Variable.make("b")
-        val c = Variable.make("c")
-        val d = Variable.make("d")
+        val a = Variable.fromString("a")
+        val b = Variable.fromString("b")
+        val c = Variable.fromString("c")
+        val d = Variable.fromString("d")
         val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
             setOf(a.not and b and c.not and d.not),
             a and b.not and c and d,
@@ -113,10 +113,10 @@ class AnnouncementResolutionStrategyTest
     @Test
     fun hammingDistance1()
     {
-        val a = Variable.make("a")
-        val b = Variable.make("b")
-        val c = Variable.make("c")
-        val d = Variable.make("d")
+        val a = Variable.fromString("a")
+        val b = Variable.fromString("b")
+        val c = Variable.fromString("c")
+        val d = Variable.fromString("d")
         val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
             setOf(a.not and b and c.not and d.not),
             a.not and b.not and c and d.not,
@@ -150,9 +150,9 @@ class AnnouncementResolutionStrategyTest
     @Test
     fun hammingDistance2()
     {
-        val a = Variable.make("a")
-        val b = Variable.make("b")
-        val c = Variable.make("c")
+        val a = Variable.fromString("a")
+        val b = Variable.fromString("b")
+        val c = Variable.fromString("c")
         val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
             setOf(a.not and b.not and c.not),
             b and c.not,

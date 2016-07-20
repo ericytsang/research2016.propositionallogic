@@ -5,9 +5,9 @@ package com.github.ericytsang.research2016.propositionallogic
  */
 open class RevisionTest
 {
-    protected val p = Variable.make("p")
-    protected val q = Variable.make("q")
-    protected val r = Variable.make("r")
+    protected val p = Variable.fromString("p")
+    protected val q = Variable.fromString("q")
+    protected val r = Variable.fromString("r")
 
     protected fun reviseTest(beliefState:Set<Proposition>,sentence:Proposition,beliefRevisionStrategy:BeliefRevisionStrategy,expected:Set<State>)
     {

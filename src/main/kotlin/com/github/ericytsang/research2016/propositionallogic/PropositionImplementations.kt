@@ -1,17 +1,17 @@
 package com.github.ericytsang.research2016.propositionallogic
 
-import com.github.ericytsang.research2016.propositionallogic.Proposition.AtomicProposition
+import com.github.ericytsang.research2016.propositionallogic.Proposition.Operand
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.util.WeakHashMap
 
 /**
- * an [AtomicProposition] which is mapped to a truth value by a [State].
+ * an [Operand] which is mapped to a truth value by [State] objects.
  */
-class Variable private constructor(_friendly:String):AtomicProposition(_friendly)
+class Variable private constructor(_friendly:String):Operand(_friendly)
 {
     companion object
     {
-        fun make(friendly:String) = Variable(friendly)
+        fun fromString(friendly:String) = Variable(friendly)
     }
     init
     {
@@ -28,17 +28,17 @@ class Variable private constructor(_friendly:String):AtomicProposition(_friendly
 }
 
 /**
- * an [AtomicProposition] that evaluates to true in any [State].
+ * an [Operand] that evaluates to true in any [State].
  */
-val tautology = object:AtomicProposition("1")
+val tautology = object:Operand("1")
 {
     override fun truthValue(state:State):Boolean = true
 }
 
 /**
- * an [AtomicProposition] that evaluates to false in every [State].
+ * an [Operand] that evaluates to false in every [State].
  */
-val contradiction = object:AtomicProposition("0")
+val contradiction = object:Operand("0")
 {
     override fun truthValue(state:State):Boolean = false
 }

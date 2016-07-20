@@ -5,13 +5,15 @@ import com.github.ericytsang.lib.collections.getRandom
 import com.github.ericytsang.lib.collections.IteratorToSetAdapter
 import com.github.ericytsang.lib.collections.branchAndBound
 import com.github.ericytsang.lib.collections.rootNodeMetaData
-import com.github.ericytsang.research2016.propositionallogic.Proposition.AtomicProposition
+import com.github.ericytsang.lib.delegates.LazyWithReceiver
+import com.github.ericytsang.research2016.propositionallogic.Proposition.Operand
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.io.Serializable
 import java.util.LinkedHashMap
+import java.util.LinkedHashSet
 
 /**
- * this class is the component in the Composite pattern.
+ * this class is the component in the composite oo design pattern.
  */
 sealed class Proposition:Serializable
 {
@@ -21,7 +23,7 @@ sealed class Proposition:Serializable
          * creates a [Proposition] in conjunctive normal form from the provided
          * [state], e.g. the situation {a, -b, c} would yield "a and -b and c".
          */
-        fun makeConjunction(state:State):Proposition
+        fun fromState(state:State):Proposition
         {
             val propositions = state.keys.map()
             {
@@ -40,7 +42,7 @@ sealed class Proposition:Serializable
 
         fun makeDnf(states:Iterable<State>):Proposition
         {
-            return Or.make(states.map {Proposition.makeConjunction(it)}) ?: contradiction
+            return Or.make(states.map {Proposition.fromState(it)}) ?: contradiction
         }
 
         /**
@@ -50,19 +52,18 @@ sealed class Proposition:Serializable
          */
         fun makeRandom(basicPropositionStrings:List<String>,numPropositions:Int):List<Variable>
         {
-            return (1..numPropositions).map {Variable.make(basicPropositionStrings.getRandom())}
+            return (1..numPropositions).map {Variable.fromString(basicPropositionStrings.getRandom())}
         }
     }
 
     /**
-     * returns the expression as a human-readable string, e.g., (0 or 1) then 1
+     * returns the expression as a human-readable string.
      */
     abstract override fun toString():String
 
     /**
-     * returns a hashcode that should equal to the hashcode of other
-     * [Proposition]s with an identical structure, [Operator]s and
-     * [AtomicProposition]s.
+     * returns a hashcode computed from the structure of the formula tree and
+     * types of the nodes in the formula tree.
      */
     override fun hashCode():Int = toString().hashCode()
 
@@ -84,11 +85,10 @@ sealed class Proposition:Serializable
      *
      * @param friendly the string returned when [toString] is called.
      */
-    abstract class AtomicProposition(val friendly:String):Proposition()
+    abstract class Operand(val friendly:String):Proposition()
     {
         /**
-         * returns the [Boolean] truth value of this [AtomicProposition] for the
-         * [state].
+         * returns the truth value of this [Operand] as per [state].
          */
         abstract fun truthValue(state:State):Boolean
 
@@ -129,10 +129,25 @@ sealed class Proposition:Serializable
     }
 
     /**
+     * returns all the basic propositions in this [Proposition].
+     */
+    val Proposition.variables:Set<Variable> by lazy()
+    {
+        return@lazy if (this is Variable)
+        {
+            setOf(this)
+        }
+        else
+        {
+            children.flatMap {it.variables}.toSet()
+        }
+    }
+
+    /**
      * returns all the models of this [Proposition], i.e., all the [State] that
      * satisfy this [Proposition].
      */
-    val models:Set<State> by lazy()
+    val Proposition.models:Set<State> by lazy()
     {
         val branch = fun(state:State):Set<State>
         {
@@ -183,21 +198,6 @@ sealed class Proposition:Serializable
     }
 }
 
-/**
- * returns all the basic propositions in this [Proposition].
- */
-val Proposition.variables:Set<Variable> get()
-{
-    return if (this is Variable)
-    {
-        setOf(this)
-    }
-    else
-    {
-        children.flatMap {it.variables}.toSet()
-    }
-}
-
 infix fun Proposition.isSubsetOf(that:Proposition):Boolean
 {
     return (that.not and this).isContradiction
@@ -212,7 +212,7 @@ infix fun Proposition.isSatisfiedBy(that:Proposition):Boolean
     // this is a subset of that
     return (that isSubsetOf this) &&
         // and for each model of this there is a model of that which satisfies it
-        this.models.all {(Proposition.makeConjunction(it) and that).isSatisfiable}
+        this.models.all {(Proposition.fromState(it) and that).isSatisfiable}
 }
 
 /**
@@ -247,7 +247,7 @@ val Proposition.isContradiction:Boolean get()
  */
 fun Proposition.evaluate(state:State):Boolean = when (this)
 {
-    is AtomicProposition -> truthValue(state)
+    is Operand -> truthValue(state)
     is Operator -> operate(children.map {it.evaluate(state)})
 }
 
@@ -272,7 +272,7 @@ fun Proposition.truthiness(state:State):Double = when (this)
             0.5
         }
     }
-    is AtomicProposition ->
+    is Operand ->
     {
         when
         {
