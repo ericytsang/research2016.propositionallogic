@@ -11,8 +11,7 @@ class Variable private constructor(_friendly:String):AtomicProposition(_friendly
 {
     companion object
     {
-        private val allInstances = WeakHashMap<String,Variable>()
-        fun make(friendly:String) = allInstances.getOrPut(friendly,{Variable(friendly)})
+        fun make(friendly:String) = Variable(friendly)
     }
     init
     {

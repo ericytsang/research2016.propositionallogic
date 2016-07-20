@@ -44,7 +44,7 @@ class BruteForceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             .let {State.permutationsOf(it.toSet())}
             // turn each state into a conjunction of a combination variables and
             // negation of variables
-            .map {Proposition.fromState(it)}
+            .map {Proposition.makeConjunction(it)}
             // go through every possible subset of conjunctions that can be made and
             // turn each into a disjunction of conjunctions
             .map {setOf(null,it)}.permutedIterator().toIterable()
@@ -176,15 +176,15 @@ class OrderedAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
                 // find out which states to accept and which to reject
                 val acceptedStates = problemInstance
                     .getStatesInPartition(searchDistance)
-                    .map {Proposition.fromState(it)}
+                    .map {Proposition.makeConjunction(it)}
                     .let {Or.make(it) ?: contradiction}
                     .let {it and problemInstance.targetBeliefState}
                     .models
                 val rejectedStates = problemInstance
                     .getStatesInPartitions(0..searchDistance)
-                    .map {Proposition.fromState(it)}
+                    .map {Proposition.makeConjunction(it)}
                     .let {Or.make(it) ?: contradiction}
-                    .let {it and (Or.make(acceptedStates.map {Proposition.fromState(it)})?.not ?: contradiction)}
+                    .let {it and (Or.make(acceptedStates.map {Proposition.makeConjunction(it)})?.not ?: contradiction)}
                     .models
                 problemInstance.setAcceptedStates(acceptedStates)
                 problemInstance.setRejectedStates(rejectedStates)
@@ -199,7 +199,7 @@ class OrderedAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             val allAcceptedStates = problemInstances
                 .flatMap {it.getAcceptedStates()}
                 .filter {it !in allRejectedStates}
-                .map {Proposition.fromState(it)}
+                .map {Proposition.makeConjunction(it)}
                 .toSet()
             val announcement = Or.make(allAcceptedStates) ?: contradiction
 
@@ -227,7 +227,7 @@ fun findAllAnnouncements(problemInstances:List<ProblemInstance>):Set<Proposition
         .let {State.permutationsOf(it.toSet())}
         // turn each state into a conjunction of a combination variables and
         // negation of variables
-        .map {Proposition.fromState(it)}
+        .map {Proposition.makeConjunction(it)}
         // go through every possible subset of conjunctions that can be made and
         // turn each into a disjunction of conjunctions
         .map {setOf(null,it)}.permutedIterator().toIterable()

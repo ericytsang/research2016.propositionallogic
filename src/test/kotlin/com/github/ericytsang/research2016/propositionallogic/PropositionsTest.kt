@@ -373,7 +373,7 @@ class PropositionsTest
     fun makePropositionsFromSituationsTest()
     {
         val models = Oif(p,(q and r)).models
-        assert(models.map {Proposition.fromState(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
+        assert(models.map {Proposition.makeConjunction(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
     }
 
     @Test

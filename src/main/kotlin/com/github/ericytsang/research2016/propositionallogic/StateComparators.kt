@@ -122,13 +122,13 @@ class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Pr
                 .apply {Collections.shuffle(this)}
             val buckets = Array<MutableSet<State>>(numBuckets,{mutableSetOf()})
             allStates.forEach {buckets.getRandom().add(it)}
-            return OrderedSetsComparator(beliefState,buckets.filter {it.isNotEmpty()}.map {Or.make(it.map {Proposition.fromState(it)})!!})
+            return OrderedSetsComparator(beliefState,buckets.filter {it.isNotEmpty()}.map {Or.make(it.map {Proposition.makeConjunction(it)})!!})
         }
     }
 
     override fun computeDistanceTo(state:State):Int
     {
         val completeOrderedSets = listOf(And.make(beliefState) ?: contradiction)+orderedSets+tautology
-        return completeOrderedSets.indexOfFirst {(it and Proposition.fromState(state)).isSatisfiable}
+        return completeOrderedSets.indexOfFirst {(it and Proposition.makeConjunction(state)).isSatisfiable}
     }
 }
