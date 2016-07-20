@@ -131,7 +131,7 @@ sealed class Proposition:Serializable
     /**
      * returns all the basic propositions in this [Proposition].
      */
-    val Proposition.variables:Set<Variable> by lazy()
+    val variables:Set<Variable> by lazy()
     {
         return@lazy if (this is Variable)
         {
@@ -147,7 +147,7 @@ sealed class Proposition:Serializable
      * returns all the models of this [Proposition], i.e., all the [State] that
      * satisfy this [Proposition].
      */
-    val Proposition.models:Set<State> by lazy()
+    val models:Set<State> by lazy()
     {
         val branch = fun(state:State):Set<State>
         {
