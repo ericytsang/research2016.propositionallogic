@@ -13,7 +13,7 @@ class SatisfiabilityRevisionTest():RevisionTest()
     @Test
     fun reviseSubSetTest()
     {
-        val beliefState = setOf(tautology)
+        val beliefState = setOf(Proposition.TAUTOLOGY)
         val sentence = p and q and r
         val expected = (p and q and r).models
         reviseTest(beliefState,sentence,SatisfiabilityBeliefRevisionStrategy(),expected)
@@ -38,7 +38,7 @@ class SatisfiabilityRevisionTest():RevisionTest()
     fun reviseContradictionTest()
     {
         val beliefState = setOf(p and q)
-        val sentence = And.make(beliefState)!!.not
+        val sentence = And.make(beliefState.toList())!!.not
         val expected = sentence.models
         reviseTest(beliefState,sentence,SatisfiabilityBeliefRevisionStrategy(),expected)
     }

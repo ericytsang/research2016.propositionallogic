@@ -30,7 +30,7 @@ public class State implements Map<Variable,Boolean>,Serializable
         Map<Variable,Boolean> variableMap = new HashMap<Variable,Boolean>(truthValues.size());
         for(Entry<String,Boolean> entry : truthValues.entrySet())
         {
-            Variable key = Variable.Companion.fromString(entry.getKey());
+            Variable key = Variable.fromString(entry.getKey());
             variableMap.put(key,entry.getValue());
         }
         return new State(variableMap);
@@ -69,7 +69,7 @@ public class State implements Map<Variable,Boolean>,Serializable
 
     public String toString()
     {
-        return new CollectionWrapper<Set<Entry<Variable,Boolean>>,Entry<Variable,Boolean>>(entrySet())
+        return CollectionWrapper.wrap(entrySet())
             .map(new Function<Entry<Variable,Boolean>,Entry<Variable,Boolean>>()
             {
                 @Override
