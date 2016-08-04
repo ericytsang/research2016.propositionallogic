@@ -5,7 +5,14 @@ import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class State implements Map<Variable,Boolean>,Serializable
 {
@@ -39,7 +46,7 @@ public class State implements Map<Variable,Boolean>,Serializable
     public static Set<State> permutationsOf(Set<Variable> variables)
     {
         int numStatesToGenerate = (int) Math.round(Math.pow(2.0,variables.size()));
-        LinkedHashSet<State> allSituations = new LinkedHashSet<State>();
+        Set<State> allSituations = new HashSet<State>();
         ArrayList<String> propositionKeys = new ArrayList<String>(variables.size());
         for (Variable variable : variables)
         {

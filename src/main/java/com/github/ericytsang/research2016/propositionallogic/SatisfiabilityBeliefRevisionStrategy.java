@@ -3,7 +3,7 @@ package com.github.ericytsang.research2016.propositionallogic;
 import com.github.ericytsang.lib.collections.CollectionWrapper;
 import com.github.ericytsang.lib.collections.Function;
 
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -20,7 +20,7 @@ public class SatisfiabilityBeliefRevisionStrategy implements BeliefRevisionStrat
                 @Override
                 public CollectionWrapper<Set<Proposition>,Proposition> invoke(CollectionWrapper<Set<Proposition>,Proposition> params)
                 {
-                    Set<Proposition> set = new LinkedHashSet<Proposition>(params);
+                    Set<Proposition> set = new HashSet<Proposition>(params);
                     set.add(sentence);
                     return CollectionWrapper.wrap(set);
                 }
