@@ -33,8 +33,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ericytsang:lib.collections:master-SNAPSHOT'
-    compile 'com.github.ericytsang:lib.formulainterpreter:master-SNAPSHOT'
+    compile 'com.github.ericytsang:lib.collections:lejos-SNAPSHOT'
+    //compile 'com.github.ericytsang:lib.formulainterpreter:master-SNAPSHOT'
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.11'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"

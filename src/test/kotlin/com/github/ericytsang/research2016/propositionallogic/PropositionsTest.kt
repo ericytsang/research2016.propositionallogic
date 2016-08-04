@@ -2,67 +2,52 @@ package com.github.ericytsang.research2016.propositionallogic
 
 import org.junit.Test
 
-/**
- * Created by surpl on 5/4/2016.
- */
 class PropositionsTest
 {
-    val p = Variable.fromString("p")
-    val q = Variable.fromString("q")
-    val r = Variable.fromString("r")
-    val x = Variable.fromString("x")
-    val y = Variable.fromString("y")
-    val z = Variable.fromString("z")
-    val s = Variable.fromString("s")
-    val t = Variable.fromString("t")
-    val u = Variable.fromString("u")
-    val v = Variable.fromString("v")
-    val w = Variable.fromString("w")
-    val a = Variable.fromString("a")
-    val b = Variable.fromString("b")
-    val c = Variable.fromString("c")
-    val d = Variable.fromString("d")
-    val e = Variable.fromString("e")
-    val f = Variable.fromString("f")
-    val g = Variable.fromString("g")
-    val h = Variable.fromString("h")
-    val i = Variable.fromString("i")
-    val j = Variable.fromString("j")
-    val k = Variable.fromString("k")
-    val l = Variable.fromString("l")
-    val m = Variable.fromString("m")
-    val n = Variable.fromString("n")
-    val o = Variable.fromString("o")
+    val p:Variable = Variable.fromString("p")
+    val q:Variable = Variable.fromString("q")
+    val r:Variable = Variable.fromString("r")
+    val x:Variable = Variable.fromString("x")
+    val y:Variable = Variable.fromString("y")
+    val z:Variable = Variable.fromString("z")
+    val s:Variable = Variable.fromString("s")
+    val t:Variable = Variable.fromString("t")
+    val u:Variable = Variable.fromString("u")
+    val v:Variable = Variable.fromString("v")
+    val w:Variable = Variable.fromString("w")
+    val a:Variable = Variable.fromString("a")
+    val b:Variable = Variable.fromString("b")
+    val c:Variable = Variable.fromString("c")
+    val d:Variable = Variable.fromString("d")
+    val e:Variable = Variable.fromString("e")
+    val f:Variable = Variable.fromString("f")
+    val g:Variable = Variable.fromString("g")
+    val h:Variable = Variable.fromString("h")
+    val i:Variable = Variable.fromString("i")
+    val j:Variable = Variable.fromString("j")
+    val k:Variable = Variable.fromString("k")
+    val l:Variable = Variable.fromString("l")
+    val m:Variable = Variable.fromString("m")
+    val n:Variable = Variable.fromString("n")
+    val o:Variable = Variable.fromString("o")
 
     val Proposition.not:Proposition get() = not()
     infix fun Proposition.or(that:Proposition):Proposition = or(that)
     infix fun Proposition.and(that:Proposition):Proposition = and(that)
-    infix fun Proposition.oif(that:Proposition):Proposition = oif(that)
-    infix fun Proposition.iff(that:Proposition):Proposition = iff(that)
-    infix fun Proposition.xor(that:Proposition):Proposition = xor(that)
-    infix fun Proposition.nand(that:Proposition):Proposition = nand(that)
 
     @Test
     fun toStringTest1()
     {
-        val generatedString = ((p.not or q) oif r).toString()
-        val expectedString = "(¬p∨q)→r"
+        val generatedString = ((p.not or q) and r).toString()
+        val expectedString = "(¬p∨q)∧r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
     @Test
     fun toStringTest2()
     {
-        val generatedString = ((p and q)iff r).toString()
-        val expectedString = "(p∧q)↔r"
-        assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
-    }
-
-    @Test
-    fun toStringTest3()
-    {
-        val generatedString = ((p nand q)xor r).toString()
-        val expectedString = "(p|q)⊕r"
+        val generatedString = ((p and q)or r.not).toString()
+        val expectedString = "(p∧q)∨¬r"
         assert(expectedString == generatedString,{"expectedString: \"$expectedString\"; generatedString: \"$generatedString\""})
     }
 
@@ -93,7 +78,7 @@ class PropositionsTest
     @Test
     fun basicPropositionsFromPropositionTest1()
     {
-        val proposition = ((p.not or q)oif r)
+        val proposition = ((p.not or q)and r)
         val actualResult = proposition.variables.map {it.friendly}.toSet()
         val expectedResult = setOf(p,q,r).map {it.friendly}.toSet()
         assert(actualResult == expectedResult,{"$actualResult != $expectedResult"})
@@ -102,42 +87,22 @@ class PropositionsTest
     @Test
     fun basicPropositionsFromPropositionTest2()
     {
-        val proposition = (((x oif(y and z))and y.not)oif x.not)
+        val proposition = (((x and(y and z))and y.not)or x.not)
         val actualResult = proposition.variables.map {it.friendly}.toSet()
         val expectedResult = setOf(x,y,z).map {it.friendly}.toSet()
         assert(actualResult == expectedResult,{"basicPropositionsFromPropositionTest2 failed: $actualResult != $expectedResult"})
     }
 
     @Test
-    fun evaluateTest()
-    {
-        val proposition = (((p oif(q and r))and q.not)oif p.not)
-        val allSituations = setOf(
-            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to false)),
-            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to true )),
-            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to false)),
-            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to true )),
-            State.fromStringMap(mapOf("p" to true ,"q" to false,"r" to false)),
-            State.fromStringMap(mapOf("p" to true ,"q" to false,"r" to true )),
-            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to false)),
-            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to true ))
-        )
-        allSituations.forEach()
-        {
-            assert(proposition.evaluate(it),{"evaluateTest failed. every situation should have evaluated to true, but situation $it evaluated to false"})
-        }
-    }
-
-    @Test
     fun modelsOfPropositionTest()
     {
-        val proposition = (p oif(q and r))
+        val proposition = (p or(q and r))
         val models = setOf(
-            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to false)),
-            State.fromStringMap(mapOf("p" to false,"q" to false,"r" to true )),
-            State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to false)),
             State.fromStringMap(mapOf("p" to false,"q" to true ,"r" to true )),
-            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to true ))
+            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to true )),
+            State.fromStringMap(mapOf("p" to true ,"q" to true ,"r" to false)),
+            State.fromStringMap(mapOf("p" to true ,"q" to false,"r" to false)),
+            State.fromStringMap(mapOf("p" to true ,"q" to false,"r" to true ))
         )
         println(proposition)
         println(proposition.models)
@@ -147,10 +112,8 @@ class PropositionsTest
     @Test
     fun modelsOfTreeWithTautologyTest()
     {
-        val proposition = Oif(p,(q or Proposition.TAUTOLOGY))
+        val proposition = And.make(p,(q or Proposition.TAUTOLOGY))
         val models = setOf(
-            State.fromStringMap(mapOf("p" to false,"q" to false)),
-            State.fromStringMap(mapOf("p" to false,"q" to true )),
             State.fromStringMap(mapOf("p" to true ,"q" to false)),
             State.fromStringMap(mapOf("p" to true ,"q" to true ))
         )
@@ -162,18 +125,18 @@ class PropositionsTest
     @Test
     fun modelsOfTreeWithContradictionTest()
     {
-        val proposition = Oif(p,(q and Proposition.CONTRADICTION))
+        val proposition = Or.make(p,(q and Proposition.CONTRADICTION))
         val models = setOf(
-            State.fromStringMap(mapOf("p" to false,"q" to false)),
-            State.fromStringMap(mapOf("p" to false,"q" to true ))
+            State.fromStringMap(mapOf("p" to true,"q" to false)),
+            State.fromStringMap(mapOf("p" to true,"q" to true ))
         )
         println(proposition)
         println(proposition.models)
         assert(proposition.models == models)
     }
 
-    val bigProposition1 = Xor(Oif(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Nand(Xor(Not(Oif(p,(q and r))),s),t),u))!!,v))!!,w))!!,x))!!,y))!!,z))!!,a))!!,b))!!,c),d)
-    val bigProposition2 = Xor(Xor(Oif(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Iff.make(listOf(Nand(Xor(Not(Oif(p,(q and r))),s),t),u))!!,v))!!,w))!!,x))!!,y))!!,z))!!,a))!!,b))!!,c),d),e)
+    val bigProposition1 = And.make(And.make(And.make(listOf(Or.make(listOf(And.make(listOf(Or.make(listOf(And.make(listOf(Or.make(listOf(And.make(listOf(Or.make(listOf(And.make(And.make(Not(Or.make(p,(q and r))),s),t),u))!!,v))!!,w))!!,x))!!,y))!!,z))!!,a))!!,b))!!,c),d)
+    val bigProposition2 = Or.make(Or.make(Or.make(Or.make(listOf(Or.make(listOf(Or.make(listOf(Or.make(listOf(Or.make(listOf(Or.make(listOf(Or.make(listOf(Or.make(listOf(And.make(Or.make(Not(Or.make(p,(q and r))),s),t),u))!!,v))!!,w))!!,x))!!,y))!!,z))!!,a))!!,b))!!,c),d),e)
 
     @Test
     fun benchmark_evaluateProp1()
@@ -250,49 +213,9 @@ class PropositionsTest
     }
 
     @Test
-    fun modelsCrossCheckWithEvaluateTest3()
-    {
-        val proposition = Nand(q,q)
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
     fun modelsCrossCheckWithEvaluateTest4()
     {
         val proposition = q or q
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
-    fun modelsCrossCheckWithEvaluateTest5()
-    {
-        val proposition = Xor(q,q)
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
-    fun modelsCrossCheckWithEvaluateTest6()
-    {
-        val proposition = q iff q
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
-    fun modelsCrossCheckWithEvaluateTest7()
-    {
-        val proposition = Oif(q,q)
         val models = proposition.models
         val notModels = proposition.not.models
         models.forEach {assert(proposition.evaluate(it))}
@@ -310,16 +233,6 @@ class PropositionsTest
     }
 
     @Test
-    fun modelsCrossCheckWithEvaluateTest9()
-    {
-        val proposition = Nand(p,q)
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
     fun modelsCrossCheckWithEvaluateTest10()
     {
         val proposition = p or q
@@ -330,33 +243,10 @@ class PropositionsTest
     }
 
     @Test
-    fun modelsCrossCheckWithEvaluateTest11()
+    fun makePropositionsFromSituationsTest()
     {
-        val proposition = p xor q
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
-    fun modelsCrossCheckWithEvaluateTest12()
-    {
-        val proposition = p iff q
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
-    }
-
-    @Test
-    fun modelsCrossCheckWithEvaluateTest13()
-    {
-        val proposition = p oif q
-        val models = proposition.models
-        val notModels = proposition.not.models
-        models.forEach {assert(proposition.evaluate(it))}
-        notModels.forEach {assert(!proposition.evaluate(it))}
+        val models = (p.not or(q and r)).models
+        assert(models.map {Proposition.makeDnf(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
     }
 
     @Test
@@ -375,13 +265,6 @@ class PropositionsTest
     fun isSatisfiableOfTautologyIsTrue()
     {
         assert((a or a.not).isSatisfiable)
-    }
-
-    @Test
-    fun makePropositionsFromSituationsTest()
-    {
-        val models = Oif(p,(q and r)).models
-        assert(models.map {Proposition.makeDnf(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
     }
 
     @Test

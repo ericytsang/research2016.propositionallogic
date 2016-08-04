@@ -390,34 +390,6 @@ public abstract class Proposition implements Serializable
         return Or.make(list);
     }
 
-    public Proposition iff(Proposition that)
-    {
-        ArrayList<Proposition> list = new ArrayList<Proposition>(2);
-        list.add(this);
-        list.add(that);
-        return Iff.make(list);
-    }
-
-    public Proposition oif(Proposition that)
-    {
-        return new Oif(this,that);
-    }
-
-    public Proposition then(Proposition that)
-    {
-        return new Oif(this,that);
-    }
-
-    public Proposition xor(Proposition that)
-    {
-        return new Xor(this,that);
-    }
-
-    public Proposition nand(Proposition that)
-    {
-        return new Nand(this,that);
-    }
-
     @Override
     public abstract String toString();
 

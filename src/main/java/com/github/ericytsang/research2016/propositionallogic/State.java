@@ -2,7 +2,6 @@ package com.github.ericytsang.research2016.propositionallogic;
 
 import com.github.ericytsang.lib.collections.CollectionWrapper;
 import com.github.ericytsang.lib.collections.Function;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.*;
@@ -171,7 +170,7 @@ public class State implements Map<Variable,Boolean>,Serializable
     }
 
     @Override
-    public void putAll(@NotNull Map<? extends Variable,? extends Boolean> m)
+    public void putAll(Map<? extends Variable,? extends Boolean> m)
     {
         truthValues.putAll(m);
     }
@@ -182,21 +181,18 @@ public class State implements Map<Variable,Boolean>,Serializable
         truthValues.clear();
     }
 
-    @NotNull
     @Override
     public Set<Variable> keySet()
     {
         return truthValues.keySet();
     }
 
-    @NotNull
     @Override
     public Collection<Boolean> values()
     {
         return truthValues.values();
     }
 
-    @NotNull
     @Override
     public Set<Entry<Variable,Boolean>> entrySet()
     {
