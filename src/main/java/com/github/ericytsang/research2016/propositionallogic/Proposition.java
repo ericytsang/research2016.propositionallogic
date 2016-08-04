@@ -105,7 +105,7 @@ public abstract class Proposition implements Serializable
     {
         if(this instanceof Variable)
         {
-            Set<Variable> set = new HashSet<Variable>(1);
+            Set<Variable> set = new HashSet<Variable>();
             set.add((Variable) this);
             return set;
         }
@@ -155,7 +155,7 @@ public abstract class Proposition implements Serializable
                         @Override
                         public State invoke(Void params)
                         {
-                            Map<Variable,Boolean> map = new LinkedHashMap<Variable,Boolean>();
+                            Map<Variable,Boolean> map = new HashMap<Variable,Boolean>(state.size()+1);
                             map.putAll(state);
                             map.put(nextVariable,true);
                             return State.fromVariableMap(map);
@@ -166,7 +166,7 @@ public abstract class Proposition implements Serializable
                         @Override
                         public State invoke(Void params)
                         {
-                            Map<Variable,Boolean> map = new LinkedHashMap<Variable,Boolean>();
+                            Map<Variable,Boolean> map = new HashMap<Variable,Boolean>(state.size()+1);
                             map.putAll(state);
                             map.put(nextVariable,false);
                             return State.fromVariableMap(map);
@@ -204,7 +204,7 @@ public abstract class Proposition implements Serializable
 
         Iterator<State> iterator = new AbstractIterator<State>()
         {
-            private Map<State,NodeMetadata> unbranchedNodes = new LinkedHashMap<State,NodeMetadata>();
+            private Map<State,NodeMetadata> unbranchedNodes = new HashMap<State,NodeMetadata>();
 
             {
                 unbranchedNodes.put(State.fromStringMap(ContainerUtils.<String,Boolean>emptyMap()),BranchAndBound.ROOT_NODE_METADATA);
