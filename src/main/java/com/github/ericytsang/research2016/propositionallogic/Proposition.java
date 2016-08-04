@@ -185,7 +185,7 @@ public abstract class Proposition implements Serializable
                 }
                 else
                 {
-                    return Collections.emptySet();
+                    return ContainerUtils.emptySet();
                 }
             }
 
@@ -207,7 +207,7 @@ public abstract class Proposition implements Serializable
             private Map<State,NodeMetadata> unbranchedNodes = new LinkedHashMap<State,NodeMetadata>();
 
             {
-                unbranchedNodes.put(State.fromStringMap(Collections.<String,Boolean>emptyMap()),BranchAndBound.ROOT_NODE_METADATA);
+                unbranchedNodes.put(State.fromStringMap(ContainerUtils.<String,Boolean>emptyMap()),BranchAndBound.ROOT_NODE_METADATA);
             }
 
             @Override

@@ -1,6 +1,7 @@
 package com.github.ericytsang.research2016.propositionallogic;
 
-import java.util.Collections;
+import com.github.ericytsang.lib.collections.ContainerUtils;
+
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public abstract class Operand extends Proposition
     @Override
     public List<Proposition> getChildren()
     {
-        return Collections.emptyList();
+        return ContainerUtils.emptyList();
     }
 
     @Override

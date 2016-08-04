@@ -1,8 +1,8 @@
 package com.github.ericytsang.research2016.propositionallogic;
 
+import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class Or extends AssociativeOperator
     public static Proposition make(Proposition...operands)
     {
         List<Proposition> list = new LinkedList<Proposition>();
-        Collections.addAll(list,operands);
+        ContainerUtils.addAll(list,operands);
         return make(list);
     }
 

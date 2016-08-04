@@ -1,10 +1,10 @@
 package com.github.ericytsang.research2016.propositionallogic;
 
 import com.github.ericytsang.lib.collections.CollectionWrapper;
+import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class AssociativeOperator extends Operator
@@ -23,7 +23,7 @@ public abstract class AssociativeOperator extends Operator
                     }
                     else
                     {
-                        return Collections.singletonList(params);
+                        return ContainerUtils.listOf(params);
                     }
                 }
             })

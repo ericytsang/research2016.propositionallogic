@@ -1,10 +1,10 @@
 package com.github.ericytsang.research2016.propositionallogic;
 
 import com.github.ericytsang.lib.collections.CollectionWrapper;
+import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +82,7 @@ public class ComparatorBeliefRevisionStrategy implements BeliefRevisionStrategy
 
         if (nearestModels.isEmpty())
         {
-            return Collections.singleton(Proposition.CONTRADICTION);
+            return ContainerUtils.setOf(Proposition.CONTRADICTION);
         }
         else
         {
@@ -100,7 +100,7 @@ public class ComparatorBeliefRevisionStrategy implements BeliefRevisionStrategy
                     @Override
                     public Set<Proposition> invoke(CollectionWrapper<List<Proposition>,Proposition> params)
                     {
-                        return Collections.singleton(Or.make(params.wrapee));
+                        return ContainerUtils.setOf(Or.make(params.wrapee));
                     }
                 });
         }
