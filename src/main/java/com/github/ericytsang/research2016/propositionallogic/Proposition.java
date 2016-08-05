@@ -8,9 +8,19 @@ import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
 import com.github.ericytsang.lib.collections.IteratorToSetAdapter;
 import com.github.ericytsang.lib.collections.NodeMetadata;
+import com.github.ericytsang.lib.formulainterpreter.FormulaTreeFactory;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Created by surpl on 7/26/2016.
@@ -42,6 +52,17 @@ public abstract class Proposition implements Serializable
             return false;
         }
     };
+
+    public static Proposition parse(String string)
+    {
+        String[] tokens = string.replace("("," ( ").replace(")"," ) ").replace("-"," - ").trim().split("[ ]+");
+        List<String> allTokens = new ArrayList<String>();
+        for (String token : tokens)
+        {
+            allTokens.add(token);
+        }
+        return propositionFactory.parse(allTokens);
+    }
 
     public static Proposition makeDnf(final State state)
     {
@@ -390,6 +411,99 @@ public abstract class Proposition implements Serializable
         return Or.make(list);
     }
 
+    public String toParsableString()
+    {
+        if (this instanceof Operand)
+        {
+            return this.toString();
+        }
+        else if (this instanceof Or)
+        {
+            return CollectionWrapper.wrap(getChildren())
+                .map(new Function<Proposition,String>()
+                {
+                    @Override
+                    public String invoke(Proposition params)
+                    {
+                        if (params.getChildren().size() > 1)
+                        {
+                            return "("+params.toParsableString()+")";
+                        }
+                        else
+                        {
+                            return params.toParsableString();
+                        }
+                    }
+                })
+                .let(new Function<CollectionWrapper<List<String>,String>,String>()
+                {
+                    @Override
+                    public String invoke(CollectionWrapper<List<String>,String> params)
+                    {
+                        return params.wrapee.get(0)+" or "+params.wrapee.get(1);
+                    }
+                });
+        }
+        else if (this instanceof And)
+        {
+            return CollectionWrapper.wrap(getChildren())
+                .map(new Function<Proposition,String>()
+                {
+                    @Override
+                    public String invoke(Proposition params)
+                    {
+                        if (params.getChildren().size() > 1)
+                        {
+                            return "("+params.toParsableString()+")";
+                        }
+                        else
+                        {
+                            return params.toParsableString();
+                        }
+                    }
+                })
+                .let(new Function<CollectionWrapper<List<String>,String>,String>()
+                {
+                    @Override
+                    public String invoke(CollectionWrapper<List<String>,String> params)
+                    {
+                        return params.wrapee.get(0)+" and "+params.wrapee.get(1);
+                    }
+                });
+        }
+        else if (this instanceof Not)
+        {
+            return CollectionWrapper.wrap(getChildren())
+                .map(new Function<Proposition,String>()
+                {
+                    @Override
+                    public String invoke(Proposition params)
+                    {
+                        if (params.getChildren().size() > 1)
+                        {
+                            return "("+params.toParsableString()+")";
+                        }
+                        else
+                        {
+                            return params.toParsableString();
+                        }
+                    }
+                })
+                .let(new Function<CollectionWrapper<List<String>,String>,String>()
+                {
+                    @Override
+                    public String invoke(CollectionWrapper<List<String>,String> params)
+                    {
+                        return "-"+params.wrapee.get(0);
+                    }
+                });
+        }
+        else
+        {
+            throw new IllegalArgumentException("unknown type: "+this);
+        }
+    }
+
     @Override
     public abstract String toString();
 
@@ -404,4 +518,94 @@ public abstract class Proposition implements Serializable
     {
         return other instanceof Proposition && other.toString().equals(toString());
     }
+
+    private static final FormulaTreeFactory.TokenInterpreter tokenInterpreter =
+        new FormulaTreeFactory.TokenInterpreter()
+    {
+        @Override
+        public FormulaTreeFactory.Symbol parse(String word)
+        {
+            String preprocessedWord = word.toLowerCase();
+            if (Pattern.matches("(and)",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,4);
+            }
+            else if (Pattern.matches("(or)",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,3);
+            }
+            else if (Pattern.matches("(0)",preprocessedWord) ||
+                Pattern.matches("(1)",preprocessedWord) ||
+                Pattern.matches("[a-zA-Z]+",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERAND,0,0);
+            }
+            else if (Pattern.matches("(-)",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,1,5);
+            }
+            else if (Pattern.matches("(\\()",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPENING_PARENTHESIS,0,0);
+            }
+            else if (Pattern.matches("(\\))",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.CLOSING_PARENTHESIS,0,0);
+            }
+            else
+            {
+                throw new IllegalArgumentException("unrecognized token: "+word);
+            }
+        }
+    };
+
+    private static final FormulaTreeFactory.OperandFactory<Proposition> operandFactory =
+        new FormulaTreeFactory.OperandFactory<Proposition>()
+    {
+        @Override
+        public Proposition parse(String word)
+        {
+            if (Pattern.matches("(1)",word))
+            {
+                return Proposition.TAUTOLOGY;
+            }
+            else if (Pattern.matches("(0)",word))
+            {
+                return Proposition.CONTRADICTION;
+            }
+            else if (Pattern.matches("[a-zA-Z]+",word))
+            {
+                return Variable.fromString(word);
+            }
+            else
+            {
+                throw new IllegalArgumentException("unrecognized token: $word");
+            }
+        }
+
+        @Override
+        public Proposition parse(String word,List<Proposition> operands)
+        {
+            String preprocessedWord = word.toLowerCase();
+            if(Pattern.matches("(and)",preprocessedWord))
+            {
+                return And.make(operands);
+            }
+            else if(Pattern.matches("(or)",preprocessedWord))
+            {
+                return Or.make(operands);
+            }
+            else if(Pattern.matches("(-)",preprocessedWord))
+            {
+                return new Not(operands.get(0));
+            }
+            else
+            {
+                throw new IllegalArgumentException("unrecognized token: $word");
+            }
+        }
+    };
+
+    private static final FormulaTreeFactory<Proposition> propositionFactory =
+        new FormulaTreeFactory<Proposition>(tokenInterpreter,operandFactory);
 }

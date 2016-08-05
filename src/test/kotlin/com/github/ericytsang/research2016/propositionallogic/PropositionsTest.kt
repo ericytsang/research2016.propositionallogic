@@ -302,4 +302,19 @@ class PropositionsTest
     {
         assert(!(a or a.not).isContradiction)
     }
+
+    @Test
+    fun parsableStringTest1()
+    {
+        val proposition = (p and q or r.not)
+        println(proposition.toParsableString())
+        assert(proposition.toParsableString() == "(p and q) or -r")
+    }
+
+    @Test
+    fun parsableStringTest2()
+    {
+        val proposition = (p and q or r.not)
+        assert(Proposition.parse(proposition.toParsableString()) == proposition)
+    }
 }

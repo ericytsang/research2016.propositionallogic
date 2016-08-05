@@ -33,9 +33,11 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ericytsang:lib.collections:lejos-SNAPSHOT'
+    compile 'com.github.ericytsang:lib.collections:lejos_1.0'
     compile files('libs/classes.jar')
-    //compile 'com.github.ericytsang:lib.formulainterpreter:master-SNAPSHOT'
+    // todo: reimplement dependant components in java
+    // todo: build and test on lejos block again
+    compile 'com.github.ericytsang:lib.formulainterpreter:v1.0'
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.11'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
