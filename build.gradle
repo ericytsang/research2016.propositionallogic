@@ -34,7 +34,6 @@ repositories {
 
 dependencies {
     compile 'com.github.ericytsang:lib.collections:lejos-SNAPSHOT'
-    compile files('libs/classes.jar')
     //compile 'com.github.ericytsang:lib.formulainterpreter:master-SNAPSHOT'
     testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.11'

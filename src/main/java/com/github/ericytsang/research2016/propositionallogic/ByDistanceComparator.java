@@ -2,7 +2,7 @@ package com.github.ericytsang.research2016.propositionallogic;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,7 +45,7 @@ public abstract class ByDistanceComparator implements Comparator<State>
      * used to cache previous calculations produced by the [computeDistanceTo]
      * function.
      */
-    private Map<State,Integer> cachedCalculations = new HashMap<State,Integer>();
+    private Map<State,Integer> cachedCalculations = new LinkedHashMap<State,Integer>();
 
     @Override
     public int compare(State state1,State state2)

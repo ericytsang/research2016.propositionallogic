@@ -3,8 +3,6 @@ package com.github.ericytsang.research2016.propositionallogic;
 import com.github.ericytsang.lib.collections.CollectionWrapper;
 import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
-import com.github.ericytsang.lib.collections.IteratorToSetAdapter;
-import com.github.ericytsang.lib.collections.PermutedIterator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -50,20 +48,19 @@ public class State implements Map<Variable,Boolean>,Serializable
         int numStatesToGenerate = (int) Math.round(Math.pow(2.0,variables.size()));
         Set<State> allSituations = new HashSet<State>();
         ArrayList<String> propositionKeys = new ArrayList<String>(variables.size());
-        List<List<Boolean>> toPermute = new ArrayList<List<Boolean>>();
         for (Variable variable : variables)
         {
             propositionKeys.add(variable.toString());
-            toPermute.add(ContainerUtils.listOf(true,false));
         }
         ContainerUtils.sort(propositionKeys);
-        for (List<Boolean> booleans : new IteratorToSetAdapter<List<Boolean>>(new PermutedIterator<Boolean>(toPermute)))
+        for (int seed = 0;seed != numStatesToGenerate;seed++)
         {
+            String string = String.format("%"+variables.size()+"s",Integer.toBinaryString(seed)).replace(' ','0');
             HashMap<String,Boolean> stringMap = new HashMap<String,Boolean>(propositionKeys.size());
             for (int i = 0;i < propositionKeys.size();i++)
             {
                 String s = propositionKeys.get(i);
-                stringMap.put(s,booleans.get(i));
+                stringMap.put(s,string.charAt(i) == '1');
             }
             State newState = State.fromStringMap(stringMap);
             allSituations.add(newState);
