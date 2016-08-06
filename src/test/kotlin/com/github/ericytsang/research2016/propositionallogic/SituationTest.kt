@@ -9,7 +9,7 @@ import java.util.TreeMap
 /**
  * Created by surpl on 5/4/2016.
  */
-class StateTest
+class SituationTest
 {
     @Test
     fun hashCodeTest()

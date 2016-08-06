@@ -131,8 +131,17 @@ public abstract class Proposition implements Serializable
         }
     }
 
-    public synchronized Set<State> getModels()
+    private Set<State> models = null;
+
+    public Set<State> getModels()
     {
+        // if a previous version of models was calculated and stored, return
+        // that. calculate otherwise.
+        if (models != null)
+        {
+            return models;
+        }
+
         final BranchAndBound<State> findModel = new BranchAndBound<State>()
         {
             @Override
@@ -232,6 +241,7 @@ public abstract class Proposition implements Serializable
         };
 
         return new IteratorToSetAdapter<State>(iterator);
+
     }
 
     /**
