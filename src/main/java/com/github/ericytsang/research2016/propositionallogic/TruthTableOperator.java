@@ -3,6 +3,7 @@ package com.github.ericytsang.research2016.propositionallogic;
 import com.github.ericytsang.lib.collections.CollectionWrapper;
 import com.github.ericytsang.lib.collections.Function;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
