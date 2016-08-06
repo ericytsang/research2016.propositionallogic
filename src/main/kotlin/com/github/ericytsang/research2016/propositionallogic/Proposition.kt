@@ -1,10 +1,34 @@
 package com.github.ericytsang.research2016.propositionallogic
 
+import com.github.ericytsang.lib.collections.AbstractIterator
 import com.github.ericytsang.lib.collections.Bounds
 import com.github.ericytsang.lib.collections.getRandom
 import com.github.ericytsang.lib.collections.IteratorToSetAdapter
+import com.github.ericytsang.lib.collections.ROOT_NODE_META_DATA
+import com.github.ericytsang.lib.collections.all
+import com.github.ericytsang.lib.collections.apply
+import com.github.ericytsang.lib.collections.associate
 import com.github.ericytsang.lib.collections.branchAndBound
-import com.github.ericytsang.lib.collections.rootNodeMetaData
+import com.github.ericytsang.lib.collections.count
+import com.github.ericytsang.lib.collections.emptyList
+import com.github.ericytsang.lib.collections.emptyMap
+import com.github.ericytsang.lib.collections.emptySet
+import com.github.ericytsang.lib.collections.filter
+import com.github.ericytsang.lib.collections.firstOrNull
+import com.github.ericytsang.lib.collections.flatMap
+import com.github.ericytsang.lib.collections.getOrPut
+import com.github.ericytsang.lib.collections.groupBy
+import com.github.ericytsang.lib.collections.let
+import com.github.ericytsang.lib.collections.listOf
+import com.github.ericytsang.lib.collections.map
+import com.github.ericytsang.lib.collections.mapNotNull
+import com.github.ericytsang.lib.collections.maxBy
+import com.github.ericytsang.lib.collections.mutableMapOf
+import com.github.ericytsang.lib.collections.mutableSetOf
+import com.github.ericytsang.lib.collections.setOf
+import com.github.ericytsang.lib.collections.to
+import com.github.ericytsang.lib.collections.toMutableSet
+import com.github.ericytsang.lib.collections.toSet
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operand
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.io.Serializable
@@ -129,9 +153,9 @@ sealed class Proposition:Serializable
     /**
      * returns all the basic propositions in this [Proposition].
      */
-    val variables:Set<Variable> by lazy()
+    val variables:Set<Variable> get()
     {
-        return@lazy if (this is Variable)
+        return if (this is Variable)
         {
             setOf(this)
         }
@@ -145,15 +169,15 @@ sealed class Proposition:Serializable
      * returns all the models of this [Proposition], i.e., all the [State] that
      * satisfy this [Proposition].
      */
-    val models:Set<State> by lazy()
+    val models:Set<State> get()
     {
         val branch = fun(state:State):Set<State>
         {
-            val nextVariable = variables.minus(state.keys).firstOrNull()
+            val nextVariable = variables.toMutableSet().apply {removeAll(state.keys)}.firstOrNull()
             if (nextVariable != null)
             {
-                val node1 = State.fromVariableMap(state+mapOf(nextVariable to true))
-                val node2 = State.fromVariableMap(state+mapOf(nextVariable to false))
+                val node1 = State.fromVariableMap(LinkedHashMap(state).apply {put(nextVariable,true)})
+                val node2 = State.fromVariableMap(LinkedHashMap(state).apply {put(nextVariable,false)})
                 return listOf(node1,node2)
                     .filter {truthiness(it) != 0.0}
                     .toSet()
@@ -177,7 +201,7 @@ sealed class Proposition:Serializable
 
         val iterator = object:AbstractIterator<State>()
         {
-            val unbranchedSituations = mutableMapOf(State.fromVariableMap(emptyMap()) to rootNodeMetaData)
+            val unbranchedSituations = mutableMapOf(State.fromVariableMap(emptyMap()) to ROOT_NODE_META_DATA)
             override fun computeNext()
             {
                 val next = branchAndBound(unbranchedSituations,branch,bounds,checkSolution)
@@ -192,7 +216,7 @@ sealed class Proposition:Serializable
             }
         }
 
-        return@lazy IteratorToSetAdapter(iterator)
+        return IteratorToSetAdapter(iterator)
     }
 }
 
@@ -219,7 +243,7 @@ infix fun Proposition.isSatisfiedBy(that:Proposition):Boolean
  */
 val Proposition.isSatisfiable:Boolean get()
 {
-    return models.isNotEmpty()
+    return !models.isEmpty()
 }
 
 /**
@@ -299,7 +323,7 @@ fun Proposition.toFullDnf():Proposition
                 // negation of it otherwise
                 .map {if (situation[it]!!) it else it.not}
                 // and everything together
-                .let {if (it.isNotEmpty()) And.make(it) else tautology}
+                .let {if (!it.isEmpty()) And.make(it) else tautology}
         }
     return Or.make(literalConjunctions) ?: contradiction
 }
@@ -317,10 +341,10 @@ fun Proposition.toDnf():Proposition
         return state1.keys.count {state1[it] != state2[it]}
     }
 
-    val basicPropositionsToSituations = LinkedHashMap(models.groupBy {it.keys}.mapValues {it.value.toMutableSet()})
+    val basicPropositionsToSituations = models.groupBy {it.keys}.entries.associate {it.key to it.value.toMutableSet()}.let {LinkedHashMap(it)}
     val unprocessedKeys = basicPropositionsToSituations.keys.toMutableSet()
 
-    while (unprocessedKeys.isNotEmpty())
+    while (!unprocessedKeys.isEmpty())
     {
         val basicPropositions = unprocessedKeys.maxBy {it.size}!!
         val situations = basicPropositionsToSituations[basicPropositions]!!
@@ -344,8 +368,8 @@ fun Proposition.toDnf():Proposition
         }
         else
         {
-            situations.remove(state1)
-            situations.remove(state2)
+            if (state1 != null) situations.remove(state1)
+            if (state2 != null) situations.remove(state2)
 
             val commonMappings = state1!!.entries.filter {state1!![it.key] == state2!![it.key]}
             val newSituation = State.fromVariableMap(commonMappings.associate {it.key to it.value})
@@ -355,7 +379,7 @@ fun Proposition.toDnf():Proposition
     }
 
     // list of literals (or negations of literals) and'd together
-    val literalConjunctions = basicPropositionsToSituations
+    val literalConjunctions = basicPropositionsToSituations.entries
         .flatMap {it.value}
         .mapNotNull()
         {
@@ -365,7 +389,7 @@ fun Proposition.toDnf():Proposition
                 // negation of it otherwise
                 .map {if (situation[it]!!) it else it.not}
                 // and everything together
-                .let {if (it.isNotEmpty()) And.make(it) else tautology}
+                .let {if (!it.isEmpty()) And.make(it) else tautology}
         }
     return Or.make(literalConjunctions) ?: contradiction
 }

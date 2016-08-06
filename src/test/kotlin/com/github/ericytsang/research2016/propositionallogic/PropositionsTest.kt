@@ -413,75 +413,6 @@ class PropositionsTest
     }
 
     @Test
-    fun makeRandom0()
-    {
-        val basicPropositions = emptyList<Variable>()
-        try
-        {
-            println(Proposition.makeRandom(basicPropositions))
-            assert(false,{"no exception thrown...was expecting an illegal argument exception"})
-        }
-        catch (ex:IllegalArgumentException)
-        {
-            // test passed
-        }
-    }
-
-    @Test
-    fun makeRandom1()
-    {
-        val basicPropositions = listOf(a)
-        val proposition = Proposition.makeRandom(basicPropositions)
-        println(proposition)
-        assert(proposition.variables.size == basicPropositions.size)
-    }
-
-    @Test
-    fun makeRandom2()
-    {
-        val basicPropositions = listOf(a,b)
-        val proposition = Proposition.makeRandom(basicPropositions)
-        println(proposition)
-        assert(proposition.variables.size == basicPropositions.size)
-    }
-
-    @Test
-    fun makeRandom3()
-    {
-        val basicPropositions = listOf(a,b,c)
-        val proposition = Proposition.makeRandom(basicPropositions)
-        println(proposition)
-        assert(proposition.variables.size == basicPropositions.size)
-    }
-
-    @Test
-    fun makeRandom4()
-    {
-        val basicPropositions = listOf(a,b,c,d)
-        val proposition = Proposition.makeRandom(basicPropositions)
-        println(proposition)
-        assert(proposition.variables.size == basicPropositions.size)
-    }
-
-    @Test
-    fun makeRandom5()
-    {
-        val basicPropositions = listOf(a,b,c,d,e)
-        val proposition = Proposition.makeRandom(basicPropositions)
-        println(proposition)
-        assert(proposition.variables.size == basicPropositions.size)
-    }
-
-    @Test
-    fun makeRandom6()
-    {
-        val basicPropositions = listOf(a,b,c,d,e,f)
-        val proposition = Proposition.makeRandom(basicPropositions)
-        println(proposition)
-        assert(proposition.variables.size == basicPropositions.size)
-    }
-
-    @Test
     fun toDnfTest1()
     {
         val proposition = a or b and c oif d
@@ -516,6 +447,6 @@ class PropositionsTest
     fun toParsableString()
     {
         val proposition = a and b or c xor d iff e nand f oif g.not
-        assert(Proposition.makeFrom(proposition.toParsableString()) == proposition)
+        assert(Proposition.Companion.parse(proposition.toParsableString()) == proposition)
     }
 }

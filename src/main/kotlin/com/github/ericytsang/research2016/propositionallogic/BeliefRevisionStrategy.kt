@@ -1,19 +1,19 @@
 package com.github.ericytsang.research2016.propositionallogic
 
+import com.github.ericytsang.lib.collections.apply
+import com.github.ericytsang.lib.collections.filter
+import com.github.ericytsang.lib.collections.flatMap
+import com.github.ericytsang.lib.collections.let
+import com.github.ericytsang.lib.collections.map
+import com.github.ericytsang.lib.collections.minWith
+import com.github.ericytsang.lib.collections.mutableSetOf
+import com.github.ericytsang.lib.collections.setOf
+import com.github.ericytsang.lib.collections.toSet
 import java.util.Comparator
 
 interface BeliefRevisionStrategy
 {
     fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
-}
-
-class TrustSensitiveBeliefRevisionStrategy(val beliefRevisionStrategy:BeliefRevisionStrategy,val trustPartitionSentenceRevisionStrategy:TrustPartitionSentenceRevisionStrategy):BeliefRevisionStrategy
-{
-    override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
-    {
-        val revisedSentence = trustPartitionSentenceRevisionStrategy.revise(sentence)
-        return beliefRevisionStrategy.revise(beliefState,revisedSentence)
-    }
 }
 
 /**
@@ -33,7 +33,7 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
 
         // create a tautology that uses all the variables in all the formulas
         // e.g. (a or -a) and (b or -b) and (c or -c) and...
-        val basicPropositionTautologies = (setOf(sentence)+beliefState)
+        val basicPropositionTautologies = mutableSetOf(sentence).apply {addAll(beliefState)}
             // get all basic propositions involved
             .flatMap {it.variables}.toSet()
             // make each one into a tautology
@@ -63,6 +63,6 @@ class SatisfiabilityBeliefRevisionStrategy():BeliefRevisionStrategy
 {
     override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
     {
-        return beliefState.plus(sentence).filter {(it and sentence).isSatisfiable}.toSet()
+        return mutableSetOf(sentence).apply {addAll(beliefState)}.filter {(it and sentence).isSatisfiable}.toSet()
     }
 }

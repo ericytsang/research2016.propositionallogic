@@ -1,8 +1,21 @@
 package com.github.ericytsang.research2016.propositionallogic
 
+import com.github.ericytsang.lib.collections.all
+import com.github.ericytsang.lib.collections.any
+import com.github.ericytsang.lib.collections.filter
+import com.github.ericytsang.lib.collections.first
+import com.github.ericytsang.lib.collections.flatMap
+import com.github.ericytsang.lib.collections.fold
+import com.github.ericytsang.lib.collections.joinToString
+import com.github.ericytsang.lib.collections.let
+import com.github.ericytsang.lib.collections.listOf
+import com.github.ericytsang.lib.collections.map
+import com.github.ericytsang.lib.collections.mapIndexed
+import com.github.ericytsang.lib.collections.mapOf
+import com.github.ericytsang.lib.collections.single
+import com.github.ericytsang.lib.collections.to
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operand
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
-import java.util.WeakHashMap
 
 /**
  * an [Operand] which is mapped to a truth value by [State] objects.
@@ -18,10 +31,6 @@ class Variable private constructor(_friendly:String):Operand(_friendly)
         if(_friendly.length < 1)
         {
             throw IllegalArgumentException("only strings of length 1 or longer are allowed to be used as the friendly string for atomic propositions")
-        }
-        if(_friendly.any {!it.isLetter()})
-        {
-            throw IllegalArgumentException("atomic proposition must be composed only of letters")
         }
     }
     override fun truthValue(state:State):Boolean = state[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
@@ -68,7 +77,7 @@ abstract class TruthTableOperator(operands:List<Proposition>):Operator(operands)
             // multiplying all the doubles together for each list into one double
             .map {it.fold(1.0) {i,n -> i*n}}
             // sum...
-            .sum()
+            .fold(0.0) {sum,num -> sum+num}
     }
 }
 

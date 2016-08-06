@@ -1,6 +1,21 @@
 package com.github.ericytsang.research2016.propositionallogic
 
+import com.github.ericytsang.lib.collections.apply
+import com.github.ericytsang.lib.collections.count
+import com.github.ericytsang.lib.collections.filter
+import com.github.ericytsang.lib.collections.fold
+import com.github.ericytsang.lib.collections.forEach
+import com.github.ericytsang.lib.collections.getOrPut
 import com.github.ericytsang.lib.collections.getRandom
+import com.github.ericytsang.lib.collections.indices
+import com.github.ericytsang.lib.collections.let
+import com.github.ericytsang.lib.collections.map
+import com.github.ericytsang.lib.collections.minBy
+import com.github.ericytsang.lib.collections.mutableListOf
+import com.github.ericytsang.lib.collections.mutableSetOf
+import com.github.ericytsang.lib.collections.run
+import com.github.ericytsang.lib.collections.toList
+import com.github.ericytsang.lib.collections.toMutableList
 import java.util.Collections
 import java.util.Comparator
 import java.util.LinkedHashMap
@@ -56,7 +71,7 @@ class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparat
 {
     override fun computeDistanceTo(state:State):Int
     {
-        return beliefStateModels.map {hammingDistance(state,it)}.min() ?: 0
+        return beliefStateModels.map {hammingDistance(state,it)}.minBy {it} ?: 0
     }
 
     /**
@@ -66,15 +81,7 @@ class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparat
      */
     fun hammingDistance(state1:State,state2:State):Int
     {
-        val commonKeys = if (state1.keys.size < state2.keys.size)
-        {
-            state1.keys.intersect(state2.keys)
-        }
-        else
-        {
-            state2.keys.intersect(state1.keys)
-        }
-
+        val commonKeys = state1.keys.filter {it in state2.keys}
         return commonKeys.count {state1[it] != state2[it]}
     }
 }
@@ -83,7 +90,7 @@ class WeightedHammingDistanceComparator(beliefState:Set<Proposition>,val weights
 {
     override fun computeDistanceTo(state:State):Int
     {
-        return beliefStateModels.map {weightedHammingDistance(state,it)}.min() ?: 0
+        return beliefStateModels.map {weightedHammingDistance(state,it)}.minBy {it} ?: 0
     }
 
     /**
@@ -94,20 +101,13 @@ class WeightedHammingDistanceComparator(beliefState:Set<Proposition>,val weights
      */
     fun weightedHammingDistance(state1:State,state2:State):Int
     {
-        val commonKeys = if (state1.keys.size < state2.keys.size)
-        {
-            state1.keys.intersect(state2.keys)
-        }
-        else
-        {
-            state2.keys.intersect(state1.keys)
-        }
+        val commonKeys = state1.keys.filter {it in state2.keys}
 
         return commonKeys
             // only consider the basic propositions that situations disagree on
             .filter {state1[it] != state2[it]}
             // sum them by their weights
-            .sumBy {weights[it] ?: 0}
+            .fold(0) {sum,element -> sum + (weights[element] ?: 0)}
     }
 }
 
@@ -120,15 +120,23 @@ class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Pr
             val allStates = State.permutationsOf(variables)
                 .toMutableList()
                 .apply {Collections.shuffle(this)}
-            val buckets = Array<MutableSet<State>>(numBuckets,{mutableSetOf()})
+            val buckets = mutableListOf<MutableSet<State>>()
+                .apply {(0..numBuckets).forEach {add(mutableSetOf())}}
             allStates.forEach {buckets.getRandom().add(it)}
-            return OrderedSetsComparator(beliefState,buckets.filter {it.isNotEmpty()}.map {Or.make(it.map {Proposition.fromState(it)})!!})
+            return OrderedSetsComparator(beliefState,buckets.filter {!it.isEmpty()}.map {Or.make(it.map {Proposition.fromState(it)})!!})
         }
     }
 
     override fun computeDistanceTo(state:State):Int
     {
-        val completeOrderedSets = listOf(And.make(beliefState) ?: contradiction)+orderedSets+tautology
-        return completeOrderedSets.indexOfFirst {(it and Proposition.fromState(state)).isSatisfiable}
+        val completeOrderedSets = mutableListOf(And.make(beliefState) ?: contradiction).apply {addAll(orderedSets)}.apply {add(tautology)}
+        for (i in completeOrderedSets.indices)
+        {
+            if ((completeOrderedSets[i] and Proposition.fromState(state)).isSatisfiable)
+            {
+                return i
+            }
+        }
+        throw RuntimeException("not supposed to iterate through the whole list and find nothing")
     }
 }

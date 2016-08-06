@@ -1,7 +1,19 @@
 package com.github.ericytsang.research2016.propositionallogic
 
+import com.github.ericytsang.lib.collections.asIterable
+import com.github.ericytsang.lib.collections.associate
+import com.github.ericytsang.lib.collections.filter
+import com.github.ericytsang.lib.collections.indices
+import com.github.ericytsang.lib.collections.joinToString
+import com.github.ericytsang.lib.collections.listOf
+import com.github.ericytsang.lib.collections.map
+import com.github.ericytsang.lib.collections.mutableMapOf
+import com.github.ericytsang.lib.collections.mutableSetOf
+import com.github.ericytsang.lib.collections.permutations
+import com.github.ericytsang.lib.collections.set
+import com.github.ericytsang.lib.collections.sortedBy
+import com.github.ericytsang.lib.collections.to
 import java.io.Serializable
-import java.util.LinkedHashSet
 
 /**
  * maps [Variable]s to truth values [Boolean]s.
@@ -16,7 +28,7 @@ class State private constructor(val propositionValues:Map<Variable,Boolean>):Map
         }
         fun fromStringMap(propositionValues:Map<String,Boolean>):State
         {
-            return State.fromVariableMap(propositionValues.mapKeys {Variable.fromString(it.key)})
+            return State.fromVariableMap(propositionValues.entries.associate {Variable.fromString(it.key) to it.value})
         }
 
         /**
@@ -25,25 +37,27 @@ class State private constructor(val propositionValues:Map<Variable,Boolean>):Map
          */
         fun permutationsOf(variables:Set<Variable>):Set<State>
         {
-            val numSituationsToGenerate = Math.round(Math.pow(2.toDouble(),variables.size.toDouble())).toInt()
-            val allSituations = LinkedHashSet<State>()
-            val propositionKeys = variables.map {it.friendly}.toList().sorted()
-            var seed = 0
-            while (seed != numSituationsToGenerate)
+            val numStatesToGenerate = Math.round(Math.pow(2.0,variables.size.toDouble())).toInt()
+            val allSituations = mutableSetOf<State>()
+            val propositionKeys = variables.map {it.toString()}.sortedBy {it}
+            val toPermute = variables.map {listOf(true,false)}
+
+            for (booleans in toPermute.permutations.asIterable())
             {
-                val newSituation = run()
+                val stringMap = mutableMapOf<String,Boolean>()
+                for (i in propositionKeys.indices)
                 {
-                    val string = Integer.toBinaryString(seed).padStart(variables.size,'0')
-                    val map = propositionKeys.mapIndexed { i, s -> s to (string[i] == '1') }.toMap()
-                    return@run State.fromStringMap(map)
+                    stringMap[propositionKeys[i]] = booleans[i]
                 }
-                allSituations.add(newSituation)
-                seed++
+                val newState = State.fromStringMap(stringMap)
+                allSituations.add(newState)
             }
-            if(allSituations.size != numSituationsToGenerate)
+
+            if(allSituations.size != numStatesToGenerate)
             {
                 throw RuntimeException("failed to generate all states! D: situations generated: $allSituations")
             }
+
             return allSituations
         }
     }
