@@ -13,7 +13,7 @@ class WeightedHammingDistanceRevisionTest():RevisionTest()
     @Test
     fun reviseSubSetTest()
     {
-        val beliefState = setOf(Proposition.TAUTOLOGY)
+        val beliefState = setOf(tautology)
         val sentence = p and q and r
         val expected = (p and q and r).models
         reviseTest(beliefState,sentence,ComparatorBeliefRevisionStrategy({WeightedHammingDistanceComparator(it,mapOf(p to 3,q to 2,r to 1))}),expected)
@@ -38,7 +38,7 @@ class WeightedHammingDistanceRevisionTest():RevisionTest()
     fun reviseContradictionTest()
     {
         val beliefState = setOf(p and q)
-        val sentence = And.make(beliefState.toList())!!.not
+        val sentence = And.make(beliefState)!!.not
         val expected = (p and q.not).models
         reviseTest(beliefState,sentence,ComparatorBeliefRevisionStrategy({WeightedHammingDistanceComparator(it,mapOf(p to 3,q to 2,r to 1))}),expected)
     }

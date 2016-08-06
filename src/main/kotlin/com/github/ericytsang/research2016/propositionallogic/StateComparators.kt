@@ -22,7 +22,7 @@ abstract class ByDistanceComparator(val beliefState:Set<Proposition>):Comparator
      */
     protected val beliefStateModels:Set<State> = run()
     {
-        beliefState.let {And.make(it.toList()) ?: Proposition.CONTRADICTION}.models
+        beliefState.let {And.make(it.toList()) ?: contradiction}.models
     }
 
     /**
@@ -122,13 +122,13 @@ class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Pr
                 .apply {Collections.shuffle(this)}
             val buckets = Array<MutableSet<State>>(numBuckets,{mutableSetOf()})
             allStates.forEach {buckets.getRandom().add(it)}
-            return OrderedSetsComparator(beliefState,buckets.filter {it.isNotEmpty()}.map {Or.make(it.map {Proposition.makeDnf(it)})!!})
+            return OrderedSetsComparator(beliefState,buckets.filter {it.isNotEmpty()}.map {Or.make(it.map {Proposition.fromState(it)})!!})
         }
     }
 
     override fun computeDistanceTo(state:State):Int
     {
-        val completeOrderedSets = listOf(And.make(beliefState.toList()) ?: Proposition.CONTRADICTION)+orderedSets+Proposition.TAUTOLOGY
-        return completeOrderedSets.indexOfFirst {(it.and(Proposition.makeDnf(state))).isSatisfiable}
+        val completeOrderedSets = listOf(And.make(beliefState) ?: contradiction)+orderedSets+tautology
+        return completeOrderedSets.indexOfFirst {(it and Proposition.fromState(state)).isSatisfiable}
     }
 }

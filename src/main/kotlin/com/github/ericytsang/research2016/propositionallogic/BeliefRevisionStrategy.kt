@@ -7,6 +7,15 @@ interface BeliefRevisionStrategy
     fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
 }
 
+class TrustSensitiveBeliefRevisionStrategy(val beliefRevisionStrategy:BeliefRevisionStrategy,val trustPartitionSentenceRevisionStrategy:TrustPartitionSentenceRevisionStrategy):BeliefRevisionStrategy
+{
+    override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
+    {
+        val revisedSentence = trustPartitionSentenceRevisionStrategy.revise(sentence)
+        return beliefRevisionStrategy.revise(beliefState,revisedSentence)
+    }
+}
+
 /**
  * class that uses an instance of the [Comparator] to order instances of the
  * [State] in order to do the belief revision.
@@ -28,25 +37,25 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
             // get all basic propositions involved
             .flatMap {it.variables}.toSet()
             // make each one into a tautology
-            .map {it.or(it.not())}
+            .map {it or it.not}
             // and them together
             .let {And.make(it)!!}
 
         // all models of the sentence..and'd together with
         // basicPropositionTautologies to make sure the resulting models
         // contains a mapping for all variables
-        val sentenceModels = (sentence.and(basicPropositionTautologies)).models
+        val sentenceModels = (sentence and basicPropositionTautologies).models
 
         // find the "first" model in the ordering or models O(n)
         val nearestModel = sentenceModels.minWith(situationSorter)
-            ?: return setOf(Proposition.CONTRADICTION)
+            ?: return setOf(contradiction)
 
         // keep only the ones with the least distance according to the sorter
         val nearestModels = sentenceModels
             .filter {situationSorter.compare(nearestModel,it) == 0}
 
         // convert into a conjunctive normal form proposition and return
-        return setOf(Or.make(nearestModels.map {Proposition.makeDnf(it)})!!)
+        return setOf(Or.make(nearestModels.map {Proposition.fromState(it)})!!)
     }
 }
 
@@ -54,6 +63,6 @@ class SatisfiabilityBeliefRevisionStrategy():BeliefRevisionStrategy
 {
     override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
     {
-        return beliefState.plus(sentence).filter {(it.and(sentence)).isSatisfiable}.toSet()
+        return beliefState.plus(sentence).filter {(it and sentence).isSatisfiable}.toSet()
     }
 }

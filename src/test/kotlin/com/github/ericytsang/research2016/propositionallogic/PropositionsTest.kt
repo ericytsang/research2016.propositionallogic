@@ -34,14 +34,6 @@ class PropositionsTest
     val n = Variable.fromString("n")
     val o = Variable.fromString("o")
 
-    val Proposition.not:Proposition get() = not()
-    infix fun Proposition.or(that:Proposition):Proposition = or(that)
-    infix fun Proposition.and(that:Proposition):Proposition = and(that)
-    infix fun Proposition.oif(that:Proposition):Proposition = oif(that)
-    infix fun Proposition.iff(that:Proposition):Proposition = iff(that)
-    infix fun Proposition.xor(that:Proposition):Proposition = xor(that)
-    infix fun Proposition.nand(that:Proposition):Proposition = nand(that)
-
     @Test
     fun toStringTest1()
     {
@@ -147,7 +139,7 @@ class PropositionsTest
     @Test
     fun modelsOfTreeWithTautologyTest()
     {
-        val proposition = Oif(p,(q or Proposition.TAUTOLOGY))
+        val proposition = Oif(p,(q or tautology))
         val models = setOf(
             State.fromStringMap(mapOf("p" to false,"q" to false)),
             State.fromStringMap(mapOf("p" to false,"q" to true )),
@@ -162,7 +154,7 @@ class PropositionsTest
     @Test
     fun modelsOfTreeWithContradictionTest()
     {
-        val proposition = Oif(p,(q and Proposition.CONTRADICTION))
+        val proposition = Oif(p,(q and contradiction))
         val models = setOf(
             State.fromStringMap(mapOf("p" to false,"q" to false)),
             State.fromStringMap(mapOf("p" to false,"q" to true ))
@@ -224,7 +216,7 @@ class PropositionsTest
     @Test
     fun modelsOfContradiction()
     {
-        val contradiction = (Proposition.TAUTOLOGY and a and b and b.not)
+        val contradiction = (tautology and a and b and b.not)
         println(contradiction)
         assert(contradiction.models.isEmpty())
     }
@@ -381,7 +373,7 @@ class PropositionsTest
     fun makePropositionsFromSituationsTest()
     {
         val models = Oif(p,(q and r)).models
-        assert(models.map {Proposition.makeDnf(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
+        assert(models.map {Proposition.fromState(it)}.fold<Proposition,Proposition?>(null) {initial,next -> initial?.let {(initial or next)} ?: next}?.models == models)
     }
 
     @Test
@@ -418,5 +410,112 @@ class PropositionsTest
     fun isContradictionOfTautologyIsFalse()
     {
         assert(!(a or a.not).isContradiction)
+    }
+
+    @Test
+    fun makeRandom0()
+    {
+        val basicPropositions = emptyList<Variable>()
+        try
+        {
+            println(Proposition.makeRandom(basicPropositions))
+            assert(false,{"no exception thrown...was expecting an illegal argument exception"})
+        }
+        catch (ex:IllegalArgumentException)
+        {
+            // test passed
+        }
+    }
+
+    @Test
+    fun makeRandom1()
+    {
+        val basicPropositions = listOf(a)
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.variables.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom2()
+    {
+        val basicPropositions = listOf(a,b)
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.variables.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom3()
+    {
+        val basicPropositions = listOf(a,b,c)
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.variables.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom4()
+    {
+        val basicPropositions = listOf(a,b,c,d)
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.variables.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom5()
+    {
+        val basicPropositions = listOf(a,b,c,d,e)
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.variables.size == basicPropositions.size)
+    }
+
+    @Test
+    fun makeRandom6()
+    {
+        val basicPropositions = listOf(a,b,c,d,e,f)
+        val proposition = Proposition.makeRandom(basicPropositions)
+        println(proposition)
+        assert(proposition.variables.size == basicPropositions.size)
+    }
+
+    @Test
+    fun toDnfTest1()
+    {
+        val proposition = a or b and c oif d
+        println(proposition)
+        assert(proposition.toDnf().models == proposition.models)
+    }
+
+    @Test
+    fun toDnfTest2()
+    {
+        val proposition = a or a.not and b
+        println(proposition.toDnf())
+        assert(proposition.toDnf().models == b.models)
+    }
+
+    @Test
+    fun toDnfTest3()
+    {
+        val proposition = a or a.not
+        println(proposition.toDnf())
+        assert(proposition.toDnf().models == tautology.models)
+    }
+
+    @Test
+    fun toFullDnfTest()
+    {
+        val proposition = a or b and c oif d
+        assert(proposition.toFullDnf().models == proposition.models)
+    }
+
+    @Test
+    fun toParsableString()
+    {
+        val proposition = a and b or c xor d iff e nand f oif g.not
+        assert(Proposition.makeFrom(proposition.toParsableString()) == proposition)
     }
 }
