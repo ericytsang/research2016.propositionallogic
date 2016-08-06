@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Created by surpl on 7/26/2016.
@@ -54,41 +55,13 @@ public abstract class Proposition implements Serializable
 
     public static Proposition parse(String string)
     {
-
-        String spacedString = "";
-        for (int i = 0; i < string.length(); i++)
+        String[] tokens = string.replace("("," ( ").replace(")"," ) ").replace("-"," - ").trim().split("[ ]+");
+        List<String> allTokens = new ArrayList<String>();
+        for (String token : tokens)
         {
-            if (string.charAt(i) == '(' || string.charAt(i) == ')' || string.charAt(i) == '-')
-            {
-                spacedString += " "+string.charAt(i)+" ";
-            }
-            else
-            {
-                spacedString += string.charAt(i);
-            }
+            allTokens.add(token);
         }
-        List<String> tokens = new ArrayList<String>();
-        String word = "";
-        for (int i = 0; i < spacedString.length(); i++)
-        {
-            if (spacedString.charAt(i) == ' ')
-            {
-                if (!word.isEmpty())
-                {
-                    tokens.add(word);
-                    word = "";
-                }
-            }
-            else
-            {
-                word += spacedString.charAt(i);
-            }
-            if (i == spacedString.length()-1 && !word.isEmpty())
-            {
-                tokens.add(word);
-            }
-        }
-        return propositionFactory.parse(tokens);
+        return propositionFactory.parse(allTokens);
     }
 
     public static Proposition makeDnf(final State state)
@@ -553,29 +526,35 @@ public abstract class Proposition implements Serializable
         public FormulaTreeFactory.Symbol parse(String word)
         {
             String preprocessedWord = word.toLowerCase();
-            if ("and".equals(preprocessedWord))
+            if (Pattern.matches("(and)",preprocessedWord))
             {
                 return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,4);
             }
-            else if ("or".equals(preprocessedWord))
+            else if (Pattern.matches("(or)",preprocessedWord))
             {
                 return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,3);
             }
-            else if ("-".equals(preprocessedWord))
+            else if (Pattern.matches("(0)",preprocessedWord) ||
+                Pattern.matches("(1)",preprocessedWord) ||
+                Pattern.matches("[a-zA-Z]+",preprocessedWord))
+            {
+                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERAND,0,0);
+            }
+            else if (Pattern.matches("(-)",preprocessedWord))
             {
                 return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,1,5);
             }
-            else if ("(".equals(preprocessedWord))
+            else if (Pattern.matches("(\\()",preprocessedWord))
             {
                 return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPENING_PARENTHESIS,0,0);
             }
-            else if (")".equals(preprocessedWord))
+            else if (Pattern.matches("(\\))",preprocessedWord))
             {
                 return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.CLOSING_PARENTHESIS,0,0);
             }
             else
             {
-                return new FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERAND,0,0);
+                throw new IllegalArgumentException("unrecognized token: "+word);
             }
         }
     };
@@ -586,17 +565,21 @@ public abstract class Proposition implements Serializable
         @Override
         public Proposition parse(String word)
         {
-            if ("1".equals(word))
+            if (Pattern.matches("(1)",word))
             {
                 return Proposition.TAUTOLOGY;
             }
-            else if ("0".equals(word))
+            else if (Pattern.matches("(0)",word))
             {
                 return Proposition.CONTRADICTION;
             }
-            else
+            else if (Pattern.matches("[a-zA-Z]+",word))
             {
                 return Variable.fromString(word);
+            }
+            else
+            {
+                throw new IllegalArgumentException("unrecognized token: $word");
             }
         }
 
@@ -604,15 +587,15 @@ public abstract class Proposition implements Serializable
         public Proposition parse(String word,List<Proposition> operands)
         {
             String preprocessedWord = word.toLowerCase();
-            if("and".equals(preprocessedWord))
+            if(Pattern.matches("(and)",preprocessedWord))
             {
                 return And.make(operands);
             }
-            else if("or".equals(preprocessedWord))
+            else if(Pattern.matches("(or)",preprocessedWord))
             {
                 return Or.make(operands);
             }
-            else if("-".equals(preprocessedWord))
+            else if(Pattern.matches("(-)",preprocessedWord))
             {
                 return new Not(operands.get(0));
             }
