@@ -1,7 +1,6 @@
 package com.github.ericytsang.research2016.propositionallogic;
 
 import com.github.ericytsang.lib.collections.CollectionWrapper;
-import com.github.ericytsang.lib.collections.ContainerUtils;
 import com.github.ericytsang.lib.collections.Function;
 
 import java.io.Serializable;
@@ -45,7 +44,7 @@ public class State implements Map<Variable,Boolean>,Serializable
         {
             propositionKeys.add(variable.toString());
         }
-        ContainerUtils.sort(propositionKeys);
+        Collections.sort(propositionKeys);
         for (int seed = 0;seed != numStatesToGenerate;seed++)
         {
             String string = String.format("%"+variables.size()+"s",Integer.toBinaryString(seed)).replace(' ','0');
@@ -83,7 +82,7 @@ public class State implements Map<Variable,Boolean>,Serializable
                 @Override
                 public Void invoke(CollectionWrapper<List<Entry<Variable,Boolean>>,Entry<Variable,Boolean>> params)
                 {
-                    ContainerUtils.sort(params.wrapee,new Comparator<Entry<Variable,Boolean>>()
+                    Collections.sort(params.wrapee,new Comparator<Entry<Variable,Boolean>>()
                     {
                         @Override
                         public int compare(Entry<Variable,Boolean> o1,Entry<Variable,Boolean> o2)

@@ -1,6 +1,6 @@
 package com.github.ericytsang.research2016.propositionallogic;
 
-import com.github.ericytsang.lib.collections.ContainerUtils;
+import java.util.Collections;
 
 public abstract class UnaryOperator extends TruthTableOperator
 {
@@ -8,7 +8,7 @@ public abstract class UnaryOperator extends TruthTableOperator
 
     public UnaryOperator(Proposition operand)
     {
-        super(ContainerUtils.listOf(operand));
+        super(Collections.singletonList(operand));
         this.operand = operand;
     }
 
