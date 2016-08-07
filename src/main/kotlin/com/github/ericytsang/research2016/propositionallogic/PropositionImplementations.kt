@@ -11,7 +11,11 @@ class Variable private constructor(_friendly:String):Operand(_friendly)
 {
     companion object
     {
-        fun fromString(friendly:String) = Variable(friendly)
+        private val allInstances = WeakHashMap<String,Variable>()
+        fun fromString(friendly:String):Variable
+        {
+            return allInstances.getOrPut(friendly,{Variable(friendly)})
+        }
     }
     init
     {
