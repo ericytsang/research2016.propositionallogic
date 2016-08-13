@@ -67,6 +67,7 @@ class BruteForceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             .find()
             {
                 announcement ->
+                if (Thread.interrupted()) throw InterruptedException()
                 problemInstances.all {it.isSolvedBy(announcement)}
             }
     }
