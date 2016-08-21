@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ericytsang:lib.collections:jvm_1.0'
+    compile 'com.github.ericytsang:lib.collections:master-SNAPSHOT'
     compile 'com.github.ericytsang:lib.formulainterpreter:v1.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.11'
