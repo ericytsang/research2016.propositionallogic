@@ -15,7 +15,7 @@ import java.util.LinkedHashMap
  * from the [beliefState], and implements the [compare] function with this
  * assumption.
  */
-abstract class ByDistanceComparator(val beliefState:Set<Proposition>):Comparator<State>
+abstract class ByDistanceComparator(val beliefState:Set<Proposition>):ComparatorBeliefRevisionStrategy.Comparator
 {
     /**
      * all models of the receiver.
@@ -54,6 +54,8 @@ abstract class ByDistanceComparator(val beliefState:Set<Proposition>):Comparator
 
 class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparator(beliefState)
 {
+    override val friendlyName:String = "hamming distance"
+
     override fun computeDistanceTo(state:State):Int
     {
         return beliefStateModels.map {hammingDistance(state,it)}.min() ?: 0
@@ -81,6 +83,8 @@ class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparat
 
 class WeightedHammingDistanceComparator(beliefState:Set<Proposition>,val weights:Map<Variable,Int>):ByDistanceComparator(beliefState)
 {
+    override val friendlyName:String = "weighted hamming distance"
+
     override fun computeDistanceTo(state:State):Int
     {
         return beliefStateModels.map {weightedHammingDistance(state,it)}.min() ?: 0
@@ -125,6 +129,8 @@ class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Pr
             return OrderedSetsComparator(beliefState,buckets.filter {it.isNotEmpty()}.map {Or.make(it.map {Proposition.fromState(it)})!!})
         }
     }
+
+    override val friendlyName:String = "ordered sentences"
 
     override fun computeDistanceTo(state:State):Int
     {

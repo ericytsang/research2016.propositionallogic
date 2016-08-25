@@ -4,11 +4,13 @@ import java.util.Comparator
 
 interface BeliefRevisionStrategy
 {
+    val friendlyName:String
     fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
 }
 
 class TrustSensitiveBeliefRevisionStrategy(val beliefRevisionStrategy:BeliefRevisionStrategy,val trustPartitionSentenceRevisionStrategy:TrustPartitionSentenceRevisionStrategy):BeliefRevisionStrategy
 {
+    override val friendlyName:String get() = "trust-sensitive ${beliefRevisionStrategy.friendlyName}"
     override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
     {
         val revisedSentence = trustPartitionSentenceRevisionStrategy.revise(sentence)
@@ -24,8 +26,9 @@ class TrustSensitiveBeliefRevisionStrategy(val beliefRevisionStrategy:BeliefRevi
  * given the initial belief state as an argument, and must return the
  * appropriate [Comparator] which will be used to sort the [State]s.
  */
-class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Proposition>)->Comparator<State>):BeliefRevisionStrategy
+class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Proposition>)->Comparator):BeliefRevisionStrategy
 {
+    override val friendlyName:String get() = situationSorterFactory(emptySet()).friendlyName
     override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
     {
         // create the situation sorter
@@ -57,10 +60,16 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
         // convert into a conjunctive normal form proposition and return
         return setOf(Or.make(nearestModels.map {Proposition.fromState(it)})!!)
     }
+
+    interface Comparator:java.util.Comparator<State>
+    {
+        val friendlyName:String
+    }
 }
 
 class SatisfiabilityBeliefRevisionStrategy():BeliefRevisionStrategy
 {
+    override val friendlyName:String get() = "satisfiability"
     override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
     {
         return beliefState.plus(sentence).filter {(it and sentence).isSatisfiable}.toSet()
