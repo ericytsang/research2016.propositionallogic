@@ -79,6 +79,13 @@ class HammingDistanceComparator(beliefState:Set<Proposition>):ByDistanceComparat
 
         return commonKeys.count {state1[it] != state2[it]}
     }
+
+    override fun hashCode():Int = 0
+
+    override fun equals(other:Any?):Boolean
+    {
+        return other is HammingDistanceComparator
+    }
 }
 
 class WeightedHammingDistanceComparator(beliefState:Set<Proposition>,val weights:Map<Variable,Int>):ByDistanceComparator(beliefState)
@@ -113,6 +120,14 @@ class WeightedHammingDistanceComparator(beliefState:Set<Proposition>,val weights
             // sum them by their weights
             .sumBy {weights[it] ?: 0}
     }
+
+    override fun hashCode():Int = weights.hashCode()
+
+    override fun equals(other:Any?):Boolean
+    {
+        return other is WeightedHammingDistanceComparator &&
+            other.weights == weights
+    }
 }
 
 class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Proposition>):ByDistanceComparator(beliefState)
@@ -136,5 +151,13 @@ class OrderedSetsComparator(beliefState:Set<Proposition>,val orderedSets:List<Pr
     {
         val completeOrderedSets = listOf(And.make(beliefState) ?: contradiction)+orderedSets+tautology
         return completeOrderedSets.indexOfFirst {(it and Proposition.fromState(state)).isSatisfiable}
+    }
+
+    override fun hashCode():Int = orderedSets.hashCode()
+
+    override fun equals(other:Any?):Boolean
+    {
+        return other is OrderedSetsComparator &&
+            other.orderedSets == orderedSets
     }
 }

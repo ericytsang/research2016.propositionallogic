@@ -6,6 +6,8 @@ package com.github.ericytsang.research2016.propositionallogic
 interface SentenceRevisionStrategy
 {
     fun revise(sentence:Proposition):Proposition
+    override fun hashCode():Int
+    override fun equals(other:Any?):Boolean
 }
 
 abstract class TrustPartitionSentenceRevisionStrategy:SentenceRevisionStrategy
@@ -43,6 +45,14 @@ class PartitionedTrustSentenceRevisionStrategy(val partitions:Set<Proposition>):
     {
         return partitions
     }
+
+    override fun hashCode():Int = partitions.hashCode()
+
+    override fun equals(other:Any?):Boolean
+    {
+        return other is PartitionedTrustSentenceRevisionStrategy &&
+            other.partitions == partitions
+    }
 }
 
 val noTrustSentenceRevisionStrategy = PartitionedTrustSentenceRevisionStrategy(setOf(tautology))
@@ -53,4 +63,8 @@ class CompleteTrustSentenceRevisionStrategy:TrustPartitionSentenceRevisionStrate
     {
         return setOf(sentence)
     }
+
+    override fun hashCode():Int = 0
+
+    override fun equals(other:Any?):Boolean = other is CompleteTrustSentenceRevisionStrategy
 }

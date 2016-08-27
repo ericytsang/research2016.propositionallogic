@@ -6,6 +6,8 @@ interface BeliefRevisionStrategy
 {
     val friendlyName:String
     fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
+    override fun hashCode():Int
+    override fun equals(other:Any?):Boolean
 }
 
 class TrustSensitiveBeliefRevisionStrategy(val beliefRevisionStrategy:BeliefRevisionStrategy,val trustPartitionSentenceRevisionStrategy:TrustPartitionSentenceRevisionStrategy):BeliefRevisionStrategy
@@ -15,6 +17,13 @@ class TrustSensitiveBeliefRevisionStrategy(val beliefRevisionStrategy:BeliefRevi
     {
         val revisedSentence = trustPartitionSentenceRevisionStrategy.revise(sentence)
         return beliefRevisionStrategy.revise(beliefState,revisedSentence)
+    }
+    override fun hashCode():Int = beliefRevisionStrategy.hashCode()+trustPartitionSentenceRevisionStrategy.hashCode()
+    override fun equals(other:Any?):Boolean
+    {
+        return other is TrustSensitiveBeliefRevisionStrategy &&
+            other.beliefRevisionStrategy == beliefRevisionStrategy &&
+            other.trustPartitionSentenceRevisionStrategy == trustPartitionSentenceRevisionStrategy
     }
 }
 
@@ -60,10 +69,18 @@ class ComparatorBeliefRevisionStrategy(val situationSorterFactory:(Set<Propositi
         // convert into a conjunctive normal form proposition and return
         return setOf(Or.make(nearestModels.map {Proposition.fromState(it)})!!)
     }
+    override fun hashCode():Int = situationSorterFactory(emptySet()).hashCode()
+    override fun equals(other:Any?):Boolean
+    {
+        return other is ComparatorBeliefRevisionStrategy &&
+            other.situationSorterFactory(emptySet()) == situationSorterFactory(emptySet())
+    }
 
     interface Comparator:java.util.Comparator<State>
     {
         val friendlyName:String
+        override fun hashCode():Int
+        override fun equals(other:Any?):Boolean
     }
 }
 
@@ -73,5 +90,10 @@ class SatisfiabilityBeliefRevisionStrategy():BeliefRevisionStrategy
     override fun revise(beliefState:Set<Proposition>,sentence:Proposition):Set<Proposition>
     {
         return beliefState.plus(sentence).filter {(it and sentence).isSatisfiable}.toSet()
+    }
+    override fun hashCode():Int = 0
+    override fun equals(other:Any?):Boolean
+    {
+        return other is SatisfiabilityBeliefRevisionStrategy
     }
 }
