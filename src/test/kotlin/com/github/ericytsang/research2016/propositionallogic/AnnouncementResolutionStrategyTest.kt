@@ -170,4 +170,28 @@ class AnnouncementResolutionStrategyTest
             assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement))!!)
         }
     }
+
+    @Test
+    fun hammingDistance3()
+    {
+        val y = Variable.fromString("y")
+        val r = Variable.fromString("r")
+        val p = Variable.fromString("p")
+        val bot1 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(y and r.not and p),
+            p.not,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val bot2 = AnnouncementResolutionStrategy.ProblemInstance(
+            setOf(y.not and r and p),
+            p,
+            ComparatorBeliefRevisionStrategy({HammingDistanceComparator(it)}))
+        val problems = listOf(bot1,bot2)
+        val announcement = OrderedAnnouncementResolutionStrategy().resolve(problems)!!
+        println(announcement)
+        problems.forEach()
+        {
+            println(And.make(it.reviseBy(announcement))!!.models)
+            assert(it.targetBeliefState isSatisfiedBy And.make(it.reviseBy(announcement))!!)
+        }
+    }
 }

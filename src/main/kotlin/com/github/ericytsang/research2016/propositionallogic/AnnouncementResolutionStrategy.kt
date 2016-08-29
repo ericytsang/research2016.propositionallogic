@@ -77,6 +77,10 @@ class OrderedAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
 {
     override fun resolve(problemInstances:List<ProblemInstance>):Proposition?
     {
+        val variableTautologies = problemInstances
+            .flatMap {it.initialBeliefState.flatMap {it.variables}+it.targetBeliefState.variables}
+            .map {it or it.not}
+            .let {And.make(it) ?: tautology}
         val instanceToStatePartitionsMap = run()
         {
             val comparators = try
@@ -94,7 +98,7 @@ class OrderedAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             }
 
             val unionOfTargetKs = problemInstances
-                .map {it.targetBeliefState}
+                .map {it.targetBeliefState and variableTautologies}
                 .let {Or.make(it) ?: contradiction}
                 .models
 
