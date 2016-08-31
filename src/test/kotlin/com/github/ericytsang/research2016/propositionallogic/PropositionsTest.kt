@@ -518,4 +518,11 @@ class PropositionsTest
         val proposition = a and b or c xor d iff e nand f oif g.not
         assert(Proposition.makeFrom(proposition.toParsableString()) == proposition)
     }
+
+    @Test
+    fun makeFromString()
+    {
+        val string = "a and p90x iff -double007 xor camelCase and CapitalFirstLetter"
+        println(Proposition.makeFrom(string).toParsableString())
+    }
 }

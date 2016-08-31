@@ -19,21 +19,21 @@ private val propositionFactory = FormulaTreeFactory(
     {
         override fun parseToken(word:String):FormulaTreeFactory.Symbol
         {
-            val preprocessedWord = word.toLowerCase().trim()
+            val preprocessedWord = word.trim()
             return when
             {
-                Pattern.matches("(iff){1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,1)
-                Pattern.matches("(then){1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,2)
-                Pattern.matches("(or){1}",preprocessedWord) ||
-                    Pattern.matches("(xor){1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,3)
-                Pattern.matches("(and){1}",preprocessedWord) ||
-                    Pattern.matches("(nand){1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,4)
-                Pattern.matches("(-){1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,1,5)
-                Pattern.matches("(1){1}",preprocessedWord) ||
-                    Pattern.matches("(0){1}",preprocessedWord) ||
-                    Pattern.matches("[a-zA-Z]+",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERAND,0,0)
-                Pattern.matches("[(]{1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPENING_PARENTHESIS,0,0)
-                Pattern.matches("[)]{1}",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.CLOSING_PARENTHESIS,0,0)
+                Pattern.matches("(iff)",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,1)
+                Pattern.matches("(then)",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,2)
+                Pattern.matches("(or)",preprocessedWord) ||
+                    Pattern.matches("(xor)",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,3)
+                Pattern.matches("(and)",preprocessedWord) ||
+                    Pattern.matches("(nand)",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,2,4)
+                Pattern.matches("(-)",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERATOR,1,5)
+                Pattern.matches("(1)",preprocessedWord) ||
+                    Pattern.matches("(0)",preprocessedWord) ||
+                    Pattern.matches("[a-zA-Z][a-zA-Z0-9]*",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPERAND,0,0)
+                Pattern.matches("[(]",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.OPENING_PARENTHESIS,0,0)
+                Pattern.matches("[)]",preprocessedWord) -> FormulaTreeFactory.Symbol(FormulaTreeFactory.Type.CLOSING_PARENTHESIS,0,0)
                 else -> throw IllegalArgumentException("unrecognized token: $word")
             }
         }
@@ -43,28 +43,28 @@ private val propositionFactory = FormulaTreeFactory(
     {
         override fun makeOperand(word:String):Proposition
         {
-            val preprocessedWord = word.toLowerCase().trim()
+            val preprocessedWord = word.trim()
             return when
             {
-                Pattern.matches("(1){1}",preprocessedWord) -> tautology
-                Pattern.matches("(0){1}",preprocessedWord) -> contradiction
-                Pattern.matches("[a-zA-Z]+",preprocessedWord) -> Variable.fromString(preprocessedWord)
+                Pattern.matches("(1)",preprocessedWord) -> tautology
+                Pattern.matches("(0)",preprocessedWord) -> contradiction
+                Pattern.matches("[a-zA-Z][a-zA-Z0-9]*",preprocessedWord) -> Variable.fromString(preprocessedWord)
                 else -> throw IllegalArgumentException("unrecognized token: $word")
             }
         }
 
         override fun makeOperator(word:String,operands:List<Proposition>):Proposition
         {
-            val preprocessedWord = word.toLowerCase().trim()
+            val preprocessedWord = word.trim()
             return when
             {
-                Pattern.matches("(iff){1}",preprocessedWord) -> Iff.make(operands)!!
-                Pattern.matches("(then){1}",preprocessedWord) -> Oif(operands.first(),operands.last())
-                Pattern.matches("(or){1}",preprocessedWord) -> Or.make(operands)!!
-                Pattern.matches("(xor){1}",preprocessedWord) -> Xor(operands.first(),operands.last())
-                Pattern.matches("(and){1}",preprocessedWord) -> And.make(operands)!!
-                Pattern.matches("(nand){1}",preprocessedWord) -> Nand(operands.first(),operands.last())
-                Pattern.matches("(-){1}",preprocessedWord) -> Not(operands.single())
+                Pattern.matches("(iff)",preprocessedWord) -> Iff.make(operands)!!
+                Pattern.matches("(then)",preprocessedWord) -> Oif(operands.first(),operands.last())
+                Pattern.matches("(or)",preprocessedWord) -> Or.make(operands)!!
+                Pattern.matches("(xor)",preprocessedWord) -> Xor(operands.first(),operands.last())
+                Pattern.matches("(and)",preprocessedWord) -> And.make(operands)!!
+                Pattern.matches("(nand)",preprocessedWord) -> Nand(operands.first(),operands.last())
+                Pattern.matches("(-)",preprocessedWord) -> Not(operands.single())
                 else -> throw IllegalArgumentException("unrecognized token: $word")
             }
         }

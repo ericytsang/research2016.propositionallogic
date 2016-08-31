@@ -21,11 +21,15 @@ class Variable private constructor(_friendly:String):Operand(_friendly)
     {
         if(_friendly.length < 1)
         {
-            throw IllegalArgumentException("only strings of length 1 or longer are allowed to be used as the friendly string for atomic propositions")
+            throw IllegalArgumentException("only strings of length 1 or longer are allowed to be used for ${javaClass.simpleName}s")
         }
-        if(_friendly.any {!it.isLetter()})
+        if(_friendly.any {!it.isLetter() && !it.isDigit()})
         {
-            throw IllegalArgumentException("atomic proposition must be composed only of letters")
+            throw IllegalArgumentException("${javaClass.simpleName} must be composed of only letters and numbers")
+        }
+        if(!_friendly.first().isLetter())
+        {
+            throw IllegalArgumentException("first character of ${javaClass.simpleName} must a letter")
         }
     }
     override fun truthValue(state:State):Boolean = state[this] ?: throw IllegalArgumentException("no value specified for given proposition ($friendly)")
