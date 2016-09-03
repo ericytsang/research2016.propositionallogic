@@ -33,10 +33,10 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ericytsang:lib.branchandbound:master-SNAPSHOT'
-    compile 'com.github.ericytsang:lib.iteratortosetadapter:master-SNAPSHOT'
-    compile 'com.github.ericytsang:lib.permutediterable:master-SNAPSHOT'
-    compile 'com.github.ericytsang:lib.formulainterpreter:master-SNAPSHOT'
+    compile 'com.github.ericytsang:lib.branchandbound:1.0'
+    compile 'com.github.ericytsang:lib.iteratortosetadapter:1.0'
+    compile 'com.github.ericytsang:lib.permutediterable:1.0'
+    compile 'com.github.ericytsang:lib.formulainterpreter:v1.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testCompile 'junit:junit:4.11'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
