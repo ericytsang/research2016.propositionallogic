@@ -1,7 +1,6 @@
 package com.github.ericytsang.research2016.propositionallogic
 
-import com.github.ericytsang.lib.collections.permutedIterator
-import com.github.ericytsang.lib.collections.toIterable
+import com.github.ericytsang.lib.permutediterable.permutedIterable
 import com.github.ericytsang.research2016.propositionallogic.AnnouncementResolutionStrategy.ProblemInstance
 import java.util.LinkedHashMap
 
@@ -47,7 +46,7 @@ class BruteForceAnnouncementResolutionStrategy:AnnouncementResolutionStrategy
             .map {Proposition.fromState(it)}
             // go through every possible subset of conjunctions that can be made and
             // turn each into a disjunction of conjunctions
-            .map {setOf(null,it)}.permutedIterator().toIterable()
+            .map {setOf(null,it)}.permutedIterable()
             .map {it.filterNotNull().toSet()}
             .map()
             {
@@ -235,7 +234,7 @@ fun findAllAnnouncements(problemInstances:List<ProblemInstance>):Set<Proposition
         .map {Proposition.fromState(it)}
         // go through every possible subset of conjunctions that can be made and
         // turn each into a disjunction of conjunctions
-        .map {setOf(null,it)}.permutedIterator().toIterable()
+        .map {setOf(null,it)}.permutedIterable()
         .map {it.filterNotNull().toSet()}
         .map()
         {

@@ -1,6 +1,5 @@
 package com.github.ericytsang.research2016.propositionallogic
 
-import com.github.ericytsang.lib.collections.getRandom
 import java.util.Collections
 import java.util.Comparator
 import java.util.LinkedHashMap

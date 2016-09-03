@@ -1,10 +1,9 @@
 package com.github.ericytsang.research2016.propositionallogic
 
-import com.github.ericytsang.lib.collections.Bounds
-import com.github.ericytsang.lib.collections.getRandom
-import com.github.ericytsang.lib.collections.IteratorToSetAdapter
-import com.github.ericytsang.lib.collections.branchAndBound
-import com.github.ericytsang.lib.collections.rootNodeMetaData
+import com.github.ericytsang.lib.branchandbound.Bounds
+import com.github.ericytsang.lib.branchandbound.branchAndBound
+import com.github.ericytsang.lib.branchandbound.rootNodeMetaData
+import com.github.ericytsang.lib.iteratortosetadapter.IteratorToSetAdapter
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operand
 import com.github.ericytsang.research2016.propositionallogic.Proposition.Operator
 import java.io.Serializable
